@@ -5,7 +5,7 @@ import { Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
 import { TextInput } from 'react-native-paper';
 
-// import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import InCallManager from 'react-native-incall-manager';
 import Modal from 'react-native-modal';
@@ -22,8 +22,6 @@ import {
 } from 'react-native-webrtc';
 // import {acc} from 'react-native-reanimated';
 
-const MOZILLA_SERVER = 'stun:stun.services.mozilla.com';
-const GOOGLE_SERVER = 'stun:stun.l.google.com:19302';
 const STUN_SERVER = 'stun:webrtc.skyrockets.space:3478';
 const SOCKET_URL = 'wss://webrtc.skyrockets.space:8080';
 
@@ -40,7 +38,7 @@ export default function CallScreen({ navigation, ...props }) {
         new RTCPeerConnection({
             iceServers: [
                 {
-                    urls: GOOGLE_SERVER,
+                    urls: STUN_SERVER,
                 },
             ],
         }),
@@ -143,6 +141,15 @@ export default function CallScreen({ navigation, ...props }) {
         conn.current.onerror = function (err) {
             console.log('Got error', err);
         };
+        AsyncStorage.getItem('userId').then((id) => {
+            console.log(id);
+            if (id) {
+                setUserId(id);
+            } else {
+                setUserId('');
+                navigation.push('Login');
+            }
+        });
         initLocalVideo();
         registerPeerEvents();
     }, []);
@@ -377,7 +384,7 @@ export default function CallScreen({ navigation, ...props }) {
         yourConn.current = new RTCPeerConnection({
             iceServers: [
                 {
-                    urls: GOOGLE_SERVER,
+                    urls: STUN_SERVER,
                 },
             ],
         });
@@ -400,7 +407,7 @@ export default function CallScreen({ navigation, ...props }) {
                 />
                 <Text>
                     SOCKET ACTIVE:{socketActive ? 'TRUE' : 'FASLE'}, FRIEND ID:
-                    {callToUsername || otherId}
+          {callToUsername || otherId}
                 </Text>
                 <Button
                     mode="contained"
@@ -410,14 +417,14 @@ export default function CallScreen({ navigation, ...props }) {
                     contentStyle={styles.btnContent}
                     disabled={!socketActive || callToUsername === '' || callActive}>
                     Call
-                </Button>
+        </Button>
                 <Button
                     mode="contained"
                     onPress={handleLeave}
                     contentStyle={styles.btnContent}
                     disabled={!callActive}>
                     End Call
-                </Button>
+        </Button>
             </View>
 
             <View style={styles.videoContainer}>
