@@ -1,100 +1,108 @@
-
-import React, { useContext } from 'react';
-import { useState } from 'react';
-
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView } from 'react-native'
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import React, { useEffect, useState, useCallback } from 'react'
+import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
+import { GiftedChat } from 'react-native-gifted-chat'
+import AsyncStorage from '@react-native-community/async-storage';
 import { firebase } from '../../firebase/config'
-import { AuthContext } from '../../utils'
 
-const RoomScreen = (props) => {
+import styles from './styles';
 
+const db = firebase.firestore()
+const entityRef = db.collection('rooms')
+
+const RoomScreen = ({ navigation, route }) => {
     const [state, setState] = useState({
-        name: ''
+        roomID: '',
+        userID: '',
+        userName: ''
     })
-    const { signOut } = useContext(AuthContext);
+    const [messages, setMessages] = useState([])
 
-    const handlerContinue = () => {
-        props.navigation.navigate('Chat', { name: state.name })
+
+    useEffect(() => {
+        // const unsubscribe = navigation.addListener('focus', async () => {
+
+        // });
+
+        // return unsubscribe;
+        setTimeout(async () => {
+            const roomID = route.params.roomID
+            const userToken = await AsyncStorage.getItem('User');
+            const user = JSON.parse(userToken)
+            setState(prev => { return { ...prev, roomID, userID: user.id, userName: user.fullName } })
+
+            entityRef
+                .doc(`${roomID}`)
+                .collection('messages')
+                .onSnapshot((querySnapshot) => {
+                    const messagesFireStore = querySnapshot
+                        .docChanges()
+                        .filter(({ type }) => type === 'added')
+                        .map(({ doc }) => {
+                            const message = doc.data()
+                            console.log('message', message)
+                            return {
+                                ...message,
+                                createdAt: message.createdAt.toDate(),
+                                user: { _id: message.user._id, name: message.user.name, }
+                            }
+                        }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                    console.log('messagesFireStore', messagesFireStore)
+                    appendMessages(messagesFireStore)
+                    // querySnapshot.forEach(doc => {
+                    //     const entity = doc.data()
+                    //     debugger
+                    //     console.log('entity', entity)
+                    // });
+                }, (error) => {
+                    Alert.alert(error)
+                });
+        });
+    }, [navigation])
+
+    const appendMessages = useCallback((messages) => {
+        setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+    }, [messages])
+
+    const onSend = (messages = []) => {
+        const { text, _id, createdAt } = messages[0]
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        const data = {
+            _id: _id,
+            authorID: state.userID,
+            createdAt: createdAt,
+            text: text,
+            user: {
+                _id: state.userID,
+                name: state.userName,
+            },
+        }
+
+        entityRef
+            .doc(`${state.roomID}`)
+            .collection('messages')
+            .doc()
+            .set(data)
+            .then(_doc => {
+                Keyboard.dismiss()
+            })
+            .catch((error) => {
+                alert(error)
+            })
     }
 
+    const chat = <GiftedChat messages={messages} onSend={onSend} user={{ _id: state.userID, name: state.userName }} />
+    if (Platform.OS === 'android') {
+        return (
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' KeyboardAvoidingView={30} enabled>
+                {chat}
+            </KeyboardAvoidingView>
+        )
+    }
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.cirle} />
-            <View style={{ margintop: 64 }}>
-                <Image
-                    source={require('../../../assets/bootsplash_logo.png')}
-                    style={{ width: 100, height: 100, alignSelf: 'center' }}
-                />
-            </View>
-            <View style={{ marginHorizontal: 32 }}>
-                <Text style={styles.header}>{`Username`}</Text>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={name => setState(prev => { return { ...prev, name } })}
-                    placeholder={'Input you name'}
-                >
-                    {state.name}
-                </TextInput>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
-                    <TouchableOpacity
-                        style={styles.continue}
-                        // onPress={() => handlerSignOut()}
-                        onPress={() => signOut()}
-                    >
-                        <Ionicons name="md-arrow-back-outline" size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.continue}
-                        onPress={() => handlerContinue()}
-                    >
-                        <Ionicons name="md-arrow-forward-outline" size={24} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-            </View>
+        <SafeAreaView style={{ flex: 1 }} >
+            {chat}
         </SafeAreaView>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f4f5f7'
-    },
-    cirle: {
-        width: 500,
-        height: 500,
-        borderRadius: 500 / 2,
-        backgroundColor: '#fff',
-        left: -120,
-        top: -50,
-        position: 'absolute'
-    },
-    header: {
-        fontWeight: '800',
-        fontSize: 30,
-        color: '#514e5a',
-        marginTop: 32
-    },
-    input: {
-        marginTop: 32,
-        height: 48,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#bab7c3',
-        borderRadius: 32,
-        paddingHorizontal: 16,
-        color: '#514e5a',
-        fontWeight: '600'
-    },
-    continue: {
-        width: 64,
-        height: 64,
-        borderRadius: 64 / 2,
-        backgroundColor: '#9075e3',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 16
-    }
-})
 
 export default RoomScreen

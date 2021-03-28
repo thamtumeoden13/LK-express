@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { AuthContext } from '../../utils'
@@ -6,25 +6,31 @@ import { AuthContext } from '../../utils'
 import styles from './styles';
 
 const RegistrationScreen = ({ navigation }) => {
-    const [fullName, setFullName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
+    const [state, setState] = useState({
+        fullName: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    })
+
+    const { signUp } = useContext(AuthContext);
 
     const onFooterLinkPress = () => {
         navigation.navigate('Login')
     }
 
-    const { signUp } = useContext(AuthContext);
+    const handlerChangeText = (name, text) => {
+        setState(prev => { return { ...prev, [name]: text } })
+    }
 
     const onRegisterPress = () => {
-        if (password !== confirmPassword) {
+        if (state.password !== state.confirmPassword) {
             alert("Passwords don't match.")
             return
         }
-        signUp({ email, password })
+        signUp(state.email, state.password, state.fullName)
     }
-
+    console.log('state', state)
     return (
         <View style={styles.container}>
             <KeyboardAwareScrollView
@@ -38,8 +44,8 @@ const RegistrationScreen = ({ navigation }) => {
                     style={styles.input}
                     placeholder='Full Name'
                     placeholderTextColor="#aaaaaa"
-                    onChangeText={(text) => setFullName(text)}
-                    value={fullName}
+                    onChangeText={(text) => handlerChangeText('fullName', text)}
+                    value={state.fullName}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
                 />
@@ -47,8 +53,8 @@ const RegistrationScreen = ({ navigation }) => {
                     style={styles.input}
                     placeholder='E-mail'
                     placeholderTextColor="#aaaaaa"
-                    onChangeText={(text) => setEmail(text)}
-                    value={email}
+                    onChangeText={(text) => handlerChangeText('email', text)}
+                    value={state.email}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
                 />
@@ -57,8 +63,8 @@ const RegistrationScreen = ({ navigation }) => {
                     placeholderTextColor="#aaaaaa"
                     // secureTextEntry
                     placeholder='Password'
-                    onChangeText={(text) => setPassword(text)}
-                    value={password}
+                    onChangeText={(text) => handlerChangeText('password', text)}
+                    value={state.password}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
                 />
@@ -67,8 +73,8 @@ const RegistrationScreen = ({ navigation }) => {
                     placeholderTextColor="#aaaaaa"
                     // secureTextEntry
                     placeholder='Confirm Password'
-                    onChangeText={(text) => setConfirmPassword(text)}
-                    value={confirmPassword}
+                    onChangeText={(text) => handlerChangeText('confirmPassword', text)}
+                    value={state.confirmPassword}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
                 />

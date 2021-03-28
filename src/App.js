@@ -8,7 +8,7 @@ import { decode, encode } from 'base-64'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AsyncStorage from '@react-native-community/async-storage';
 
-import { LoginScreen, HomeScreen, RegistrationScreen, AuthLoadingScreen, RoomScreen } from './screens'
+import { LoginScreen, HomeScreen, RegistrationScreen, AuthLoadingScreen, RoomScreen, ChatScreen } from './screens'
 import { AuthContext } from './utils'
 import { firebase } from './firebase/config'
 
@@ -32,7 +32,7 @@ const Tab = createBottomTabNavigator();
 function TabStack() {
     return (
         <Tab.Navigator>
-            <Tab.Screen name="Home" component={RoomScreen}
+            <Tab.Screen name="Home" component={HomeScreen}
                 options={{
                     tabBarLabel: 'Home',
                     tabBarIcon: ({ color, size }) => (
@@ -40,18 +40,18 @@ function TabStack() {
                     ),
                 }}
             />
-            <Tab.Screen name="PublicRooms" component={HomeScreen}
+            <Tab.Screen name="PublicRoom" component={RoomScreen}
                 options={{
-                    tabBarLabel: 'PublicRooms',
+                    tabBarLabel: 'PublicRoom',
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="bell" color={color} size={size} />
                     ),
                     tabBarBadge: 3,
                 }}
             />
-            <Tab.Screen name="PrivateRooms" component={HomeScreen}
+            <Tab.Screen name="PrivateRoom" component={ChatScreen}
                 options={{
-                    tabBarLabel: 'PrivateRooms',
+                    tabBarLabel: 'PrivateRoom',
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="account" color={color} size={size} />
                     ),
@@ -154,7 +154,7 @@ export default function App() {
                 dispatch({ type: 'SIGN_OUT' })
                 AsyncStorage.removeItem('User')
             },
-            signUp: async ({ email, password }) => {
+            signUp: async (email, password, fullName) => {
                 // In a production app, we need to send user data to server and get a token
                 // We will also need to handle errors if sign up failed
                 // After getting token, we need to persist the token using `SecureStore`
@@ -173,7 +173,8 @@ export default function App() {
                         usersRef
                             .doc(uid)
                             .set(data)
-                            .then(() => {
+                            .then(async (firestoreDocument) => {
+                                const user = firestoreDocument.data()
                                 AsyncStorage.setItem('User', JSON.stringify(user))
                                 dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
                             })

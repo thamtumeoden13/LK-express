@@ -1,150 +1,60 @@
-import React, { useEffect, useState, useCallback } from 'react'
-import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { GiftedChat } from 'react-native-gifted-chat'
-import styles from './styles';
+
+import React, { useContext } from 'react';
+import { useState } from 'react';
+
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView } from 'react-native'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+
 import { firebase } from '../../firebase/config'
+import styles from './styles';
+import { AuthContext } from '../../utils'
 
 const HomeScreen = (props) => {
-    const [messages, setMessages] = useState([]);
 
-    const [entityText, setEntityText] = useState('')
-    const [entities, setEntities] = useState([])
+    const [state, setState] = useState({
+        roomID: ''
+    })
+    const { signOut } = useContext(AuthContext);
 
-    const entityRef = firebase.firestore().collection('entities')
-    // const userID =props.route.params.user.id
-    useEffect(() => {
-        // entityRef
-        //     .where("authorID", "==", userID)
-        //     .orderBy('createdAt', 'desc')
-        //     .onSnapshot(
-        //         querySnapshot => {
-        //             const newEntities = []
-        //             querySnapshot.forEach(doc => {
-        //                 const entity = doc.data()
-        //                 entity.id = doc.id
-        //                 newEntities.push(entity)
-        //             });
-        //             setEntities(newEntities)
-        //         },
-        //         error => {
-        //             console.log(error)
-        //         }
-        //     )
-        // setMessages([
-        //     {
-        //         // _id: 1,
-        //         text: 'This is a quick reply. Do you love Gifted Chat? (radio) KEEP IT',
-        //         createdAt: new Date(),
-        //         quickReplies: {
-        //             type: 'radio', // or 'checkbox',
-        //             keepIt: true,
-        //             values: [
-        //                 {
-        //                     title: '😋 Yes',
-        //                     value: 'yes',
-        //                 },
-        //                 {
-        //                     title: '📷 Yes, let me show you with a picture!',
-        //                     value: 'yes_picture',
-        //                 },
-        //                 {
-        //                     title: '😞 Nope. What?',
-        //                     value: 'no',
-        //                 },
-        //             ],
-        //         },
-        //     },
-        // ])
-    }, [])
-
-    const onSend = useCallback((messages = []) => {
-        setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-        const data = {
-            text: messages,
-            authorID: userID,
-            createdAt: timestamp,
-        };
-        entityRef
-            .add(data)
-            .then(_doc => {
-                // setEntityText('')
-                // Keyboard.dismiss()
-            })
-            .catch((error) => {
-                alert(error)
-            });
-    }, [])
-
-    const onAddButtonPress = () => {
-        if (entityText && entityText.length > 0) {
-            const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-            const data = {
-                text: entityText,
-                authorID: userID,
-                createdAt: timestamp,
-            };
-            entityRef
-                .add(data)
-                .then(_doc => {
-                    setEntityText('')
-                    Keyboard.dismiss()
-                })
-                .catch((error) => {
-                    alert(error)
-                });
-        }
+    const handlerContinue = () => {
+        props.navigation.navigate('PublicRoom', { roomID: state.roomID })
     }
 
     return (
-        // <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <GiftedChat
-            messages={messages}
-            onSend={messages => onSend(messages)}
-            user={{
-                _id: 1,
-            }}
-        />
-        // </SafeAreaView>
-    )
-
-    const renderEntity = ({ item, index }) => {
-        return (
-            <View style={styles.entityContainer}>
-                <Text style={styles.entityText}>
-                    {index}. {item.text}
-                </Text>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.cirle} />
+            <View style={{ margintop: 64 }}>
+                <Image
+                    source={require('../../../assets/bootsplash_logo.png')}
+                    style={{ width: 100, height: 100, alignSelf: 'center' }}
+                />
             </View>
-        )
-    }
-
-    return (
-        <View style={styles.container}>
-            <View style={styles.formContainer}>
+            <View style={{ marginHorizontal: 32 }}>
+                <Text style={styles.header}>{`JOIN ROOM`}</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder='Add new entity'
-                    placeholderTextColor="#aaaaaa"
-                    onChangeText={(text) => setEntityText(text)}
-                    value={entityText}
-                    underlineColorAndroid="transparent"
-                    autoCapitalize="none"
-                />
-                <TouchableOpacity style={styles.button} onPress={onAddButtonPress}>
-                    <Text style={styles.buttonText}>Add</Text>
-                </TouchableOpacity>
-            </View>
-            { entities && (
-                <View style={styles.listContainer}>
-                    <FlatList
-                        data={entities}
-                        renderItem={renderEntity}
-                        keyExtractor={(item) => item.id}
-                        removeClippedSubviews={true}
-                    />
+                    onChangeText={roomID => setState(prev => { return { ...prev, roomID } })}
+                    placeholder={'Input you room'}
+                >
+                    {state.roomID}
+                </TextInput>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
+                    <TouchableOpacity
+                        style={styles.continue}
+                        // onPress={() => handlerSignOut()}
+                        onPress={() => signOut()}
+                    >
+                        <Ionicons name="arrow-undo-outline" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.continue}
+                        onPress={() => handlerContinue()}
+                    >
+                        <Ionicons name="md-arrow-forward-outline" size={24} color="#fff" />
+                    </TouchableOpacity>
                 </View>
-            )}
-        </View>
+            </View>
+        </SafeAreaView>
     )
 }
 

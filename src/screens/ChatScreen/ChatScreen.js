@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, Platform, KeyboardAvoidingView, SafeAreaView } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat'
 
@@ -17,12 +17,12 @@ import { firebase } from '../../firebase/config'
 // import Fire from '../Fire'
 
 const ChatScreen = (props) => {
-    const [state, setState] = React.useState({
+    const [state, setState] = useState({
         messages: [],
         user: {}
     })
 
-    React.useEffect(() => {
+    useEffect(() => {
         firebase.auth().onAuthStateChanged(user => {
             console.log('user', user)
             if (!!user)

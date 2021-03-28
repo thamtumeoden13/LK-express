@@ -8,4 +8,6 @@ import AuthLoadingScreen from './AuthLoadingScreen/AuthLoadingScreen'
 
 import RoomScreen from './RoomScreen/RoomScreen'
 
-export { LoginScreen, HomeScreen, RegistrationScreen, AuthLoadingScreen, RoomScreen }
+import ChatScreen from './ChatScreen/ChatScreen'
+
+export { LoginScreen, HomeScreen, RegistrationScreen, AuthLoadingScreen, RoomScreen, ChatScreen }
