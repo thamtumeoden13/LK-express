@@ -1,5 +1,11 @@
-export { default as LoginScreen } from './LoginScreen/LoginScreen'
+import LoginScreen from './LoginScreen/LoginScreen'
 
-export { default as HomeScreen } from './HomeScreen/HomeScreen'
+import HomeScreen from './HomeScreen/HomeScreen'
 
-export { default as RegistrationScreen } from './RegistrationScreen/RegistrationScreen'
+import RegistrationScreen from './RegistrationScreen/RegistrationScreen'
+
+import AuthLoadingScreen from './AuthLoadingScreen/AuthLoadingScreen'
+
+import RoomScreen from './RoomScreen/RoomScreen'
+
+export { LoginScreen, HomeScreen, RegistrationScreen, AuthLoadingScreen, RoomScreen }

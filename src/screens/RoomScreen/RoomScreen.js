@@ -1,26 +1,29 @@
 
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { useState } from 'react';
 
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import { firebase } from '../../firebase/config'
+import { AuthContext } from '../../utils'
 
-const LoginScreen = (props) => {
+const RoomScreen = (props) => {
 
     const [state, setState] = useState({
         name: ''
     })
+    const { signOut } = useContext(AuthContext);
 
     const handlerContinue = () => {
-        props.navigation.navigate('Chat', {name: state.name})
+        props.navigation.navigate('Chat', { name: state.name })
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={styles.cirle} />
             <View style={{ margintop: 64 }}>
                 <Image
-                    source={require('../../assets/bootsplash_logo.png')}
+                    source={require('../../../assets/bootsplash_logo.png')}
                     style={{ width: 100, height: 100, alignSelf: 'center' }}
                 />
             </View>
@@ -33,7 +36,14 @@ const LoginScreen = (props) => {
                 >
                     {state.name}
                 </TextInput>
-                <View style={{ alignItems: 'flex-end' }} >
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
+                    <TouchableOpacity
+                        style={styles.continue}
+                        // onPress={() => handlerSignOut()}
+                        onPress={() => signOut()}
+                    >
+                        <Ionicons name="md-arrow-back-outline" size={24} color="#fff" />
+                    </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.continue}
                         onPress={() => handlerContinue()}
@@ -42,7 +52,7 @@ const LoginScreen = (props) => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -83,8 +93,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#9075e3',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop:16
+        marginTop: 16
     }
 })
 
-export default LoginScreen
+export default RoomScreen

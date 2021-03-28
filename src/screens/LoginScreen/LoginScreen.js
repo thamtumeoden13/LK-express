@@ -1,43 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { AuthContext } from '../../utils'
+
 import styles from './styles';
 
-import { firebase } from '../../firebase/config'
-
-export default function LoginScreen({navigation}) {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+const LoginScreen = (props) => {
+    const [email, setEmail] = useState('ltv.mrvu@gmail.com')
+    const [password, setPassword] = useState('123456')
 
     const onFooterLinkPress = () => {
-        navigation.navigate('Registration')
+        props.navigation.navigate('Registration')
     }
-    
+    const { signIn } = useContext(AuthContext);
+
     const onLoginPress = () => {
-        firebase
-            .auth()
-            .signInWithEmailAndPassword(email, password)
-            .then((response) => {
-                const uid = response.user.uid
-                const usersRef = firebase.firestore().collection('users')
-                usersRef
-                    .doc(uid)
-                    .get()
-                    .then(firestoreDocument => {
-                        if (!firestoreDocument.exists) {
-                            alert("User does not exist anymore.")
-                            return;
-                        }
-                        const user = firestoreDocument.data()
-                        navigation.navigate('Home', {user})
-                    })
-                    .catch(error => {
-                        alert(error)
-                    });
-            })
-            .catch(error => {
-                alert(error)
-            })
+        signIn({ email, password })
     }
 
     return (
@@ -70,7 +48,8 @@ export default function LoginScreen({navigation}) {
                 />
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => onLoginPress()}>
+                    onPress={() => onLoginPress()}
+                >
                     <Text style={styles.buttonTitle}>Log in</Text>
                 </TouchableOpacity>
                 <View style={styles.footerView}>
@@ -80,3 +59,5 @@ export default function LoginScreen({navigation}) {
         </View>
     )
 }
+
+export default LoginScreen

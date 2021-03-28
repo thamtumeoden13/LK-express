@@ -1,18 +1,16 @@
 import * as React from 'react'
 import { View, Text, Platform, KeyboardAvoidingView, SafeAreaView } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat'
-import auth from '@react-native-firebase/auth'
-import database from '@react-native-firebase/database';
 
 import { firebase } from '../firebase/config'
 
-// const reference = database().ref('/users/123');
-// const messages = database().ref('/messages')
+// const reference = firebase.database().ref('/users/123');
+// const messages = firebase.database().ref('/messages')
 //     .once('value')
 //     .then(snapshot => {
 //         console.log('User data: ', snapshot.val());
 //     });
-// const mess2 = database().ref('/messages')
+// const mess2 = firebase.database().ref('/messages')
 //     .on('value', snapshot => {
 //         console.log('User data: ', snapshot.val());
 //     });
@@ -38,7 +36,7 @@ const ChatScreen = (props) => {
                     }
                 })
         })
-        // database().ref('/messages').on('value', snapshot => {
+        // firebase.database().ref('/messages').on('value', snapshot => {
         //     Object.keys(snapshot.val()).map(function (key) {
         //         const { user, text, timestamp } = snapshot.val()[key]
         //         const { _id } = user
@@ -52,13 +50,13 @@ const ChatScreen = (props) => {
         //         })
         //     })
         // });
-        const onValueChange = database()
+        const onValueChange = firebase.database()
             .ref(`/messages`)
             .on('value', snapshot => {
                 console.log('User data: ', snapshot.val());
             });
 
-        const onChildAdd = database().ref('/messages').on('child_added', snapshot => {
+        const onChildAdd = firebase.database().ref('/messages').on('child_added', snapshot => {
             console.log('A new node has been added', snapshot.val());
             const { user, text, timestamp } = snapshot.val()
             const { key: _id } = snapshot
@@ -72,8 +70,8 @@ const ChatScreen = (props) => {
         });
         // Stop listening for updates when no longer required
         return () => {
-            database().ref('/messages').off('child_added', onChildAdd);
-            database().ref(`/messages`).off('value', onValueChange);
+            firebase.database().ref('/messages').off('child_added', onChildAdd);
+            firebase.database().ref(`/messages`).off('value', onValueChange);
         }
     }, [])
     const onSend = (messages = []) => {
@@ -81,11 +79,11 @@ const ChatScreen = (props) => {
         messages.forEach(element => {
             const message = {
                 text: element.text,
-                timestamp: database.ServerValue.TIMESTAMP,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
                 user: element.user
             };
             console.log('forEach', message)
-            database().ref('/messages').push(message);
+            firebase.database().ref('/messages').push(message);
         });
     }
 
