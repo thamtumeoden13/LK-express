@@ -23,7 +23,7 @@ const HomeScreen = (props) => {
     }
 
     const handlerContinue = () => {
-        props.navigation.navigate('PublicRoom', { roomID: state.roomID })
+        props.navigation.navigate('HomeDetail', { roomID: state.roomID, tabBarVisible: false })
     }
 
     return (

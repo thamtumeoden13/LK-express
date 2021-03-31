@@ -20,7 +20,7 @@ LogBox.ignoreAllLogs()
 
 const StackAuth = createStackNavigator();
 
-function AuthStack(params) {
+function AuthStack() {
     return (
         <StackAuth.Navigator initialRouteName={"Login"}>
             <StackAuth.Screen name="Login" component={LoginScreen} />
@@ -29,32 +29,78 @@ function AuthStack(params) {
     )
 }
 
+const HomeStack = createStackNavigator();
+
+function HomeStackScreen() {
+    return (
+        <HomeStack.Navigator >
+            <HomeStack.Screen name="Home" component={HomeScreen}/>
+            <HomeStack.Screen name="HomeDetail" component={ChatScreen} />
+        </HomeStack.Navigator>
+    );
+}
+
+const PublicRoomStack = createStackNavigator();
+
+function PublicRoomStackScreen() {
+    return (
+        <PublicRoomStack.Navigator>
+            <PublicRoomStack.Screen name="PublicRoom" component={RoomScreen} />
+            <PublicRoomStack.Screen name="PublicRoomDetail" component={ChatScreen} />
+        </PublicRoomStack.Navigator>
+    );
+}
+
+const PrivateRoomStack = createStackNavigator();
+
+function PrivateRoomStackScreen() {
+    return (
+        <PrivateRoomStack.Navigator>
+            <PrivateRoomStack.Screen name="PrivateRoom" component={RoomScreen} />
+            <PrivateRoomStack.Screen name="PrivateRoomDetail" component={ChatScreen} />
+        </PrivateRoomStack.Navigator>
+    );
+}
+
 const Tab = createBottomTabNavigator();
 function TabStack() {
+    const isTabBarVisible = (route) => {
+        console.log(route.name,!['HomeDetail', 'PublicRoomDetail', 'PrivateRoomDetail'].includes(route.name))
+        return !['HomeDetail', 'PublicRoomDetail', 'PrivateRoomDetail'].includes(route.name);
+    };
     return (
-        <Tab.Navigator>
-            <Tab.Screen name="Home" component={HomeScreen}
+        <Tab.Navigator
+            screenOptions={({ route }) => ({
+                tabBarVisible: isTabBarVisible(route)
+            })}
+            tabBarOptions={{
+                activeTintColor: 'tomato',
+                inactiveTintColor: 'gray',
+            }}
+
+        >
+            <Tab.Screen name="Home" component={HomeStackScreen}
                 options={{
                     tabBarLabel: 'Home',
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="home" color={color} size={size} />
-                    ),
+                    )
                 }}
             />
-            <Tab.Screen name="PublicRoom" component={RoomScreen}
+            <Tab.Screen name="PublicRoom" component={PublicRoomStackScreen}
                 options={{
                     tabBarLabel: 'PublicRoom',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="bell" color={color} size={size} />
+                        <MaterialCommunityIcons name="battlenet" color={color} size={size} />
                     ),
                     tabBarBadge: 3,
                 }}
             />
-            <Tab.Screen name="PrivateRoom" component={ChatScreen}
+            <Tab.Screen name="PrivateRoom" component={PrivateRoomStackScreen}
                 options={{
                     tabBarLabel: 'PrivateRoom',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="account" color={color} size={size} />
+                        <MaterialCommunityIcons name="bell" color={color} size={size} />
                     ),
                 }}
             />
@@ -214,7 +260,10 @@ export default function App() {
                         // <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
                         <Stack.Screen name="Login" component={AuthStack} />
                     ) : (
-                        <Stack.Screen name="Home" component={TabStack} />
+                        <>
+                            <Stack.Screen name="Home" component={TabStack} />
+                            {/* <Stack.Screen name="ChatDetail" component={ChatScreen} /> */}
+                        </>
                     )}
                 </Stack.Navigator>
             </NavigationContainer >

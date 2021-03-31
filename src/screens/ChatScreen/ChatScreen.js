@@ -1,79 +1,169 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, Platform, KeyboardAvoidingView, SafeAreaView } from 'react-native'
+import React, { useEffect, useState, useCallback } from 'react'
+import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat'
-
+import AsyncStorage from '@react-native-community/async-storage';
 import { firebase } from '../../firebase/config'
+import { notificationManager } from '../../utils/NotificationManager'
 
-// const reference = firebase.database().ref('/users/123');
-// const messages = firebase.database().ref('/messages')
-//     .once('value')
-//     .then(snapshot => {
-//         console.log('User data: ', snapshot.val());
-//     });
-// const mess2 = firebase.database().ref('/messages')
-//     .on('value', snapshot => {
-//         console.log('User data: ', snapshot.val());
-//     });
-// import Fire from '../Fire'
+import styles from './styles';
 
-const ChatScreen = (props) => {
+const db = firebase.firestore()
+const entityRef = db.collection('rooms')
+
+const RoomScreen = (props) => {
+    // // const focusedOptions = props.descriptors[props.state.routes[state.index].key].options;
+
+    // if (props.tabBarVisible === false) {
+    //     return null;
+    // }
+    
     const [state, setState] = useState({
-        messages: [],
-        user: {}
+        roomID: '',
+        userID: '',
+        userName: '',
+        isActivedLocalPushNotify: false
     })
+    const [messages, setMessages] = useState([])
 
     useEffect(() => {
-        firebase.auth().onAuthStateChanged(user => {
-            console.log('user', user)
-            if (!!user)
-                setState(prev => {
-                    return {
-                        ...prev,
-                        user: {
-                            _id: user.uid,
-                            name: props.route.params.name
-                        }
-                    }
-                })
+        setTimeout(async () => {
+            const roomID = props.route.params.roomID
+            const userToken = await AsyncStorage.getItem('User');
+            const user = JSON.parse(userToken)
+            setState(prev => { return { ...prev, roomID, userID: user.id, userName: user.fullName } })
         })
-        const onValueChange = firebase.database()
-            .ref(`/messages`)
-            .on('value', snapshot => {
-                console.log('User data: ', snapshot.val());
-            });
-
-        const onChildAdd = firebase.database().ref('/messages').on('child_added', snapshot => {
-            console.log('A new node has been added', snapshot.val());
-            const { user, text, timestamp } = snapshot.val()
-            const { key: _id } = snapshot
-            const createdAt = new Date(timestamp)
-            setState(prev => {
-                return {
-                    ...prev,
-                    messages: GiftedChat.append(prev.messages, { _id, createdAt, text, user })
-                }
-            })
-        });
-        // Stop listening for updates when no longer required
-        return () => {
-            firebase.database().ref('/messages').off('child_added', onChildAdd);
-            firebase.database().ref(`/messages`).off('value', onValueChange);
-        }
     }, [])
-    const onSend = (messages = []) => {
-        console.log('onSend', messages)
-        messages.forEach(element => {
-            const message = {
-                text: element.text,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                user: element.user
-            };
-            console.log('forEach', message)
-            firebase.database().ref('/messages').push(message);
-        });
+
+    useEffect(() => {
+        if (!!state.userID && !!state.roomID) {
+            getRealtimCollection()
+        }
+    }, [state.userID, state.roomID])
+
+    const getCollection = () => {
+        entityRef
+            .doc(`${state.roomID}`)
+            .collection('messages')
+            .get()
+            .then((querySnapshot) => {
+                let messagesFireStore = []
+                querySnapshot.forEach((doc) => {
+                    const message = doc.data()
+                    console.log('message', message)
+                    console.log('_id: message.user._id', message.user._id)
+                    messagesFireStore.push({
+                        ...message,
+                        createdAt: message.createdAt.toDate(),
+                        user: { _id: message.user._id, name: message.user.name, }
+                    })
+                })
+
+                messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                console.log('messagesFireStore', messagesFireStore)
+                appendMessages(messagesFireStore, state.userID)
+            }, (error) => {
+                Alert.alert(error)
+            });
     }
 
-    const chat = <GiftedChat messages={state.messages} onSend={onSend} user={state.user} />
+    const getRealtimCollection = () => {
+        entityRef
+            .doc(`${state.roomID}`)
+            .collection('messages')
+            .onSnapshot((querySnapshot) => {
+                //    const messagesFireStore =  querySnapshot
+                //         .docChanges()
+                //         .filter(({ type }) => type === 'added')
+                //         .map(({ doc }) => {
+                //             const message = doc.data()
+                //             console.log('message', message)
+                //             return {
+                //                 ...message,
+                //                 createdAt: message.createdAt.toDate(),
+                //                 user: { _id: message.user._id, name: message.user.name, }
+                //             }
+                //         }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                //     console.log('messagesFireStore', messagesFireStore)
+                //     appendMessages(messagesFireStore, state.userID)
+
+                let messagesFireStore = []
+
+                querySnapshot.docChanges().forEach(change => {
+                    const message = change.doc.data()
+                    if (change.type === "added") {
+                        console.log("New message: ", change.doc.data());
+                        messagesFireStore.push({
+                            ...message,
+                            createdAt: message.createdAt.toDate(),
+                            user: { _id: message.user._id, name: message.user.name, }
+                        })
+                    }
+                    if (change.type === "modified") {
+                        console.log("Modified message: ", change.doc.data());
+                    }
+                    if (change.type === "removed") {
+                        console.log("Removed message: ", change.doc.data());
+                    }
+                })
+                messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                console.log('messagesFireStore', messagesFireStore)
+                appendMessages(messagesFireStore, state.userID, state.roomID)
+            }, (error) => {
+                Alert.alert(error)
+            });
+    }
+
+    const appendMessages = useCallback((messages, userID, roomID) => {
+        setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+        console.log('appendMessages', messages)
+        if (!!messages && messages.length > 0 && userID != messages[0].authorID) {
+            handlerLocalPushNotify(messages[0], roomID)
+        }
+    }, [messages])
+
+    const handlerLocalPushNotify = (message, roomID) => {
+        const options = {
+            soundName: "default",
+            playSound: true,
+            vibrate: true
+        }
+        notificationManager.showNotification(
+            Math.random(),
+            `${roomID}`,
+            `${message.text}`,
+            {}, // data
+            options //options
+        )
+    }
+
+    const onSend = (messages = []) => {
+        const { text, _id, createdAt } = messages[0]
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        const data = {
+            _id: _id,
+            authorID: state.userID,
+            createdAt: createdAt,
+            text: text,
+            user: {
+                _id: state.userID,
+                name: state.userName,
+            },
+        }
+
+        entityRef
+            .doc(`${state.roomID}`)
+            .collection('messages')
+            .doc()
+            .set(data)
+            .then(_doc => {
+                Keyboard.dismiss()
+            })
+            .catch((error) => {
+                alert(error)
+            })
+    }
+
+    const chat = <GiftedChat messages={messages} onSend={onSend} user={{ _id: state.userID, name: state.userName }} />
     if (Platform.OS === 'android') {
         return (
             <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' KeyboardAvoidingView={30} enabled>
@@ -88,4 +178,4 @@ const ChatScreen = (props) => {
     )
 }
 
-export default ChatScreen
+export default RoomScreen
