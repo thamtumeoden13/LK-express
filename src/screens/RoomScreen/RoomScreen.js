@@ -3,6 +3,7 @@ import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, Vi
 import { GiftedChat } from 'react-native-gifted-chat'
 import AsyncStorage from '@react-native-community/async-storage';
 import { firebase } from '../../firebase/config'
+import { notificationManager } from '../../utils/NotificationManager'
 
 import styles from './styles';
 
@@ -13,55 +14,121 @@ const RoomScreen = ({ navigation, route }) => {
     const [state, setState] = useState({
         roomID: '',
         userID: '',
-        userName: ''
+        userName: '',
+        isActivedLocalPushNotify: false
     })
     const [messages, setMessages] = useState([])
 
-
     useEffect(() => {
-        // const unsubscribe = navigation.addListener('focus', async () => {
-
-        // });
-
-        // return unsubscribe;
         setTimeout(async () => {
             const roomID = route.params.roomID
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             setState(prev => { return { ...prev, roomID, userID: user.id, userName: user.fullName } })
+        })
+    }, [])
 
-            entityRef
-                .doc(`${roomID}`)
-                .collection('messages')
-                .onSnapshot((querySnapshot) => {
-                    const messagesFireStore = querySnapshot
-                        .docChanges()
-                        .filter(({ type }) => type === 'added')
-                        .map(({ doc }) => {
-                            const message = doc.data()
-                            console.log('message', message)
-                            return {
-                                ...message,
-                                createdAt: message.createdAt.toDate(),
-                                user: { _id: message.user._id, name: message.user.name, }
-                            }
-                        }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-                    console.log('messagesFireStore', messagesFireStore)
-                    appendMessages(messagesFireStore)
-                    // querySnapshot.forEach(doc => {
-                    //     const entity = doc.data()
-                    //     debugger
-                    //     console.log('entity', entity)
-                    // });
-                }, (error) => {
-                    Alert.alert(error)
-                });
-        });
-    }, [navigation])
+    useEffect(() => {
+        if (!!state.userID && !!state.roomID) {
+            getRealtimCollection()
+        }
+    }, [state.userID, state.roomID])
 
-    const appendMessages = useCallback((messages) => {
+    const getCollection = () => {
+        entityRef
+            .doc(`${state.roomID}`)
+            .collection('messages')
+            .get()
+            .then((querySnapshot) => {
+                let messagesFireStore = []
+                querySnapshot.forEach((doc) => {
+                    const message = doc.data()
+                    console.log('message', message)
+                    console.log('_id: message.user._id', message.user._id)
+                    messagesFireStore.push({
+                        ...message,
+                        createdAt: message.createdAt.toDate(),
+                        user: { _id: message.user._id, name: message.user.name, }
+                    })
+                })
+
+                messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                console.log('messagesFireStore', messagesFireStore)
+                appendMessages(messagesFireStore, state.userID)
+            }, (error) => {
+                Alert.alert(error)
+            });
+    }
+
+    const getRealtimCollection = () => {
+        entityRef
+            .doc(`${state.roomID}`)
+            .collection('messages')
+            .onSnapshot((querySnapshot) => {
+                //    const messagesFireStore =  querySnapshot
+                //         .docChanges()
+                //         .filter(({ type }) => type === 'added')
+                //         .map(({ doc }) => {
+                //             const message = doc.data()
+                //             console.log('message', message)
+                //             return {
+                //                 ...message,
+                //                 createdAt: message.createdAt.toDate(),
+                //                 user: { _id: message.user._id, name: message.user.name, }
+                //             }
+                //         }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                //     console.log('messagesFireStore', messagesFireStore)
+                //     appendMessages(messagesFireStore, state.userID)
+
+                let messagesFireStore = []
+
+                querySnapshot.docChanges().forEach(change => {
+                    const message = change.doc.data()
+                    if (change.type === "added") {
+                        console.log("New message: ", change.doc.data());
+                        messagesFireStore.push({
+                            ...message,
+                            createdAt: message.createdAt.toDate(),
+                            user: { _id: message.user._id, name: message.user.name, }
+                        })
+                    }
+                    if (change.type === "modified") {
+                        console.log("Modified message: ", change.doc.data());
+                    }
+                    if (change.type === "removed") {
+                        console.log("Removed message: ", change.doc.data());
+                    }
+                })
+                messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                console.log('messagesFireStore', messagesFireStore)
+                appendMessages(messagesFireStore, state.userID, state.roomID)
+            }, (error) => {
+                Alert.alert(error)
+            });
+    }
+
+    const appendMessages = useCallback((messages, userID, roomID) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+        console.log('appendMessages', messages)
+        if (!!messages && messages.length > 0 && userID != messages[0].authorID) {
+            handlerLocalPushNotify(messages[0], roomID)
+        }
     }, [messages])
+
+    const handlerLocalPushNotify = (message,roomID) => {
+        const options = {
+            soundName: "default",
+            playSound: true,
+            vibrate: true
+        }
+        notificationManager.showNotification(
+            Math.random(),
+            `${roomID}`,
+            `${message.text}`,
+            {}, // data
+            options //options
+        )
+    }
 
     const onSend = (messages = []) => {
         const { text, _id, createdAt } = messages[0]

@@ -18,26 +18,12 @@ const HomeScreen = (props) => {
     const { signOut } = useContext(AuthContext);
 
     const handlerSignOut = () => {
-        // signOut()
-        notificationManager.cancelAllLocalNotification()
+        signOut()
+        // notificationManager.cancelAllLocalNotification()
     }
 
     const handlerContinue = () => {
-        // props.navigation.navigate('PublicRoom', { roomID: state.roomID })
-
-        const options = {
-            soundName: "default",
-            playSound: true,
-            vibrate: true
-        }
-
-        notificationManager.showNotification(
-            Math.random(),
-            "App notification",
-            " Message notification",
-            {}, // data
-            options //options
-        )
+        props.navigation.navigate('PublicRoom', { roomID: state.roomID })
     }
 
     return (
