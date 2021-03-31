@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState, useReducer } from 'react'
-import { LogBox } from 'react-native'
+import React, { useEffect, useState, useReducer, useRef } from 'react'
+import { Alert, LogBox } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack'
@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { LoginScreen, HomeScreen, RegistrationScreen, AuthLoadingScreen, RoomScreen, ChatScreen } from './screens'
 import { AuthContext } from './utils'
 import { firebase } from './firebase/config'
+import { notificationManager } from './utils/NotificationManager'
 
 if (!global.btoa) { global.btoa = encode }
 if (!global.atob) { global.atob = decode }
@@ -115,7 +116,22 @@ export default function App() {
         };
 
         bootstrapAsync();
+
+        notificationManager.configure(onRegister, onNotification, onOpenNotification)
     }, [])
+
+    const onRegister = (token) => {
+        console.log('[Notification] registered', token)
+    }
+
+    const onNotification = (notify) => {
+        console.log('[Notification] onNotification', notify)
+    }
+
+    const onOpenNotification = (notify) => {
+        console.log('[onOpenNotification] registered', notify)
+        Alert.alert('Open notification')
+    }
 
     const authContext = React.useMemo(
         () => ({

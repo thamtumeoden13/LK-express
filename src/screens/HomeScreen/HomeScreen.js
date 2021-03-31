@@ -8,6 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import { firebase } from '../../firebase/config'
 import styles from './styles';
 import { AuthContext } from '../../utils'
+import { notificationManager } from '../../utils/NotificationManager'
 
 const HomeScreen = (props) => {
 
@@ -16,8 +17,27 @@ const HomeScreen = (props) => {
     })
     const { signOut } = useContext(AuthContext);
 
+    const handlerSignOut = () => {
+        // signOut()
+        notificationManager.cancelAllLocalNotification()
+    }
+
     const handlerContinue = () => {
-        props.navigation.navigate('PublicRoom', { roomID: state.roomID })
+        // props.navigation.navigate('PublicRoom', { roomID: state.roomID })
+
+        const options = {
+            soundName: "default",
+            playSound: true,
+            vibrate: true
+        }
+
+        notificationManager.showNotification(
+            Math.random(),
+            "App notification",
+            " Message notification",
+            {}, // data
+            options //options
+        )
     }
 
     return (
@@ -41,8 +61,7 @@ const HomeScreen = (props) => {
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
                     <TouchableOpacity
                         style={styles.continue}
-                        // onPress={() => handlerSignOut()}
-                        onPress={() => signOut()}
+                        onPress={() => handlerSignOut()}
                     >
                         <Ionicons name="arrow-undo-outline" size={24} color="#fff" />
                     </TouchableOpacity>

@@ -13,6 +13,7 @@
 		45CC58B1FA0D97DEFBAE9016 /* libPods-LKexpress.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 14B4D6CE0BF0536B37250167 /* libPods-LKexpress.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		971107D225F61AE300424097 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 971107D125F61AE300424097 /* GoogleService-Info.plist */; };
+		97F1CB8626136A5100A5FB4A /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97F1CB8526136A5100A5FB4A /* MapKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,8 @@
 		971107BC25F6174400424097 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SimpleLineIcons.ttf; sourceTree = "<group>"; };
 		971107BD25F6174400424097 /* Zocial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Zocial.ttf; sourceTree = "<group>"; };
 		971107D125F61AE300424097 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "LKexpress/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		97F1CB8426136A1300A5FB4A /* LKexpress.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = LKexpress.entitlements; path = LKexpress/LKexpress.entitlements; sourceTree = "<group>"; };
+		97F1CB8526136A5100A5FB4A /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		AD30F35E00F314993C50F080 /* Pods-LKexpress.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LKexpress.release.xcconfig"; path = "Target Support Files/Pods-LKexpress/Pods-LKexpress.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
@@ -53,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				97F1CB8626136A5100A5FB4A /* MapKit.framework in Frameworks */,
 				45CC58B1FA0D97DEFBAE9016 /* libPods-LKexpress.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -63,6 +67,7 @@
 		13B07FAE1A68108700A75B9A /* LKexpress */ = {
 			isa = PBXGroup;
 			children = (
+				97F1CB8426136A1300A5FB4A /* LKexpress.entitlements */,
 				971107D125F61AE300424097 /* GoogleService-Info.plist */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -78,6 +83,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				97F1CB8526136A5100A5FB4A /* MapKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				14B4D6CE0BF0536B37250167 /* libPods-LKexpress.a */,
@@ -363,6 +369,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = LKexpress/LKexpress.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -391,6 +398,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = LKexpress/LKexpress.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
