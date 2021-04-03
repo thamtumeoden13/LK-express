@@ -6,7 +6,7 @@ import { AuthContext } from '../../utils'
 import styles from './styles';
 
 const LoginScreen = (props) => {
-    const [email, setEmail] = useState('.mrvu@gmail.com')
+    const [email, setEmail] = useState('ltv.mrvu@gmail.com')
     const [password, setPassword] = useState('123456')
 
     const onFooterLinkPress = () => {

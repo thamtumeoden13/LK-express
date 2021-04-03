@@ -10,7 +10,8 @@ const RegistrationScreen = ({ navigation }) => {
         fullName: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        avatarURL: ''
     })
 
     const { signUp } = useContext(AuthContext);
@@ -28,9 +29,9 @@ const RegistrationScreen = ({ navigation }) => {
             alert("Passwords don't match.")
             return
         }
-        signUp(state.email, state.password, state.fullName)
+        signUp(state.email, state.password, state.fullName, state.avatarURL)
     }
-    console.log('state', state)
+
     return (
         <View style={styles.container}>
             <KeyboardAwareScrollView
@@ -75,6 +76,16 @@ const RegistrationScreen = ({ navigation }) => {
                     placeholder='Confirm Password'
                     onChangeText={(text) => handlerChangeText('confirmPassword', text)}
                     value={state.confirmPassword}
+                    underlineColorAndroid="transparent"
+                    autoCapitalize="none"
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholderTextColor="#aaaaaa"
+                    // secureTextEntry
+                    placeholder='Confirm Password'
+                    onChangeText={(text) => handlerChangeText('avatarURL', text)}
+                    value={state.avatarURL}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
                 />

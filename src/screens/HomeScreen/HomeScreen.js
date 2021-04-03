@@ -1,9 +1,10 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useState } from 'react';
 
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import AsyncStorage from '@react-native-community/async-storage';
 
 import { firebase } from '../../firebase/config'
 import styles from './styles';
@@ -13,7 +14,9 @@ import { notificationManager } from '../../utils/NotificationManager'
 const HomeScreen = (props) => {
 
     const [state, setState] = useState({
-        roomID: ''
+        roomID: '',
+        userName: '',
+        avatarURL: ''
     })
     const { signOut } = useContext(AuthContext);
 
@@ -23,15 +26,29 @@ const HomeScreen = (props) => {
     }
 
     const handlerContinue = () => {
-        props.navigation.navigate('HomeDetail', { roomID: state.roomID, tabBarVisible: false })
+        props.navigation.navigate('ChatDetail', { roomID: state.roomID, tabBarVisible: false })
     }
+
+    useEffect(() => {
+        setTimeout(async () => {
+            const userToken = await AsyncStorage.getItem('User');
+            const user = JSON.parse(userToken)
+            setState(prev => {
+                return {
+                    ...prev,
+                    userName: user.fullName,
+                    avatarURL: user.avatarURL
+                }
+            })
+        })
+    }, [])
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.cirle} />
-            <View style={{ margintop: 64 }}>
+            <View style={{ margintop: 64, paddingVertical: 20 }}>
                 <Image
-                    source={require('../../../assets/bootsplash_logo.png')}
+                    source={!!state.avatarURL ? { uri: state.avatarURL } : require('../../../assets/bootsplash_logo.png')}
                     style={{ width: 100, height: 100, alignSelf: 'center' }}
                 />
             </View>

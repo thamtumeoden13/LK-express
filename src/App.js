@@ -7,8 +7,12 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { decode, encode } from 'base-64'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AsyncStorage from '@react-native-community/async-storage';
+import codePush from "react-native-code-push";
 
-import { LoginScreen, HomeScreen, RegistrationScreen, AuthLoadingScreen, RoomScreen, ChatScreen } from './screens'
+import {
+    LoginScreen, RegistrationScreen, AuthLoadingScreen,
+    HomeScreen, RoomScreen, ChatScreen, RoomChatScreen
+} from './screens'
 import { AuthContext } from './utils'
 import { firebase } from './firebase/config'
 import { notificationManager } from './utils/NotificationManager'
@@ -34,7 +38,7 @@ const HomeStack = createStackNavigator();
 function HomeStackScreen() {
     return (
         <HomeStack.Navigator >
-            <HomeStack.Screen name="Home" component={HomeScreen}/>
+            <HomeStack.Screen name="Home" component={HomeScreen} />
             <HomeStack.Screen name="HomeDetail" component={ChatScreen} />
         </HomeStack.Navigator>
     );
@@ -46,7 +50,7 @@ function PublicRoomStackScreen() {
     return (
         <PublicRoomStack.Navigator>
             <PublicRoomStack.Screen name="PublicRoom" component={RoomScreen} />
-            <PublicRoomStack.Screen name="PublicRoomDetail" component={ChatScreen} />
+            <PublicRoomStack.Screen name="PublicRoomDetail" component={RoomChatScreen} />
         </PublicRoomStack.Navigator>
     );
 }
@@ -65,7 +69,6 @@ function PrivateRoomStackScreen() {
 const Tab = createBottomTabNavigator();
 function TabStack() {
     const isTabBarVisible = (route) => {
-        console.log(route.name,!['HomeDetail', 'PublicRoomDetail', 'PrivateRoomDetail'].includes(route.name))
         return !['HomeDetail', 'PublicRoomDetail', 'PrivateRoomDetail'].includes(route.name);
     };
     return (
@@ -110,7 +113,7 @@ function TabStack() {
 
 const Stack = createStackNavigator();
 
-export default function App() {
+const App = () => {
     const [state, dispatch] = useReducer(
         (prevState, action) => {
             switch (action.type) {
@@ -216,7 +219,7 @@ export default function App() {
                 dispatch({ type: 'SIGN_OUT' })
                 AsyncStorage.removeItem('User')
             },
-            signUp: async (email, password, fullName) => {
+            signUp: async (email, password, fullName, avatarURL) => {
                 // In a production app, we need to send user data to server and get a token
                 // We will also need to handle errors if sign up failed
                 // After getting token, we need to persist the token using `SecureStore`
@@ -230,15 +233,16 @@ export default function App() {
                             id: uid,
                             email,
                             fullName,
+                            avatarURL: avatarURL
                         };
                         const usersRef = firebase.firestore().collection('users')
                         usersRef
                             .doc(uid)
                             .set(data)
-                            .then(async (firestoreDocument) => {
-                                const user = firestoreDocument.data()
-                                AsyncStorage.setItem('User', JSON.stringify(user))
-                                dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
+                            .then(async () => {
+                                // const user = firestoreDocument.data()
+                                await AsyncStorage.setItem('User', JSON.stringify(data))
+                                dispatch({ type: 'SIGN_IN', token: JSON.stringify(data) });
                             })
                             .catch((error) => {
                                 alert(error)
@@ -262,7 +266,7 @@ export default function App() {
                     ) : (
                         <>
                             <Stack.Screen name="Home" component={TabStack} />
-                            {/* <Stack.Screen name="ChatDetail" component={ChatScreen} /> */}
+                            <Stack.Screen name="ChatDetail" component={RoomChatScreen} />
                         </>
                     )}
                 </Stack.Navigator>
@@ -270,3 +274,7 @@ export default function App() {
         </AuthContext.Provider>
     );
 }
+
+// export default App
+let codePushOptions = { checkFrequency: codePush.CheckFrequency.ON_APP_RESUME };
+export default codePush(codePushOptions)(App)

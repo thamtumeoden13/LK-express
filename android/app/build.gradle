@@ -154,6 +154,8 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            manifestPlaceholders = [usesCleartextTraffic:"true"]
+            resValue "string", "CodePushDeploymentKey", '"dEl2fhAufvhR7566pFdpLbHu1KisOMnTp0QrV"'
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -161,6 +163,16 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            manifestPlaceholders = [usesCleartextTraffic:"false"]
+            resValue "string", "CodePushDeploymentKey", '"dEl2fhAufvhR7566pFdpLbHu1KisOMnTp0QrV"'
+        }
+        releaseStaging {
+            matchingFallbacks = ['release']
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
+            manifestPlaceholders = [usesCleartextTraffic:"false"]
+            resValue "string", "CodePushDeploymentKey", '"dEl2fhAufvhR7566pFdpLbHu1KisOMnTp0QrV"'
         }
     }
 

@@ -10,7 +10,7 @@ import styles from './styles';
 const db = firebase.firestore()
 const entityRef = db.collection('rooms')
 
-const RoomScreen = (props) => {
+const ChatScreen = (props) => {
     // // const focusedOptions = props.descriptors[props.state.routes[state.index].key].options;
 
     // if (props.tabBarVisible === false) {
@@ -40,31 +40,6 @@ const RoomScreen = (props) => {
         }
     }, [state.userID, state.roomID])
 
-    const getCollection = () => {
-        entityRef
-            .doc(`${state.roomID}`)
-            .collection('messages')
-            .get()
-            .then((querySnapshot) => {
-                let messagesFireStore = []
-                querySnapshot.forEach((doc) => {
-                    const message = doc.data()
-                    console.log('message', message)
-                    console.log('_id: message.user._id', message.user._id)
-                    messagesFireStore.push({
-                        ...message,
-                        createdAt: message.createdAt.toDate(),
-                        user: { _id: message.user._id, name: message.user.name, }
-                    })
-                })
-
-                messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-                console.log('messagesFireStore', messagesFireStore)
-                appendMessages(messagesFireStore, state.userID)
-            }, (error) => {
-                Alert.alert(error)
-            });
-    }
 
     const getRealtimCollection = () => {
         entityRef
@@ -178,4 +153,4 @@ const RoomScreen = (props) => {
     )
 }
 
-export default RoomScreen
+export default ChatScreen
