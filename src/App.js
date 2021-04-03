@@ -1,18 +1,18 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState, useReducer, useRef } from 'react'
-import { Alert, LogBox } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack'
+import { Alert, LogBox, AppState, Platform } from 'react-native'
 import { decode, encode } from 'base-64'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AsyncStorage from '@react-native-community/async-storage';
 import codePush from "react-native-code-push";
+import { PERMISSIONS, request, openSettings, checkMultiple } from 'react-native-permissions';
+import RNExitApp from 'react-native-exit-app';
+import Toast from 'react-native-toast-message';
 
-import {
-    LoginScreen, RegistrationScreen, AuthLoadingScreen,
-    HomeScreen, RoomScreen, ChatScreen, RoomChatScreen
-} from './screens'
+import AppContainer from './navigators'
+
+import { ModalCenterAlert } from "./components/common/modal/ModalCenterAlert";
+import OpenSetting from './components/app/modalInputForm/OpenSetting';
+
 import { AuthContext } from './utils'
 import { firebase } from './firebase/config'
 import { notificationManager } from './utils/NotificationManager'
@@ -22,152 +22,208 @@ if (!global.atob) { global.atob = decode }
 
 LogBox.ignoreAllLogs()
 
-const StackAuth = createStackNavigator();
-
-function AuthStack() {
-    return (
-        <StackAuth.Navigator initialRouteName={"Login"}>
-            <StackAuth.Screen name="Login" component={LoginScreen} />
-            <StackAuth.Screen name="Registration" component={RegistrationScreen} />
-        </StackAuth.Navigator>
-    )
-}
-
-const HomeStack = createStackNavigator();
-
-function HomeStackScreen() {
-    return (
-        <HomeStack.Navigator >
-            <HomeStack.Screen name="Home" component={HomeScreen} />
-            <HomeStack.Screen name="HomeDetail" component={ChatScreen} />
-        </HomeStack.Navigator>
-    );
-}
-
-const PublicRoomStack = createStackNavigator();
-
-function PublicRoomStackScreen() {
-    return (
-        <PublicRoomStack.Navigator>
-            <PublicRoomStack.Screen name="PublicRoom" component={RoomScreen} />
-            <PublicRoomStack.Screen name="PublicRoomDetail" component={RoomChatScreen} />
-        </PublicRoomStack.Navigator>
-    );
-}
-
-const PrivateRoomStack = createStackNavigator();
-
-function PrivateRoomStackScreen() {
-    return (
-        <PrivateRoomStack.Navigator>
-            <PrivateRoomStack.Screen name="PrivateRoom" component={RoomScreen} />
-            <PrivateRoomStack.Screen name="PrivateRoomDetail" component={ChatScreen} />
-        </PrivateRoomStack.Navigator>
-    );
-}
-
-const Tab = createBottomTabNavigator();
-function TabStack() {
-    const isTabBarVisible = (route) => {
-        return !['HomeDetail', 'PublicRoomDetail', 'PrivateRoomDetail'].includes(route.name);
-    };
-    return (
-        <Tab.Navigator
-            screenOptions={({ route }) => ({
-                tabBarVisible: isTabBarVisible(route)
-            })}
-            tabBarOptions={{
-                activeTintColor: 'tomato',
-                inactiveTintColor: 'gray',
-            }}
-
-        >
-            <Tab.Screen name="Home" component={HomeStackScreen}
-                options={{
-                    tabBarLabel: 'Home',
-                    tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="home" color={color} size={size} />
-                    )
+const toastConfig = {
+    success_custom: (internalState) => (
+        <View style={{
+            flexDirection: 'row',
+            width: calcWidth('90%'), maxHeight: verticalScale(120),
+            backgroundColor: '#fff',
+            padding: moderateScale(10),
+            borderLeftWidth: scale(10),
+            borderTopWidth: scale(1),
+            borderRightWidth: scale(1),
+            borderBottomWidth: scale(1),
+            borderColor: 'limegreen',
+            borderTopLeftRadius: scale(10),
+            borderBottomLeftRadius: scale(10),
+        }}>
+            <Icon name='checkcircleo' type='antdesign' color='limegreen' size={scale(12)}
+                containerStyle={{
+                    justifyContent: 'center',
+                    marginRight: moderateScale(10)
                 }}
-            />
-            <Tab.Screen name="PublicRoom" component={PublicRoomStackScreen}
-                options={{
-                    tabBarLabel: 'PublicRoom',
-                    tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="battlenet" color={color} size={size} />
-                    ),
-                    tabBarBadge: 3,
-                }}
-            />
-            <Tab.Screen name="PrivateRoom" component={PrivateRoomStackScreen}
-                options={{
-                    tabBarLabel: 'PrivateRoom',
-                    tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="bell" color={color} size={size} />
-                    ),
-                }}
-            />
-        </Tab.Navigator>
-    )
-}
 
-const Stack = createStackNavigator();
+                activeOpacity={0.7}
+            />
+            <View style={{ paddingHorizontal: moderateScale(10) }}>
+                <Text style={{ color: '#000', fontSize: scale(14), fontWeight: 'bold' }} numberOfLines={1}>{internalState.text1}</Text>
+                <Text style={{ color: '#000', fontSize: scale(12) }} numberOfLines={4}>{internalState.text2}</Text>
+            </View>
+        </View>
+    ),
+    info_custom: (internalState) => (
+        <View style={{
+            flexDirection: 'row',
+            width: calcWidth('90%'), maxHeight: verticalScale(120),
+            backgroundColor: '#fff',
+            padding: moderateScale(10),
+            borderLeftWidth: scale(10),
+            borderTopWidth: scale(1),
+            borderRightWidth: scale(1),
+            borderBottomWidth: scale(1),
+            borderColor: 'dodgerblue',
+            borderTopLeftRadius: scale(10),
+            borderBottomLeftRadius: scale(10),
+        }}>
+            <Icon name='infocirlceo' type='antdesign' color='dodgerblue' size={scale(12)}
+                containerStyle={{
+                    justifyContent: 'center',
+                    marginRight: moderateScale(10)
+                }}
+
+                activeOpacity={0.7}
+            />
+            <View style={{ paddingHorizontal: moderateScale(10) }}>
+                <Text style={{ color: '#000', fontSize: scale(14), fontWeight: 'bold' }} numberOfLines={1}>{internalState.text1}</Text>
+                <Text style={{ color: '#000', fontSize: scale(12) }} numberOfLines={4}>{internalState.text2}</Text>
+            </View>
+        </View>
+    ),
+    error_custom: (internalState) => (
+        <View style={{
+            flexDirection: 'row',
+            width: calcWidth('90%'), maxHeight: verticalScale(120),
+            backgroundColor: '#fff',
+            padding: moderateScale(10),
+            borderLeftWidth: scale(10),
+            borderTopWidth: scale(1),
+            borderRightWidth: scale(1),
+            borderBottomWidth: scale(1),
+            borderColor: 'crimson',
+            borderTopLeftRadius: scale(10),
+            borderBottomLeftRadius: scale(10),
+        }}>
+            <Icon name='closecircleo' type='antdesign' color='crimson' size={scale(12)}
+                containerStyle={{
+                    justifyContent: 'center',
+                    marginRight: moderateScale(10)
+                }}
+
+                activeOpacity={0.7}
+            />
+            <View style={{ paddingHorizontal: moderateScale(10) }}>
+                <Text style={{ color: '#000', fontSize: scale(14), fontWeight: 'bold' }} numberOfLines={1}>{internalState.text1}</Text>
+                <Text style={{ color: '#000', fontSize: scale(12) }} numberOfLines={4}>{internalState.text2}</Text>
+            </View>
+        </View>
+    ),
+};
 
 const App = () => {
-    const [state, dispatch] = useReducer(
-        (prevState, action) => {
-            switch (action.type) {
-                case 'RESTORE_TOKEN':
-                    return {
-                        ...prevState,
-                        userToken: action.token,
-                        isLoading: false,
-                    };
-                case 'SIGN_IN':
-                    return {
-                        ...prevState,
-                        isSignout: false,
-                        userToken: action.token,
-                    };
-                case 'SIGN_OUT':
-                    return {
-                        ...prevState,
-                        isSignout: true,
-                        userToken: null,
-                    };
-            }
+    const [alert, setAlert] = useState({
+        isVisible: false,
+        disabledIcon: false,
+        modalAlert: {
+            type: 'error',
+            title: '',
+            content: '',
         },
-        {
-            isLoading: true,
-            isSignout: false,
-            userToken: null,
-        }
-    )
+        typeModalInputForm: -1
+    })
 
     useEffect(() => {
-        // Fetch the token from storage then navigate to our appropriate place
-        const bootstrapAsync = async () => {
-            let userToken;
+        notificationManager.configure(onRegister, onNotification, onOpenNotification)
+        const appLocationState = AppState.addEventListener('change', requestLocationPermission)
 
-            try {
-                userToken = await AsyncStorage.getItem('User');
-                if (!!userToken) {
-                    dispatch({ type: 'RESTORE_TOKEN', token: JSON.stringify(userToken) });
-                }
-            } catch (e) {
-                // Restoring token failed
-            }
-
-            // After restoring token, we may need to validate it in production apps
-
-            // This will switch to the App screen or Auth screen and this loading
-            // screen will be unmounted and thrown away.
+        return () => {
+            appLocationState
+            // appLocationState2
+            // appPermission
+            // handlerOpenURL
+            // unsubscribe
         };
 
-        bootstrapAsync();
-
-        notificationManager.configure(onRegister, onNotification, onOpenNotification)
     }, [])
+
+    const requestLocationPermission = async () => {
+        if (Platform.OS === 'ios') {
+            const response = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+            if (response !== 'granted') {
+                preOpenSettingPermission()
+            }
+        }
+        else {
+            const response = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+            if (response !== 'granted') {
+                preOpenSettingPermission()
+            }
+        }
+    }
+
+    const preOpenSettingPermission = () => {
+        // Alert.alert(
+        //     "Vui lòng bật định vị để sử dụng ứng dụng",
+        //     "Nhấn Cancel để bỏ qua, nhấn OK để vào cài đặt",
+        //     [
+        //         {
+        //             text: "Cancel",
+        //             onPress: () => openSettingPermission(false),
+        //             style: "cancel"
+        //         },
+        //         { text: "OK", onPress: () => openSettingPermission(true) }
+        //     ],
+        //     { cancelable: false },
+        // );
+        setAlert(prev => {
+            return {
+                ...prev,
+                isVisible: true,
+                modalAlert: { type: 'warning' },
+                typeModalInputForm: 1,
+                disabledIcon: true
+            }
+        })
+    }
+    const openSettingPermission = (status) => {
+        setTimeout(() => {
+            if (!!status) {
+                openSettings()
+            }
+            else {
+                RNExitApp.exitApp();
+            }
+        }, 500);
+    }
+
+    const renderModalInputForm = (typeModalInputForm) => {
+        let ModalInputForm
+        switch (typeModalInputForm) {
+            case 1:
+                ModalInputForm = (
+                    <OpenSetting
+                        openSetting={openSettingPermission}
+                    />
+                )
+                break;
+            default:
+                ModalInputForm = null
+                break;
+        }
+        return ModalInputForm
+    }
+
+    const onCloseModalAlert = () => {
+        setAlert(prev => {
+            return {
+                ...prev,
+                isVisible: false,
+                modalAlert: {
+                    type: 'error',
+                    content: ''
+                },
+                typeModalInputForm: -1
+            }
+        })
+    }
+
+    const restartApp = () => {
+        // setTimeout(() => {
+        //     Platform.select({
+        //         ios: RNRestart.Restart(),
+        //         android: RNExitApp.exitApp()
+        //     })
+        // }, 500);
+    }
 
     const onRegister = (token) => {
         console.log('[Notification] registered', token)
@@ -256,22 +312,23 @@ const App = () => {
         []
     )
 
+    const { isVisible, disabledIcon, typeModalInputForm, modalAlert } = alert
     return (
-        <AuthContext.Provider value={authContext}>
-            <NavigationContainer>
-                <Stack.Navigator screenOptions={{ headerShown: false }}>
-                    {state.userToken == null ? (
-                        // <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
-                        <Stack.Screen name="Login" component={AuthStack} />
-                    ) : (
-                        <>
-                            <Stack.Screen name="Home" component={TabStack} />
-                            <Stack.Screen name="ChatDetail" component={RoomChatScreen} />
-                        </>
-                    )}
-                </Stack.Navigator>
-            </NavigationContainer >
-        </AuthContext.Provider>
+        <>
+            <Toast config={toastConfig} ref={(ref) => Toast.setRef(ref)} />
+            <ModalCenterAlert
+                isVisible={isVisible}
+                disabledIcon={disabledIcon}
+                typeModal={modalAlert.type}
+                titleModal={modalAlert.title}
+                contentModal={modalAlert.content}
+                childComponent={renderModalInputForm(typeModalInputForm)}
+                onCloseModalAlert={onCloseModalAlert}
+            />
+            <AuthContext.Provider value={authContext}>
+                <AppContainer />
+            </AuthContext.Provider>
+        </>
     );
 }
 

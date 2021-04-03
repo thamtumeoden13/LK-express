@@ -54,6 +54,11 @@ const RoomScreen = ({ navigation, route }) => {
             });
     }
 
+    const onHandlerJoinRoom = (roomID) => {
+        console.log('onHandlerJoinRoom', roomID)
+        navigation.navigate('ChatDetail', { roomID: roomID, tabBarVisible: false })
+    }
+
     const keyExtractor = (item, index) => index.toString()
 
     const renderItem = ({ item }) => (
@@ -70,6 +75,7 @@ const RoomScreen = ({ navigation, route }) => {
             ViewComponent={LinearGradient} // Only if no expo
             style={{ marginVertical: 5 }}
             containerStyle={{ paddingVertical: 10 }}
+            onPress={() => onHandlerJoinRoom(item.roomID)}
         >
             <Avatar rounded source={{ uri: item.avatar_url }} />
             <ListItem.Content>

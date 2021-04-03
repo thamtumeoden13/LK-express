@@ -45,13 +45,12 @@ const RoomChatScreen = (props) => {
 
     useEffect(() => {
         if (!!state.userID && !!state.roomID) {
-            getRealtimCollection()
+            getRealtimeCollection()
             getUsersCollection()
         }
     }, [state.userID, state.roomID])
 
-
-    const getRealtimCollection = () => {
+    const getRealtimeCollection = () => {
         entityRef
             .doc(`${state.roomID}`)
             .collection('messages')
@@ -134,6 +133,7 @@ const RoomChatScreen = (props) => {
         // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
 
         const currentValue = {
+            roomID: state.roomID,
             currentUser: state.userName,
             currentAvatar: state.avatarURL,
             currentMessage: text,
@@ -148,18 +148,21 @@ const RoomChatScreen = (props) => {
                 alert(error)
             })
 
-        const user = {
-            userID: state.userID,
-            userName: state.userName
+        if (!state.isExistsUser) {
+            const user = {
+                userID: state.userID,
+                userName: state.userName
+            }
+            entityRef.doc(`${state.roomID}`).collection('users')
+                .doc().set(user)
+                .then(_doc => {
+                    Keyboard.dismiss()
+                })
+                .catch((error) => {
+                    alert(error)
+                })
+
         }
-        entityRef.doc(`${state.roomID}`).collection('users')
-            .doc().set(user)
-            .then(_doc => {
-                Keyboard.dismiss()
-            })
-            .catch((error) => {
-                alert(error)
-            })
 
         const data = {
             _id: _id,

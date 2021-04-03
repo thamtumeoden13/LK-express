@@ -16,17 +16,25 @@ const HomeScreen = (props) => {
     const [state, setState] = useState({
         roomID: '',
         userName: '',
-        avatarURL: ''
+        avatarURL: '',
+        connectUser: 'ltv3.mrvu@gmail.com'
     })
     const { signOut } = useContext(AuthContext);
 
-    const handlerSignOut = () => {
-        signOut()
-        // notificationManager.cancelAllLocalNotification()
+    const onHandlerInput = (name, value) => {
+        setState(prev => { return { ...prev, [name]: value } })
     }
 
-    const handlerContinue = () => {
-        props.navigation.navigate('ChatDetail', { roomID: state.roomID, tabBarVisible: false })
+    const handlerSignOut = () => {
+        signOut()
+        notificationManager.cancelAllLocalNotification()
+    }
+
+    const handlerContinue = (typeRoomName) => {
+        props.navigation.navigate(
+            `${typeRoomName == 'roomID' ? 'RoomChatDetail' : 'ChatDetail'}`,
+            { [typeRoomName]: `${typeRoomName == 'roomID' ? state.roomID : state.connectUser}`, tabBarVisible: false }
+        )
     }
 
     useEffect(() => {
@@ -56,8 +64,9 @@ const HomeScreen = (props) => {
                 <Text style={styles.header}>{`JOIN ROOM`}</Text>
                 <TextInput
                     style={styles.input}
-                    onChangeText={roomID => setState(prev => { return { ...prev, roomID } })}
+                    onChangeText={roomID => onHandlerInput('roomID', roomID)}
                     placeholder={'Input you room'}
+                    autoCapitalize='none'
                 >
                     {state.roomID}
                 </TextInput>
@@ -70,7 +79,33 @@ const HomeScreen = (props) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.continue}
-                        onPress={() => handlerContinue()}
+                        onPress={() => handlerContinue('roomID')}
+                    >
+                        <Ionicons name="md-arrow-forward-outline" size={24} color="#fff" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View style={{ marginHorizontal: 32 }}>
+                <Text style={styles.header}>{`CONNECT TO`}</Text>
+                <TextInput
+                    style={styles.input}
+                    onChangeText={connectUser => onHandlerInput('connectUser', connectUser)}
+                    placeholder={'Input you USER'}
+                    autoCapitalize='none'
+
+                >
+                    {state.connectUser}
+                </TextInput>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }} >
+                    <TouchableOpacity
+                        style={styles.continue}
+                        onPress={() => handlerSignOut()}
+                    >
+                        <Ionicons name="arrow-undo-outline" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.continue}
+                        onPress={() => handlerContinue('connectUser')}
                     >
                         <Ionicons name="md-arrow-forward-outline" size={24} color="#fff" />
                     </TouchableOpacity>
