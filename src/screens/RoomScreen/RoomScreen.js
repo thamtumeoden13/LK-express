@@ -9,7 +9,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { firebase } from '../../firebase/config'
 import { notificationManager } from '../../utils/NotificationManager'
 
-import { listDataElement } from './constants'
+import { listDataElement } from '../../constants/dataTest'
 import styles from './styles';
 
 const db = firebase.firestore()

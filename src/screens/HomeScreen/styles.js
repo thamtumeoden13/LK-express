@@ -21,7 +21,6 @@ export default StyleSheet.create({
         marginTop: 32
     },
     input: {
-        marginTop: 32,
         height: 48,
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: '#bab7c3',
@@ -31,12 +30,11 @@ export default StyleSheet.create({
         fontWeight: '600'
     },
     continue: {
-        width: 64,
-        height: 64,
-        borderRadius: 64 / 2,
+        width: 48,
+        height: 48,
+        borderRadius: 48 / 2,
         backgroundColor: '#9075e3',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 16
     }
 })

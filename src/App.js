@@ -2,7 +2,6 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useState, useReducer, useRef } from 'react'
 import { Alert, LogBox, AppState, Platform } from 'react-native'
 import { decode, encode } from 'base-64'
-import AsyncStorage from '@react-native-community/async-storage';
 import codePush from "react-native-code-push";
 import { PERMISSIONS, request, openSettings, checkMultiple } from 'react-native-permissions';
 import RNExitApp from 'react-native-exit-app';
@@ -13,8 +12,6 @@ import AppContainer from './navigators'
 import { ModalCenterAlert } from "./components/common/modal/ModalCenterAlert";
 import OpenSetting from './components/app/modalInputForm/OpenSetting';
 
-import { AuthContext } from './utils'
-import { firebase } from './firebase/config'
 import { notificationManager } from './utils/NotificationManager'
 
 if (!global.btoa) { global.btoa = encode }
@@ -109,7 +106,7 @@ const toastConfig = {
     ),
 };
 
-const App = () => {
+const App = (props) => {
     const [alert, setAlert] = useState({
         isVisible: false,
         disabledIcon: false,
@@ -123,10 +120,10 @@ const App = () => {
 
     useEffect(() => {
         notificationManager.configure(onRegister, onNotification, onOpenNotification)
-        const appLocationState = AppState.addEventListener('change', requestLocationPermission)
-
+        AppState.addEventListener('change', requestLocationPermission)
+        requestLocationPermission()
         return () => {
-            appLocationState
+            AppState.removeEventListener('change', requestLocationPermission)
             // appLocationState2
             // appPermission
             // handlerOpenURL
@@ -141,11 +138,17 @@ const App = () => {
             if (response !== 'granted') {
                 preOpenSettingPermission()
             }
+            else{
+                onCloseModalAlert()
+            }
         }
         else {
             const response = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
             if (response !== 'granted') {
                 preOpenSettingPermission()
+            }
+            else {
+                onCloseModalAlert()
             }
         }
     }
@@ -238,80 +241,6 @@ const App = () => {
         Alert.alert('Open notification')
     }
 
-    const authContext = React.useMemo(
-        () => ({
-            signIn: async ({ email, password }) => {
-                // In a production app, we need to send some data (usually username, password) to server and get a token
-                // We will also need to handle errors if sign in failed
-                // After getting token, we need to persist the token using `SecureStore`
-                // In the example, we'll use a dummy token
-                firebase
-                    .auth()
-                    .signInWithEmailAndPassword(email, password)
-                    .then((response) => {
-                        const uid = response.user.uid
-                        const usersRef = firebase.firestore().collection('users')
-                        usersRef
-                            .doc(uid)
-                            .get()
-                            .then(firestoreDocument => {
-                                if (!firestoreDocument.exists) {
-                                    alert("User does not exist anymore.")
-                                    return;
-                                }
-                                const user = firestoreDocument.data()
-                                AsyncStorage.setItem('User', JSON.stringify(user))
-                                dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
-                            })
-                            .catch(error => {
-                                alert(error)
-                            });
-                    })
-                    .catch(error => {
-                        alert(error)
-                    })
-            },
-            signOut: () => {
-                dispatch({ type: 'SIGN_OUT' })
-                AsyncStorage.removeItem('User')
-            },
-            signUp: async (email, password, fullName, avatarURL) => {
-                // In a production app, we need to send user data to server and get a token
-                // We will also need to handle errors if sign up failed
-                // After getting token, we need to persist the token using `SecureStore`
-                // In the example, we'll use a dummy token
-                firebase
-                    .auth()
-                    .createUserWithEmailAndPassword(email, password)
-                    .then((response) => {
-                        const uid = response.user.uid
-                        const data = {
-                            id: uid,
-                            email,
-                            fullName,
-                            avatarURL: avatarURL
-                        };
-                        const usersRef = firebase.firestore().collection('users')
-                        usersRef
-                            .doc(uid)
-                            .set(data)
-                            .then(async () => {
-                                // const user = firestoreDocument.data()
-                                await AsyncStorage.setItem('User', JSON.stringify(data))
-                                dispatch({ type: 'SIGN_IN', token: JSON.stringify(data) });
-                            })
-                            .catch((error) => {
-                                alert(error)
-                            });
-                    })
-                    .catch((error) => {
-                        alert(error)
-                    });
-            },
-        }),
-        []
-    )
-
     const { isVisible, disabledIcon, typeModalInputForm, modalAlert } = alert
     return (
         <>
@@ -325,9 +254,7 @@ const App = () => {
                 childComponent={renderModalInputForm(typeModalInputForm)}
                 onCloseModalAlert={onCloseModalAlert}
             />
-            <AuthContext.Provider value={authContext}>
-                <AppContainer />
-            </AuthContext.Provider>
+            <AppContainer />
         </>
     );
 }
