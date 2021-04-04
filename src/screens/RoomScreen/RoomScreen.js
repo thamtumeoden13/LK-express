@@ -56,7 +56,7 @@ const RoomScreen = ({ navigation, route }) => {
 
     const onHandlerJoinRoom = (roomID) => {
         console.log('onHandlerJoinRoom', roomID)
-        navigation.navigate('ChatDetail', { roomID: roomID, tabBarVisible: false })
+        navigation.navigate('RoomChatDetail', { roomID: roomID, tabBarVisible: false })
     }
 
     const keyExtractor = (item, index) => index.toString()
