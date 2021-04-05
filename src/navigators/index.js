@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 import {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
-    HomeScreen, RoomScreen, ChatScreen, RoomChatScreen
+    HomeScreen, RoomScreen, ChatScreen, RoomChatScreen, ProfileScreen
 } from '../screens'
 
 import { AuthContext } from '../utils'
@@ -48,11 +48,11 @@ function PublicRoomStackScreen() {
 
 const PrivateRoomStack = createStackNavigator();
 
-function PrivateRoomStackScreen() {
+function ProfileStackScreen() {
     return (
         <PrivateRoomStack.Navigator>
-            <PrivateRoomStack.Screen name="PrivateRoom" component={RoomScreen} />
-            <PrivateRoomStack.Screen name="PrivateRoomDetail" component={ChatScreen} />
+            <PrivateRoomStack.Screen name="ProfileScreen" component={ProfileScreen} />
+            <PrivateRoomStack.Screen name="ProfileScreenDetail" component={ProfileScreen} />
         </PrivateRoomStack.Navigator>
     );
 }
@@ -83,16 +83,16 @@ function TabStack() {
             />
             <Tab.Screen name="PublicRoom" component={PublicRoomStackScreen}
                 options={{
-                    tabBarLabel: 'PublicRoom',
+                    tabBarLabel: 'Phòng chat',
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="battlenet" color={color} size={size} />
                     ),
                     tabBarBadge: 3,
                 }}
             />
-            <Tab.Screen name="PrivateRoom" component={PrivateRoomStackScreen}
+            <Tab.Screen name="ProfileScreen" component={ProfileStackScreen}
                 options={{
-                    tabBarLabel: 'PrivateRoom',
+                    tabBarLabel: 'Cá nhân',
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="bell" color={color} size={size} />
                     ),

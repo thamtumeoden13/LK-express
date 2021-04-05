@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react'
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { AuthContext } from '../../utils'
+import { listDataElement } from '../../constants/dataTest'
 
 import styles from './styles';
 
@@ -11,11 +12,9 @@ const RegistrationScreen = ({ navigation }) => {
         email: '',
         password: '',
         confirmPassword: '',
-        avatarURL: ''
+        avatarURL: listDataElement[Math.floor(Math.random() * (listDataElement.length - 1))].avatar_url
     })
-
     const { signUp } = useContext(AuthContext);
-
     const onFooterLinkPress = () => {
         navigation.navigate('Login')
     }
@@ -31,7 +30,6 @@ const RegistrationScreen = ({ navigation }) => {
         }
         signUp(state.email, state.password, state.fullName, state.avatarURL)
     }
-
     return (
         <View style={styles.container}>
             <KeyboardAwareScrollView
@@ -39,7 +37,7 @@ const RegistrationScreen = ({ navigation }) => {
                 keyboardShouldPersistTaps="always">
                 <Image
                     style={styles.logo}
-                    source={require('../../../assets/bootsplash_logo.png')}
+                    source={state.avatarURL ? { uri: state.avatarURL } : require('../../../assets/bootsplash_logo.png')}
                 />
                 <TextInput
                     style={styles.input}
@@ -83,11 +81,12 @@ const RegistrationScreen = ({ navigation }) => {
                     style={styles.input}
                     placeholderTextColor="#aaaaaa"
                     // secureTextEntry
-                    placeholder='Confirm Password'
+                    placeholder='Avatar URL'
                     onChangeText={(text) => handlerChangeText('avatarURL', text)}
                     value={state.avatarURL}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
+                    editable={false}
                 />
                 <TouchableOpacity
                     style={styles.button}

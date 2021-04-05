@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat'
+import { Container, Tab, Tabs, TabHeading } from 'native-base';
 import AsyncStorage from '@react-native-community/async-storage';
-import { ListItem, Avatar } from 'react-native-elements';
+import { ListItem, Avatar, Badge } from 'react-native-elements';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
+
 
 import { firebase } from '../../firebase/config'
 import { notificationManager } from '../../utils/NotificationManager'
@@ -92,11 +94,86 @@ const RoomScreen = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={{ flex: 1 }} >
-            <FlatList
-                keyExtractor={keyExtractor}
-                data={!!rooms ? rooms : listDataElement}
-                renderItem={renderItem}
-            />
+            <Container>
+                <Tabs
+                    locked
+                    tabBarUnderlineStyle={{ backgroundColor: '#00f' }}
+                >
+                    <Tab
+                        heading={
+                            <TabHeading style={{ backgroundColor: '#fff' }}>
+                                <Text style={{ color: '#000' }}>{`Phòng chat`}</Text>
+                                <Badge status='error' value={listDataElement.length}
+                                    containerStyle={{
+                                        position: 'absolute', top: 5, right: 5,
+                                        justifyContent: 'center', alignItems: 'center'
+                                    }}
+                                    textStyle={{ fontSize: 8 }}
+                                />
+                            </TabHeading>
+                        }
+                        tabStyle={{ backgroundColor: '#fff' }}
+                        activeTabStyle={{ backgroundColor: '#eff1f4' }}
+                        textStyle={{ fontSize: 12, color: '#000' }}
+                        activeTextStyle={{ fontSize: 14, color: '#00f' }}
+                    >
+                        <FlatList
+                            keyExtractor={keyExtractor}
+                            data={!!rooms ? rooms : listDataElement}
+                            renderItem={renderItem}
+                        />
+                    </Tab>
+                    <Tab
+                        heading={
+                            <TabHeading style={{ backgroundColor: '#fff' }}>
+                                <Text style={{ color: '#000' }}>{`Bạn bè`}</Text>
+                                <Badge status='primary'
+                                    value={listDataElement.length}
+                                    containerStyle={{
+                                        position: 'absolute', top: 5, right: 5,
+                                        justifyContent: 'center', alignItems: 'center'
+                                    }}
+                                    textStyle={{ fontSize: 8 }}
+                                />
+                            </TabHeading>
+                        }
+                        tabStyle={{ backgroundColor: '#fff' }}
+                        activeTabStyle={{ backgroundColor: '#eff1f4' }}
+                        textStyle={{ fontSize: 12, color: '#000' }}
+                        activeTextStyle={{ fontSize: 14, color: '#00f' }}
+                    >
+                        <FlatList
+                            keyExtractor={keyExtractor}
+                            data={!!rooms ? rooms : listDataElement}
+                            renderItem={renderItem}
+                        />
+                    </Tab>
+                    <Tab
+                        heading={
+                            <TabHeading style={{ backgroundColor: '#fff' }}>
+                                <Text style={{ color: '#000' }}>{`Danh bạ`}</Text>
+                                <Badge status='success' value={listDataElement.length}
+                                    containerStyle={{
+                                        position: 'absolute', top: 5, right: 5,
+                                        justifyContent: 'center', alignItems: 'center',
+                                    }}
+                                    textStyle={{ fontSize: 8 }}
+                                />
+                            </TabHeading>
+                        }
+                        tabStyle={{ backgroundColor: '#fff' }}
+                        activeTabStyle={{ backgroundColor: '#eff1f4' }}
+                        textStyle={{ fontSize: 12, color: '#000' }}
+                        activeTextStyle={{ fontSize: 14, color: '#00f' }}
+                    >
+                        <FlatList
+                            keyExtractor={keyExtractor}
+                            data={!!rooms ? rooms : listDataElement}
+                            renderItem={renderItem}
+                        />
+                    </Tab>
+                </Tabs>
+            </Container>
         </SafeAreaView>
     )
 }
