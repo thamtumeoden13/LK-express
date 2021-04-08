@@ -1,12 +1,51 @@
-import React, { useEffect, useState, useCallback } from 'react'
-import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
+import React, { useEffect, useState, useCallback, useRef, createRef } from 'react'
+import {
+    FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity,
+    View, KeyboardAvoidingView, Alert, ScrollView
+} from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat'
 import AsyncStorage from '@react-native-community/async-storage';
+// import { ActionSheetCustom as ActionSheet } from 'react-native-actionsheet'
+import ActionSheet, {
+    addHasReachedTopListener,
+    removeHasReachedTopListener,
+} from "react-native-actions-sheet";
+
 import { firebase } from '../../firebase/config'
 import { notificationManager } from '../../utils/NotificationManager'
 
 import styles from './styles';
 
+const items = [
+    100,
+    60,
+    150,
+    200,
+    170,
+    80,
+    41,
+    101,
+    61,
+    151,
+    202,
+    172,
+    82,
+    43,
+    103,
+    64,
+    155,
+    205,
+    176,
+    86,
+    46,
+    106,
+    66,
+    152,
+    203,
+    173,
+    81,
+    42,
+];
 const db = firebase.firestore()
 const entityRef = db.collection('rooms')
 
@@ -17,6 +56,27 @@ const RoomChatScreen = (props) => {
     //     return null;
     // }
 
+    const actionSheetRef = useRef();
+    const scrollViewRef = useRef();
+
+    const onHasReachedTop = hasReachedTop => {
+        if (hasReachedTop)
+            scrollViewRef.current?.setNativeProps({
+                scrollEnabled: hasReachedTop,
+            });
+    };
+
+    const onClose = () => {
+        scrollViewRef.current?.setNativeProps({
+            scrollEnabled: false,
+        });
+    };
+
+    const onOpen = () => {
+        scrollViewRef.current?.setNativeProps({
+            scrollEnabled: false,
+        });
+    };
     const [state, setState] = useState({
         roomID: '',
         userID: '',
@@ -41,6 +101,10 @@ const RoomChatScreen = (props) => {
                 }
             })
         })
+        addHasReachedTopListener(onHasReachedTop);
+        return () => {
+            removeHasReachedTopListener(onHasReachedTop);
+        };
     }, [])
 
     useEffect(() => {
@@ -185,24 +249,115 @@ const RoomChatScreen = (props) => {
             })
     }
 
+    const handlerLongPressMessage = (action, message) => {
+        console.log('handlerLongPressMessage', message)
+        actionSheetRef.current?.show()
+    }
+
+    const options = [
+        'Cancel',
+        'Apple',
+        <Text style={{ color: 'yellow' }}>Banana</Text>,
+        'Watermelon',
+        <Text style={{ color: 'red' }}>Durian</Text>
+    ]
+
     const chat = <GiftedChat
         messages={messages}
-        onSend={onSend}
         user={{
             _id: state.userID,
             name: state.userName,
             avatarURL: state.avatarURL
-        }} />
-    if (Platform.OS === 'android') {
-        return (
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' KeyboardAvoidingView={30} enabled>
-                {chat}
-            </KeyboardAvoidingView>
-        )
-    }
+        }}
+        onSend={onSend}
+        onLongPress={handlerLongPressMessage}
+        onPressAvatar={() => Alert.alert('yyy')}
+    />
+    // if (Platform.OS === 'android') {
+    //     return (
+    //         <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' KeyboardAvoidingView={30} enabled>
+    //             {chat}
+    //         </KeyboardAvoidingView>
+    //     )
+    // }
     return (
         <SafeAreaView style={{ flex: 1 }} >
             {chat}
+            <ActionSheet
+                initialOffsetFromBottom={0.6}
+                ref={actionSheetRef}
+                onOpen={onOpen}
+                statusBarTranslucent
+                bounceOnOpen={true}
+                bounciness={4}
+                gestureEnabled={true}
+                onClose={onClose}
+                defaultOverlayOpacity={0.3}>
+                <ScrollView
+                    ref={scrollViewRef}
+                    nestedScrollEnabled={true}
+                    onScrollEndDrag={() =>
+                        actionSheetRef.current?.handleChildScrollEnd()
+                    }
+                    onScrollAnimationEnd={() =>
+                        actionSheetRef.current?.handleChildScrollEnd()
+                    }
+                    onMomentumScrollEnd={() =>
+                        actionSheetRef.current?.handleChildScrollEnd()
+                    }
+                    style={styles.scrollview}>
+                    <View style={styles.container}>
+                        {['#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71'].map(
+                            color => (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        actionSheetRef.current?.hide();
+                                    }}
+                                    key={color}
+                                    style={{
+                                        width: 60,
+                                        height: 60,
+                                        borderRadius: 100,
+                                        backgroundColor: color,
+                                    }}
+                                />
+                            ),
+                        )}
+                    </View>
+
+                    <TextInput
+                        style={styles.input}
+                        multiline={true}
+                        placeholder="Write your text here"
+                    />
+
+                    <View>
+                        {items.map(item => (
+                            <TouchableOpacity
+                                key={item}
+                                onPress={() => {
+                                    actionSheetRef.current?.hide();
+                                }}
+                                style={styles.listItem}>
+                                <View
+                                    style={{
+                                        width: item,
+                                        height: 15,
+                                        backgroundColor: '#f0f0f0',
+                                        marginVertical: 15,
+                                        borderRadius: 5,
+                                    }}
+                                />
+
+                                <View style={styles.btnLeft} />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    {/*  Add a Small Footer at Bottom */}
+                    <View style={styles.footer} />
+                </ScrollView>
+            </ActionSheet>
         </SafeAreaView>
     )
 }

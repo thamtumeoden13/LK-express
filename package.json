@@ -13,6 +13,7 @@
     "@react-native-community/async-storage": "1.12.1",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/push-notification-ios": "1.8.0",
+    "@react-native-community/toolbar-android": "*",
     "@react-navigation/bottom-tabs": "5.11.8",
     "@react-navigation/drawer": "5.12.4",
     "@react-navigation/native": "5.9.3",
@@ -22,9 +23,12 @@
     "appcenter-crashes": "4.1.0",
     "base-64": "1.0.0",
     "firebase": "8.2.10",
-    "native-base": "2.15.2",
+    "mime": "1.6.0",
+    "native-base": "2.13.12",
     "react": "16.13.1",
     "react-native": "0.63.4",
+    "react-native-actions-sheet": "^0.4.2",
+    "react-native-actionsheet": "2.4.2",
     "react-native-code-push": "6.3.0",
     "react-native-elements": "3.3.2",
     "react-native-exit-app": "1.1.0",
@@ -44,7 +48,7 @@
     "react-native-toast-message": "1.4.9",
     "react-native-touchable-scale": "2.1.2",
     "react-native-vector-icons": "8.1.0",
-    "react-native-webrtc": "1.87.3"
+    "react-native-webrtc": "1.89.1"
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",
