@@ -1,18 +1,18 @@
-import React, { useEffect, useState, useCallback, useRef, createRef } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useLayoutEffect } from 'react'
 import {
     FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity,
     View, KeyboardAvoidingView, Alert, ScrollView
 } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat'
 import AsyncStorage from '@react-native-community/async-storage';
-// import { ActionSheetCustom as ActionSheet } from 'react-native-actionsheet'
 import ActionSheet, {
     addHasReachedTopListener,
     removeHasReachedTopListener,
 } from "react-native-actions-sheet";
 
 import { firebase } from '../../firebase/config'
-import { notificationManager } from '../../utils/NotificationManager'
+import { notificationManager } from 'utils/NotificationManager'
+import HeaderTitle from 'components/common/Header/HeaderTitle'
 
 import styles from './styles';
 
@@ -49,12 +49,7 @@ const items = [
 const db = firebase.firestore()
 const entityRef = db.collection('rooms')
 
-const RoomChatScreen = (props) => {
-    // // const focusedOptions = props.descriptors[props.state.routes[state.index].key].options;
-
-    // if (props.tabBarVisible === false) {
-    //     return null;
-    // }
+const RoomChatScreen = ({ route, navigation }) => {
 
     const actionSheetRef = useRef();
     const scrollViewRef = useRef();
@@ -89,7 +84,7 @@ const RoomChatScreen = (props) => {
 
     useEffect(() => {
         setTimeout(async () => {
-            const roomID = props.route.params.roomID
+            const roomID = route.params.roomID
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             setState(prev => {
@@ -106,6 +101,11 @@ const RoomChatScreen = (props) => {
             removeHasReachedTopListener(onHasReachedTop);
         };
     }, [])
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerTitle: () => <HeaderTitle title={`Phòng chat ${state.roomID}`} />
+        });
+    }, [navigation, state.roomID])
 
     useEffect(() => {
         if (!!state.userID && !!state.roomID) {
@@ -281,7 +281,7 @@ const RoomChatScreen = (props) => {
     //     )
     // }
     return (
-        <SafeAreaView style={{ flex: 1 }} >
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'red' }} >
             {chat}
             <ActionSheet
                 initialOffsetFromBottom={0.6}

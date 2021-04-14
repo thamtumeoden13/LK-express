@@ -14,8 +14,10 @@ import RoomChatScreen from './ChatScreen/RoomChatScreen'
 
 import ProfileScreen from './ProfileScreen/ProfileScreen'
 
+import CategoryScreen from './CategoryScreen/CategoryScreen'
+
 export {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
     HomeScreen, RoomScreen, ChatScreen, RoomChatScreen,
-    ProfileScreen
+    ProfileScreen, CategoryScreen
 }

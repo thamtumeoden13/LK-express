@@ -1,15 +1,26 @@
 import React, { useReducer, useEffect, useRef, useState } from 'react'
+import { SafeAreaView, Animated, View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack'
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AsyncStorage from '@react-native-community/async-storage';
+import { Icon } from 'react-native-elements';
+import LinearGradient from 'react-native-linear-gradient';
 
 import {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
-    HomeScreen, RoomScreen, ChatScreen, RoomChatScreen, ProfileScreen
+    HomeScreen, RoomScreen, ChatScreen, RoomChatScreen, ProfileScreen, CategoryScreen
 } from '../screens'
 
+import DrawerIcon from 'components/common/icon/DrawerIcon'
+import BackIcon from 'components/common/icon/BackIcon'
+import BagIcon from 'components/common/icon/BagIcon'
+import HeaderTitle from 'components/common/Header/HeaderTitle'
+import DrawerContentComponents from './DrawerContentComponents'
+
+import { moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import { AuthContext } from '../utils'
 import { firebase } from '../firebase/config'
 
@@ -26,52 +37,96 @@ function AuthStack() {
 
 const HomeStack = createStackNavigator();
 
-function HomeStackScreen() {
+function HomeStackScreen({ navigation }) {
     return (
         <HomeStack.Navigator >
-            <HomeStack.Screen name="Home" component={HomeScreen} />
+            <HomeStack.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{
+                    headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Trang chủ`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
             <HomeStack.Screen name="HomeDetail" component={ChatScreen} />
         </HomeStack.Navigator>
     );
 }
 
-const PublicRoomStack = createStackNavigator();
+const ChatRoomStack = createStackNavigator();
 
-function PublicRoomStackScreen() {
+function PublicRoomStackScreen({ navigation }) {
     return (
-        <PublicRoomStack.Navigator>
-            <PublicRoomStack.Screen name="PublicRoom" component={RoomScreen} />
-            <PublicRoomStack.Screen name="PublicRoomDetail" component={RoomChatScreen} />
-        </PublicRoomStack.Navigator>
+        <ChatRoomStack.Navigator>
+            <ChatRoomStack.Screen
+                name="ChatRoom"
+                component={RoomScreen}
+                options={{
+                    headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Phòng chat`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+            <ChatRoomStack.Screen
+                name="RoomChatDetail"
+                component={RoomChatScreen}
+                options={{
+                    headerLeft: () => <BackIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Phòng chat 111`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+        </ChatRoomStack.Navigator>
     );
 }
 
-const PrivateRoomStack = createStackNavigator();
+const CategoryStack = createStackNavigator();
 
-function ProfileStackScreen() {
+function CategoryStackScreen({ navigation }) {
     return (
-        <PrivateRoomStack.Navigator>
-            <PrivateRoomStack.Screen name="ProfileScreen" component={ProfileScreen} />
-            <PrivateRoomStack.Screen name="ProfileScreenDetail" component={ProfileScreen} />
-        </PrivateRoomStack.Navigator>
+        <CategoryStack.Navigator>
+            <CategoryStack.Screen
+                name="Category"
+                component={CategoryScreen}
+                options={{
+                    headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Sản phẩm`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+            <CategoryStack.Screen name="CategoryDetail" component={CategoryScreen} />
+        </CategoryStack.Navigator>
+    );
+}
+
+const ProfileStack = createStackNavigator();
+
+function ProfileStackScreen({ navigation }) {
+    return (
+        <ProfileStack.Navigator>
+            <ProfileStack.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                    headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Cá nhân`} />,
+                }}
+            />
+            <ProfileStack.Screen name="ProfileDetail" component={ProfileScreen} />
+        </ProfileStack.Navigator>
     );
 }
 
 const Tab = createBottomTabNavigator();
 function TabStack() {
-    const isTabBarVisible = (route) => {
-        return !['HomeDetail', 'PublicRoomDetail', 'PrivateRoomDetail'].includes(route.name);
-    };
     return (
         <Tab.Navigator
-            screenOptions={({ route }) => ({
-                tabBarVisible: isTabBarVisible(route)
-            })}
             tabBarOptions={{
                 activeTintColor: 'tomato',
                 inactiveTintColor: 'gray',
             }}
-
         >
             <Tab.Screen name="Home" component={HomeStackScreen}
                 options={{
@@ -81,7 +136,7 @@ function TabStack() {
                     )
                 }}
             />
-            <Tab.Screen name="PublicRoom" component={PublicRoomStackScreen}
+            <Tab.Screen name="ChatRoom" component={PublicRoomStackScreen}
                 options={{
                     tabBarLabel: 'Phòng chat',
                     tabBarIcon: ({ color, size }) => (
@@ -90,7 +145,15 @@ function TabStack() {
                     tabBarBadge: 3,
                 }}
             />
-            <Tab.Screen name="ProfileScreen" component={ProfileStackScreen}
+            <Tab.Screen name="Category" component={CategoryStackScreen}
+                options={{
+                    tabBarLabel: 'Danh mục',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialCommunityIcons name="bell" color={color} size={size} />
+                    ),
+                }}
+            />
+            <Tab.Screen name="Profile" component={ProfileStackScreen}
                 options={{
                     tabBarLabel: 'Cá nhân',
                     tabBarIcon: ({ color, size }) => (
@@ -102,6 +165,7 @@ function TabStack() {
     )
 }
 
+const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
 export default () => {
@@ -235,18 +299,21 @@ export default () => {
     return (
         <AuthContext.Provider value={authContext}>
             <NavigationContainer>
-                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                <Drawer.Navigator
+                    screenOptions={{ headerShown: false }}
+                    drawerContent={props => <DrawerContentComponents {...props} />}
+                >
                     {state.userToken == null ? (
                         // <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
-                        <Stack.Screen name="Login" component={AuthStack} />
+                        <Drawer.Screen name="Login" component={AuthStack} />
                     ) : (
                         <>
-                            <Stack.Screen name="Home" component={TabStack} />
-                            <Stack.Screen name="RoomChatDetail" component={RoomChatScreen} />
-                            <Stack.Screen name="ChatDetail" component={ChatScreen} />
+                            <Drawer.Screen name="Home" component={TabStack} />
+                            <Drawer.Screen name="RoomChatDetail" component={RoomChatScreen} />
+                            <Drawer.Screen name="ChatDetail" component={ChatScreen} />
                         </>
                     )}
-                </Stack.Navigator>
+                </Drawer.Navigator>
             </NavigationContainer >
         </AuthContext.Provider>
     )

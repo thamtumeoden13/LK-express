@@ -10,21 +10,15 @@
       {
         "cwd": "babelrc",
         "root": [
-          "./src"
-        ],
-        "extensions": [
-          ".js",
-          ".ios.js",
-          ".android.js"
+          "./src/"
         ],
         "alias": {
-          "test": "./test",
-          "underscore": "lodash",
           "@actions": "./src/actions",
           "@assets": "./src/assets",
           "@common": "./src/common",
           "@components": "./src/components",
           "@componentsCommon": "./src/components/common",
+          "@componentsCarousel": "./src/components/carousel",
           "@constants": "./src/constants",
           "@navigators": "./src/navigators",
           "@reducers": "./src/reducers",
@@ -33,22 +27,16 @@
           "@utils": "./src/utils",
           "@srcState": "./src/state",
           "@stateRedux": "./src/state/redux",
-          "@stateUtils": "./src/state/utils"
+          "@stateUtils": "./src/state/utils",
         }
       }
     ],
     [
       "@babel/plugin-transform-runtime"
-    ]
+    ],
+    ["react-native-reanimated/plugin"],
     // [
     //   "transform-remove-console"
     // ]
-  ],
-  "env": {
-    "production": {
-      // "plugins": [
-      //   "transform-remove-console"
-      // ]
-    }
-  }
+  ]
 }

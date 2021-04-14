@@ -21,12 +21,10 @@ PODS:
   - boost-for-react-native (1.63.0)
   - BVLinearGradient (2.5.6):
     - React
-  - CocoaAsyncSocket (7.6.4)
-  - CocoaLibEvent (1.0.0)
-  - CodePush (6.3.0):
+  - CodePush (7.0.0):
     - Base64 (~> 1.1)
     - JWT (~> 3.0.0-beta.12)
-    - React
+    - React-Core
     - SSZipArchive (~> 2.2.2)
   - Crashlytics (3.14.0):
     - Fabric (~> 1.10.2)
@@ -40,80 +38,34 @@ PODS:
     - React-Core (= 0.63.4)
     - React-jsi (= 0.63.4)
     - ReactCommon/turbomodule/core (= 0.63.4)
-  - Firebase/Core (7.7.0):
+  - Firebase/Core (7.8.1):
     - Firebase/CoreOnly
-    - FirebaseAnalytics (= 7.7.0)
-  - Firebase/CoreOnly (7.7.0):
-    - FirebaseCore (= 7.7.0)
-  - FirebaseAnalytics (7.7.0):
+    - FirebaseAnalytics (= 7.8.1)
+  - Firebase/CoreOnly (7.8.1):
+    - FirebaseCore (= 7.8.0)
+  - FirebaseAnalytics (7.8.1):
     - FirebaseCore (~> 7.0)
     - FirebaseInstallations (~> 7.0)
-    - GoogleAppMeasurement (= 7.7.0)
+    - GoogleAppMeasurement (= 7.8.1)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.0)
     - GoogleUtilities/MethodSwizzler (~> 7.0)
     - GoogleUtilities/Network (~> 7.0)
     - "GoogleUtilities/NSData+zlib (~> 7.0)"
     - nanopb (~> 2.30907.0)
-  - FirebaseCore (7.7.0):
+  - FirebaseCore (7.8.0):
     - FirebaseCoreDiagnostics (~> 7.4)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
-  - FirebaseCoreDiagnostics (7.7.0):
+  - FirebaseCoreDiagnostics (7.8.0):
     - GoogleDataTransport (~> 8.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
     - nanopb (~> 2.30907.0)
-  - FirebaseInstallations (7.7.0):
+  - FirebaseInstallations (7.8.0):
     - FirebaseCore (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/UserDefaults (~> 7.0)
     - PromisesObjC (~> 1.2)
-  - Flipper (0.54.0):
-    - Flipper-Folly (~> 2.2)
-    - Flipper-RSocket (~> 1.1)
-  - Flipper-DoubleConversion (1.1.7)
-  - Flipper-Folly (2.3.0):
-    - boost-for-react-native
-    - CocoaLibEvent (~> 1.0)
-    - Flipper-DoubleConversion
-    - Flipper-Glog
-    - OpenSSL-Universal (= 1.0.2.20)
-  - Flipper-Glog (0.3.6)
-  - Flipper-PeerTalk (0.0.4)
-  - Flipper-RSocket (1.1.0):
-    - Flipper-Folly (~> 2.2)
-  - FlipperKit (0.54.0):
-    - FlipperKit/Core (= 0.54.0)
-  - FlipperKit/Core (0.54.0):
-    - Flipper (~> 0.54.0)
-    - FlipperKit/CppBridge
-    - FlipperKit/FBCxxFollyDynamicConvert
-    - FlipperKit/FBDefines
-    - FlipperKit/FKPortForwarding
-  - FlipperKit/CppBridge (0.54.0):
-    - Flipper (~> 0.54.0)
-  - FlipperKit/FBCxxFollyDynamicConvert (0.54.0):
-    - Flipper-Folly (~> 2.2)
-  - FlipperKit/FBDefines (0.54.0)
-  - FlipperKit/FKPortForwarding (0.54.0):
-    - CocoaAsyncSocket (~> 7.6)
-    - Flipper-PeerTalk (~> 0.0.4)
-  - FlipperKit/FlipperKitHighlightOverlay (0.54.0)
-  - FlipperKit/FlipperKitLayoutPlugin (0.54.0):
-    - FlipperKit/Core
-    - FlipperKit/FlipperKitHighlightOverlay
-    - FlipperKit/FlipperKitLayoutTextSearchable
-    - YogaKit (~> 1.18)
-  - FlipperKit/FlipperKitLayoutTextSearchable (0.54.0)
-  - FlipperKit/FlipperKitNetworkPlugin (0.54.0):
-    - FlipperKit/Core
-  - FlipperKit/FlipperKitReactPlugin (0.54.0):
-    - FlipperKit/Core
-  - FlipperKit/FlipperKitUserDefaultsPlugin (0.54.0):
-    - FlipperKit/Core
-  - FlipperKit/SKIOSNetworkPlugin (0.54.0):
-    - FlipperKit/Core
-    - FlipperKit/FlipperKitNetworkPlugin
   - Folly (2020.01.13.00):
     - boost-for-react-native
     - DoubleConversion
@@ -124,32 +76,34 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.5)
-  - GoogleAppMeasurement (7.7.0):
+  - GoogleAppMeasurement (7.8.1):
     - GoogleUtilities/AppDelegateSwizzler (~> 7.0)
     - GoogleUtilities/MethodSwizzler (~> 7.0)
     - GoogleUtilities/Network (~> 7.0)
     - "GoogleUtilities/NSData+zlib (~> 7.0)"
     - nanopb (~> 2.30907.0)
-  - GoogleDataTransport (8.2.0):
+  - GoogleDataTransport (8.3.0):
+    - GoogleUtilities/Environment (~> 7.2)
     - nanopb (~> 2.30907.0)
-  - GoogleUtilities/AppDelegateSwizzler (7.2.2):
+    - PromisesObjC (~> 1.2)
+  - GoogleUtilities/AppDelegateSwizzler (7.3.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.2.2):
+  - GoogleUtilities/Environment (7.3.0):
     - PromisesObjC (~> 1.2)
-  - GoogleUtilities/Logger (7.2.2):
+  - GoogleUtilities/Logger (7.3.0):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (7.2.2):
+  - GoogleUtilities/MethodSwizzler (7.3.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (7.2.2):
+  - GoogleUtilities/Network (7.3.0):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.2.2)"
-  - GoogleUtilities/Reachability (7.2.2):
+  - "GoogleUtilities/NSData+zlib (7.3.0)"
+  - GoogleUtilities/Reachability (7.3.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.2.2):
+  - GoogleUtilities/UserDefaults (7.3.0):
     - GoogleUtilities/Logger
   - JWT (3.0.0-beta.12):
     - Base64 (~> 1.1.2)
@@ -158,46 +112,37 @@ PODS:
     - nanopb/encode (= 2.30907.0)
   - nanopb/decode (2.30907.0)
   - nanopb/encode (2.30907.0)
-  - OpenSSL-Universal (1.0.2.20):
-    - OpenSSL-Universal/Static (= 1.0.2.20)
-  - OpenSSL-Universal/Static (1.0.2.20)
-  - Permission-AppTrackingTransparency (3.0.1):
+  - Permission-BluetoothPeripheral (2.1.4):
     - RNPermissions
-  - Permission-BluetoothPeripheral (3.0.1):
+  - Permission-Calendars (2.1.4):
     - RNPermissions
-  - Permission-Calendars (3.0.1):
+  - Permission-Camera (2.1.4):
     - RNPermissions
-  - Permission-Camera (3.0.1):
+  - Permission-Contacts (2.1.4):
     - RNPermissions
-  - Permission-Contacts (3.0.1):
+  - Permission-FaceID (2.1.4):
     - RNPermissions
-  - Permission-FaceID (3.0.1):
+  - Permission-LocationAlways (2.1.4):
     - RNPermissions
-  - Permission-LocationAccuracy (3.0.1):
+  - Permission-LocationWhenInUse (2.1.4):
     - RNPermissions
-  - Permission-LocationAlways (3.0.1):
+  - Permission-MediaLibrary (2.1.4):
     - RNPermissions
-  - Permission-LocationWhenInUse (3.0.1):
+  - Permission-Microphone (2.1.4):
     - RNPermissions
-  - Permission-MediaLibrary (3.0.1):
+  - Permission-Motion (2.1.4):
     - RNPermissions
-  - Permission-Microphone (3.0.1):
+  - Permission-Notifications (2.1.4):
     - RNPermissions
-  - Permission-Motion (3.0.1):
+  - Permission-PhotoLibrary (2.1.4):
     - RNPermissions
-  - Permission-Notifications (3.0.1):
+  - Permission-Reminders (2.1.4):
     - RNPermissions
-  - Permission-PhotoLibrary (3.0.1):
+  - Permission-Siri (2.1.4):
     - RNPermissions
-  - Permission-PhotoLibraryAddOnly (3.0.1):
+  - Permission-SpeechRecognition (2.1.4):
     - RNPermissions
-  - Permission-Reminders (3.0.1):
-    - RNPermissions
-  - Permission-Siri (3.0.1):
-    - RNPermissions
-  - Permission-SpeechRecognition (3.0.1):
-    - RNPermissions
-  - Permission-StoreKit (3.0.1):
+  - Permission-StoreKit (2.1.4):
     - RNPermissions
   - PromisesObjC (1.2.12)
   - RCTRequired (0.63.4)
@@ -368,8 +313,6 @@ PODS:
   - React-jsinspector (0.63.4)
   - react-native-safe-area-context (3.2.0):
     - React-Core
-  - react-native-webrtc (1.89.1):
-    - React-Core
   - React-RCTActionSheet (0.63.4):
     - React-Core/RCTActionSheetHeaders (= 0.63.4)
   - React-RCTAnimation (0.63.4):
@@ -430,8 +373,6 @@ PODS:
     - React-Core (= 0.63.4)
     - React-cxxreact (= 0.63.4)
     - React-jsi (= 0.63.4)
-  - ReactNativeIncallManager (3.3.0):
-    - React
   - RNCAsyncStorage (1.12.1):
     - React-Core
   - RNCMaskedView (0.1.10):
@@ -451,9 +392,9 @@ PODS:
     - React
   - RNGestureHandler (1.10.3):
     - React-Core
-  - RNPermissions (3.0.1):
-    - React-Core
-  - RNReanimated (2.0.0):
+  - RNPermissions (2.1.4):
+    - React
+  - RNReanimated (2.1.0):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
@@ -487,11 +428,7 @@ PODS:
   - RNVectorIcons (8.1.0):
     - React-Core
   - SSZipArchive (2.2.3)
-  - toolbar-android (0.1.0-rc.2):
-    - React
   - Yoga (1.14.0)
-  - YogaKit (1.18.1):
-    - Yoga (~> 1.14)
 
 DEPENDENCIES:
   - appcenter-analytics (from `../node_modules/appcenter-analytics/ios`)
@@ -502,46 +439,24 @@ DEPENDENCIES:
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
-  - Flipper (~> 0.54.0)
-  - Flipper-DoubleConversion (= 1.1.7)
-  - Flipper-Folly (~> 2.2)
-  - Flipper-Glog (= 0.3.6)
-  - Flipper-PeerTalk (~> 0.0.4)
-  - Flipper-RSocket (~> 1.1)
-  - FlipperKit (~> 0.54.0)
-  - FlipperKit/Core (~> 0.54.0)
-  - FlipperKit/CppBridge (~> 0.54.0)
-  - FlipperKit/FBCxxFollyDynamicConvert (~> 0.54.0)
-  - FlipperKit/FBDefines (~> 0.54.0)
-  - FlipperKit/FKPortForwarding (~> 0.54.0)
-  - FlipperKit/FlipperKitHighlightOverlay (~> 0.54.0)
-  - FlipperKit/FlipperKitLayoutPlugin (~> 0.54.0)
-  - FlipperKit/FlipperKitLayoutTextSearchable (~> 0.54.0)
-  - FlipperKit/FlipperKitNetworkPlugin (~> 0.54.0)
-  - FlipperKit/FlipperKitReactPlugin (~> 0.54.0)
-  - FlipperKit/FlipperKitUserDefaultsPlugin (~> 0.54.0)
-  - FlipperKit/SKIOSNetworkPlugin (~> 0.54.0)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
-  - Permission-AppTrackingTransparency (from `../node_modules/react-native-permissions/ios/AppTrackingTransparency`)
-  - Permission-BluetoothPeripheral (from `../node_modules/react-native-permissions/ios/BluetoothPeripheral`)
-  - Permission-Calendars (from `../node_modules/react-native-permissions/ios/Calendars`)
-  - Permission-Camera (from `../node_modules/react-native-permissions/ios/Camera`)
-  - Permission-Contacts (from `../node_modules/react-native-permissions/ios/Contacts`)
-  - Permission-FaceID (from `../node_modules/react-native-permissions/ios/FaceID`)
-  - Permission-LocationAccuracy (from `../node_modules/react-native-permissions/ios/LocationAccuracy`)
-  - Permission-LocationAlways (from `../node_modules/react-native-permissions/ios/LocationAlways`)
-  - Permission-LocationWhenInUse (from `../node_modules/react-native-permissions/ios/LocationWhenInUse`)
-  - Permission-MediaLibrary (from `../node_modules/react-native-permissions/ios/MediaLibrary`)
-  - Permission-Microphone (from `../node_modules/react-native-permissions/ios/Microphone`)
-  - Permission-Motion (from `../node_modules/react-native-permissions/ios/Motion`)
-  - Permission-Notifications (from `../node_modules/react-native-permissions/ios/Notifications`)
-  - Permission-PhotoLibrary (from `../node_modules/react-native-permissions/ios/PhotoLibrary`)
-  - Permission-PhotoLibraryAddOnly (from `../node_modules/react-native-permissions/ios/PhotoLibraryAddOnly`)
-  - Permission-Reminders (from `../node_modules/react-native-permissions/ios/Reminders`)
-  - Permission-Siri (from `../node_modules/react-native-permissions/ios/Siri`)
-  - Permission-SpeechRecognition (from `../node_modules/react-native-permissions/ios/SpeechRecognition`)
-  - Permission-StoreKit (from `../node_modules/react-native-permissions/ios/StoreKit`)
+  - Permission-BluetoothPeripheral (from `../node_modules/react-native-permissions/ios/BluetoothPeripheral.podspec`)
+  - Permission-Calendars (from `../node_modules/react-native-permissions/ios/Calendars.podspec`)
+  - Permission-Camera (from `../node_modules/react-native-permissions/ios/Camera.podspec`)
+  - Permission-Contacts (from `../node_modules/react-native-permissions/ios/Contacts.podspec`)
+  - Permission-FaceID (from `../node_modules/react-native-permissions/ios/FaceID.podspec`)
+  - Permission-LocationAlways (from `../node_modules/react-native-permissions/ios/LocationAlways.podspec`)
+  - Permission-LocationWhenInUse (from `../node_modules/react-native-permissions/ios/LocationWhenInUse.podspec`)
+  - Permission-MediaLibrary (from `../node_modules/react-native-permissions/ios/MediaLibrary.podspec`)
+  - Permission-Microphone (from `../node_modules/react-native-permissions/ios/Microphone.podspec`)
+  - Permission-Motion (from `../node_modules/react-native-permissions/ios/Motion.podspec`)
+  - Permission-Notifications (from `../node_modules/react-native-permissions/ios/Notifications.podspec`)
+  - Permission-PhotoLibrary (from `../node_modules/react-native-permissions/ios/PhotoLibrary.podspec`)
+  - Permission-Reminders (from `../node_modules/react-native-permissions/ios/Reminders.podspec`)
+  - Permission-Siri (from `../node_modules/react-native-permissions/ios/Siri.podspec`)
+  - Permission-SpeechRecognition (from `../node_modules/react-native-permissions/ios/SpeechRecognition.podspec`)
+  - Permission-StoreKit (from `../node_modules/react-native-permissions/ios/StoreKit.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
   - React (from `../node_modules/react-native/`)
@@ -555,7 +470,6 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
-  - react-native-webrtc (from `../node_modules/react-native-webrtc`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
   - React-RCTBlob (from `../node_modules/react-native/Libraries/Blob`)
@@ -566,7 +480,6 @@ DEPENDENCIES:
   - React-RCTText (from `../node_modules/react-native/Libraries/Text`)
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - ReactNativeIncallManager (from `../node_modules/react-native-incall-manager`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
   - "RNCPushNotificationIOS (from `../node_modules/@react-native-community/push-notification-ios`)"
@@ -577,7 +490,6 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
-  - "toolbar-android (from `../node_modules/@react-native-community/toolbar-android`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -586,8 +498,6 @@ SPEC REPOS:
     - AppCenterReactNativeShared
     - Base64
     - boost-for-react-native
-    - CocoaAsyncSocket
-    - CocoaLibEvent
     - Crashlytics
     - Fabric
     - Firebase
@@ -595,22 +505,13 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreDiagnostics
     - FirebaseInstallations
-    - Flipper
-    - Flipper-DoubleConversion
-    - Flipper-Folly
-    - Flipper-Glog
-    - Flipper-PeerTalk
-    - Flipper-RSocket
-    - FlipperKit
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleUtilities
     - JWT
     - nanopb
-    - OpenSSL-Universal
     - PromisesObjC
     - SSZipArchive
-    - YogaKit
 
 EXTERNAL SOURCES:
   appcenter-analytics:
@@ -633,44 +534,38 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/Folly.podspec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
-  Permission-AppTrackingTransparency:
-    :path: "../node_modules/react-native-permissions/ios/AppTrackingTransparency"
   Permission-BluetoothPeripheral:
-    :path: "../node_modules/react-native-permissions/ios/BluetoothPeripheral"
+    :path: "../node_modules/react-native-permissions/ios/BluetoothPeripheral.podspec"
   Permission-Calendars:
-    :path: "../node_modules/react-native-permissions/ios/Calendars"
+    :path: "../node_modules/react-native-permissions/ios/Calendars.podspec"
   Permission-Camera:
-    :path: "../node_modules/react-native-permissions/ios/Camera"
+    :path: "../node_modules/react-native-permissions/ios/Camera.podspec"
   Permission-Contacts:
-    :path: "../node_modules/react-native-permissions/ios/Contacts"
+    :path: "../node_modules/react-native-permissions/ios/Contacts.podspec"
   Permission-FaceID:
-    :path: "../node_modules/react-native-permissions/ios/FaceID"
-  Permission-LocationAccuracy:
-    :path: "../node_modules/react-native-permissions/ios/LocationAccuracy"
+    :path: "../node_modules/react-native-permissions/ios/FaceID.podspec"
   Permission-LocationAlways:
-    :path: "../node_modules/react-native-permissions/ios/LocationAlways"
+    :path: "../node_modules/react-native-permissions/ios/LocationAlways.podspec"
   Permission-LocationWhenInUse:
-    :path: "../node_modules/react-native-permissions/ios/LocationWhenInUse"
+    :path: "../node_modules/react-native-permissions/ios/LocationWhenInUse.podspec"
   Permission-MediaLibrary:
-    :path: "../node_modules/react-native-permissions/ios/MediaLibrary"
+    :path: "../node_modules/react-native-permissions/ios/MediaLibrary.podspec"
   Permission-Microphone:
-    :path: "../node_modules/react-native-permissions/ios/Microphone"
+    :path: "../node_modules/react-native-permissions/ios/Microphone.podspec"
   Permission-Motion:
-    :path: "../node_modules/react-native-permissions/ios/Motion"
+    :path: "../node_modules/react-native-permissions/ios/Motion.podspec"
   Permission-Notifications:
-    :path: "../node_modules/react-native-permissions/ios/Notifications"
+    :path: "../node_modules/react-native-permissions/ios/Notifications.podspec"
   Permission-PhotoLibrary:
-    :path: "../node_modules/react-native-permissions/ios/PhotoLibrary"
-  Permission-PhotoLibraryAddOnly:
-    :path: "../node_modules/react-native-permissions/ios/PhotoLibraryAddOnly"
+    :path: "../node_modules/react-native-permissions/ios/PhotoLibrary.podspec"
   Permission-Reminders:
-    :path: "../node_modules/react-native-permissions/ios/Reminders"
+    :path: "../node_modules/react-native-permissions/ios/Reminders.podspec"
   Permission-Siri:
-    :path: "../node_modules/react-native-permissions/ios/Siri"
+    :path: "../node_modules/react-native-permissions/ios/Siri.podspec"
   Permission-SpeechRecognition:
-    :path: "../node_modules/react-native-permissions/ios/SpeechRecognition"
+    :path: "../node_modules/react-native-permissions/ios/SpeechRecognition.podspec"
   Permission-StoreKit:
-    :path: "../node_modules/react-native-permissions/ios/StoreKit"
+    :path: "../node_modules/react-native-permissions/ios/StoreKit.podspec"
   RCTRequired:
     :path: "../node_modules/react-native/Libraries/RCTRequired"
   RCTTypeSafety:
@@ -693,8 +588,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
-  react-native-webrtc:
-    :path: "../node_modules/react-native-webrtc"
   React-RCTActionSheet:
     :path: "../node_modules/react-native/Libraries/ActionSheetIOS"
   React-RCTAnimation:
@@ -715,8 +608,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/Libraries/Vibration"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  ReactNativeIncallManager:
-    :path: "../node_modules/react-native-incall-manager"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-community/async-storage"
   RNCMaskedView:
@@ -737,8 +628,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
-  toolbar-android:
-    :path: "../node_modules/@react-native-community/toolbar-android"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -751,53 +640,40 @@ SPEC CHECKSUMS:
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BVLinearGradient: e3aad03778a456d77928f594a649e96995f1c872
-  CocoaAsyncSocket: 694058e7c0ed05a9e217d1b3c7ded962f4180845
-  CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
-  CodePush: 69186fd1143f7e5e5c6f65383cf14f4927e28213
+  CodePush: 4e72e70067c1442ddfe25e3e53b23a6fa573f5c6
   Crashlytics: 9220f5bc89e7a618df411b4f639389dbfb0e03d2
   DoubleConversion: cde416483dac037923206447da6e1454df403714
   Fabric: ea977e3cd9c20425516d3dafd3bf8c941c51223f
   FBLazyVector: 3bb422f41b18121b71783a905c10e58606f7dc3e
   FBReactNativeSpec: f2c97f2529dd79c083355182cc158c9f98f4bd6e
-  Firebase: cd2ab85eec8170dc260186159f21072ecb679ad5
-  FirebaseAnalytics: f3f8f75de34fe04141a69bb1c4bd7e24a80178e1
-  FirebaseCore: ac35d680a0bf32319a59966a1478e0741536b97b
-  FirebaseCoreDiagnostics: 179bf3831213451c8addd036aca7fcf5492ec154
-  FirebaseInstallations: 42c86e7b02ff75b7f27f85833bf5dcb5f38a9774
-  Flipper: be611d4b742d8c87fbae2ca5f44603a02539e365
-  Flipper-DoubleConversion: 38631e41ef4f9b12861c67d17cb5518d06badc41
-  Flipper-Folly: e4493b013c02d9347d5e0cb4d128680239f6c78a
-  Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
-  Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
-  Flipper-RSocket: 64e7431a55835eb953b0bf984ef3b90ae9fdddd7
-  FlipperKit: ab353d41aea8aae2ea6daaf813e67496642f3d7d
+  Firebase: d59ad4129167f9f0d2a4f6c1f0c462254b6002c8
+  FirebaseAnalytics: 3b98b563d7d64c07900511198b4805cfd9f9f61c
+  FirebaseCore: 049029df3096e5c118917029be7da75ee16f3b1b
+  FirebaseCoreDiagnostics: 066f996579cf097bdad3d7dc9a918d6b9e129c50
+  FirebaseInstallations: 7f7ed0e7e27fb51f57291e1876e2ddb1524126c1
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
-  GoogleAppMeasurement: 0c3b134b2c0a90c4c24833873894bfe0e42a0384
-  GoogleDataTransport: 1024b1a4dfbd7a0e92cb20d7e0a6f1fb66b449a4
-  GoogleUtilities: 31c5b01f978a70c6cff2afc6272b3f1921614b43
+  GoogleAppMeasurement: 50a254ee92c1b94fbe2abea7e3da35e4c6dedce0
+  GoogleDataTransport: b006084b73915a42c28a3466961a4edda3065da6
+  GoogleUtilities: abda45f519bc4073aa1171d2f8742108def46017
   JWT: 9b5c05abbcc1a0e69c3c91e1655b3387fc7e581d
   nanopb: 59221d7f958fb711001e6a449489542d92ae113e
-  OpenSSL-Universal: ff34003318d5e1163e9529b08470708e389ffcdd
-  Permission-AppTrackingTransparency: b529454e0fa560f0dcb7c4fd74399417cc1e674b
-  Permission-BluetoothPeripheral: 9f0bd529583f759e49fdc60eaa1191b8be69f709
-  Permission-Calendars: beecff003fc9fa36979f95e19cfcd54ba26a5ddf
-  Permission-Camera: b2e50546c095139bb1264be9c34c796332340d32
-  Permission-Contacts: db364c0086fc1fa1d5af33256cf9ab6ff2336ed1
-  Permission-FaceID: 6db862861e789c479daf88431b5f8f5f3436a65d
-  Permission-LocationAccuracy: 76669f87b4c276f5ae803cc0ddd1862a4c0e9dd8
-  Permission-LocationAlways: a274bc04bb386068782468dbdaca3859f51634ca
-  Permission-LocationWhenInUse: 3a2b0dbc167d79e8e920a4377ff9520cdc108407
-  Permission-MediaLibrary: 468eee83eb186823bb55b7252626539e0e4a2d97
-  Permission-Microphone: bcdaaa22af6217b86fad0843413a238b9413f2d6
-  Permission-Motion: 629f9b549c48d25216fdf2ebea365178e315f61c
-  Permission-Notifications: 504dcbc12f929b72cdab0c89a4245816d53d1452
-  Permission-PhotoLibrary: 29a07bdd077ae760363f73ab52d22a7b88cbd781
-  Permission-PhotoLibraryAddOnly: fa32d59bded28fe9f77519289ceba90df946382b
-  Permission-Reminders: 9f920c4def6f09fbee9373807543fcc29bef1cf2
-  Permission-Siri: 3e54dd61ff5708fa6946ceff9ba4adc9bc673576
-  Permission-SpeechRecognition: 714f191e9c54762d8960438aa0aafa8df5bef6a4
-  Permission-StoreKit: f172158c9c4e25085bc6a2a055ba6d80ee872e3e
+  Permission-BluetoothPeripheral: 2c8ce842373ae7162e41428d66831247fdd660c5
+  Permission-Calendars: a451703f55ae46a53be140407b8ae18dcfaf89da
+  Permission-Camera: 402f1ac15b962448d75e8cf2039d235e7bc09a85
+  Permission-Contacts: 546030b78788365b36c202b7ac5a8205f8c7efba
+  Permission-FaceID: 08f06f502c95dbd7d35033e65c7ebe23d4189f67
+  Permission-LocationAlways: 48085521ad224052f5b25c3fdc6d0e996d162428
+  Permission-LocationWhenInUse: 7449010ca36a26dbe6b10e69e9d6ebcab0222c42
+  Permission-MediaLibrary: 04ebc411e788b3ff11c74c30128ecf6507cdc9ce
+  Permission-Microphone: 84332821b494a0864867ae41c0b29f28002db47b
+  Permission-Motion: f1d0e65296b9a741ac3493a86c2330b8c06b04b4
+  Permission-Notifications: d437cafc026900006d35981d35a2d694f883f44e
+  Permission-PhotoLibrary: d98d4dcf5da6bb811fac27abdd441e6a2facc53c
+  Permission-Reminders: bf9a50c0bacbff547eaebc9f2af6b7648b9854d9
+  Permission-Siri: 782f6152006ace9ea1103160104f2f9fff4193c2
+  Permission-SpeechRecognition: f72edf19023885941b0c37762d2d1563ffb37237
+  Permission-StoreKit: 0e6437409b465302ad5c1f30b80c21776b7f9530
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   RCTRequired: 082f10cd3f905d6c124597fd1c14f6f2655ff65e
   RCTTypeSafety: 8c9c544ecbf20337d069e4ae7fd9a377aadf504b
@@ -810,7 +686,6 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 93bd528844ad21dc07aab1c67cb10abae6df6949
   React-jsinspector: 58aef7155bc9a9683f5b60b35eccea8722a4f53a
   react-native-safe-area-context: f0906bf8bc9835ac9a9d3f97e8bde2a997d8da79
-  react-native-webrtc: ccb0c21eb4fb04326648fbdb4a5d49977e2cf274
   React-RCTActionSheet: 89a0ca9f4a06c1f93c26067af074ccdce0f40336
   React-RCTAnimation: 1bde3ecc0c104c55df246eda516e0deb03c4e49b
   React-RCTBlob: a97d378b527740cc667e03ebfa183a75231ab0f0
@@ -821,22 +696,19 @@ SPEC CHECKSUMS:
   React-RCTText: 5c51df3f08cb9dedc6e790161195d12bac06101c
   React-RCTVibration: ae4f914cfe8de7d4de95ae1ea6cc8f6315d73d9d
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
-  ReactNativeIncallManager: a840ef75640518065742a893e6c6ff98ee820039
   RNCAsyncStorage: b03032fdbdb725bea0bd9e5ec5a7272865ae7398
   RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
   RNCPushNotificationIOS: 61a7c72bd1ebad3568025957d001e0f0e7b32191
   RNExitApp: c4e052df2568b43bec8a37c7cd61194d4cfee2c3
   RNFirebase: 37daa9a346d070f9f6ee1f3b4aaf4c8e3b1d5d1c
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
-  RNPermissions: 4c8a37b4dde50f1f152bf8cd08c4a43d2355829e
-  RNReanimated: 5231286440b796e09df3bfa5c1b12b02bfe07664
+  RNPermissions: 3635b407c15f2fe591bd2101c8f20aa0912caba8
+  RNReanimated: 70f662b5232dd5d19ccff581e919a54ea73df51c
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
   RNVectorIcons: 31cebfcf94e8cf8686eb5303ae0357da64d7a5a4
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
-  toolbar-android: 85f3ef4d691469f2d304e7dee4bca013aa1ba1ff
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
-  YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: cb4ee8e2b347291fa2db8918346f55cd7546b9b5
+PODFILE CHECKSUM: bfd7bdb60a457946522f3ea2c168d26b50357cc0
 
 COCOAPODS: 1.10.0
