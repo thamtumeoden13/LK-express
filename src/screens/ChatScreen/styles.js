@@ -76,36 +76,4 @@ export default StyleSheet.create({
         marginBottom: 15,
         paddingHorizontal: 10,
     },
-    container: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    scrollview: {
-        width: '100%',
-        padding: 12,
-    },
-    btn: {
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'center',
-        backgroundColor: '#fe8a71',
-        paddingHorizontal: 10,
-        borderRadius: 5,
-        elevation: 5,
-        shadowColor: 'black',
-        shadowOffset: { width: 0.3 * 4, height: 0.5 * 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 0.7 * 4,
-    },
-    safeareview: {
-        justifyContent: 'center',
-        flex: 1,
-    },
-    btnTitle: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
 })

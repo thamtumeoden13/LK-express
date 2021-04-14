@@ -35,7 +35,7 @@ const ProfileScreen = (props) => {
 
     useEffect(() => {
         setTimeout(async () => {
-            const connectUser = props.route.params.connectUser
+            const connectUser = props.route.params.id
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             setState(prev => {

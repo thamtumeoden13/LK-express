@@ -1,17 +1,15 @@
 import React, { useReducer, useEffect, useRef, useState } from 'react'
-import { SafeAreaView, Animated, View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack'
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AsyncStorage from '@react-native-community/async-storage';
-import { Icon } from 'react-native-elements';
-import LinearGradient from 'react-native-linear-gradient';
 
 import {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
-    HomeScreen, RoomScreen, ChatScreen, RoomChatScreen, ProfileScreen, CategoryScreen
+    HomeScreen, ChatScreen, ChatDetailScreen, RoomScreen, RoomChatScreen,
+    ProfileScreen, CategoryScreen
 } from '../screens'
 
 import DrawerIcon from 'components/common/icon/DrawerIcon'
@@ -20,7 +18,6 @@ import BagIcon from 'components/common/icon/BagIcon'
 import HeaderTitle from 'components/common/Header/HeaderTitle'
 import DrawerContentComponents from './DrawerContentComponents'
 
-import { moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import { AuthContext } from '../utils'
 import { firebase } from '../firebase/config'
 
@@ -39,45 +36,54 @@ const HomeStack = createStackNavigator();
 
 function HomeStackScreen({ navigation }) {
     return (
-        <HomeStack.Navigator >
+        <HomeStack.Navigator initialRouteName="HomeDrawer">
             <HomeStack.Screen
-                name="Home"
+                name="HomeDrawer"
                 component={HomeScreen}
                 options={{
-                    headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Trang chủ`} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
-            <HomeStack.Screen name="HomeDetail" component={ChatScreen} />
+            {/* <HomeStack.Screen name="HomeDetail" component={ChatScreen} /> */}
         </HomeStack.Navigator>
     );
 }
 
-const ChatRoomStack = createStackNavigator();
+const RoomChatStack = createStackNavigator();
 
-function PublicRoomStackScreen({ navigation }) {
+function RoomChatStackScreen({ navigation }) {
     return (
-        <ChatRoomStack.Navigator>
-            <ChatRoomStack.Screen
-                name="ChatRoom"
+        <RoomChatStack.Navigator initialRouteName="RoomChat">
+            <RoomChatStack.Screen
+                name="RoomChat"
                 component={RoomScreen}
                 options={{
-                    headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Phòng chat`} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
-            <ChatRoomStack.Screen
+            <RoomChatStack.Screen
                 name="RoomChatDetail"
                 component={RoomChatScreen}
                 options={{
                     headerLeft: () => <BackIcon navigation={navigation} />,
-                    headerTitle: () => <HeaderTitle title={`Phòng chat 111`} />,
+                    // headerTitle: () => <HeaderTitle title={`Phòng chat 111`} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
-        </ChatRoomStack.Navigator>
+            <RoomChatStack.Screen
+                name="ChatDetail"
+                component={ChatDetailScreen}
+                options={{
+                    headerLeft: () => <BackIcon navigation={navigation} />,
+                    // headerTitle: () => <HeaderTitle title={`Phòng chat 111`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+        </RoomChatStack.Navigator>
     );
 }
 
@@ -85,12 +91,12 @@ const CategoryStack = createStackNavigator();
 
 function CategoryStackScreen({ navigation }) {
     return (
-        <CategoryStack.Navigator>
+        <CategoryStack.Navigator initialRouteName="Category">
             <CategoryStack.Screen
                 name="Category"
                 component={CategoryScreen}
                 options={{
-                    headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Sản phẩm`} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
@@ -104,12 +110,12 @@ const ProfileStack = createStackNavigator();
 
 function ProfileStackScreen({ navigation }) {
     return (
-        <ProfileStack.Navigator>
+        <ProfileStack.Navigator initialRouteName="Profile">
             <ProfileStack.Screen
                 name="Profile"
                 component={ProfileScreen}
                 options={{
-                    headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Cá nhân`} />,
                 }}
@@ -127,6 +133,7 @@ function TabStack() {
                 activeTintColor: 'tomato',
                 inactiveTintColor: 'gray',
             }}
+            initialRouteName='Home'
         >
             <Tab.Screen name="Home" component={HomeStackScreen}
                 options={{
@@ -136,7 +143,7 @@ function TabStack() {
                     )
                 }}
             />
-            <Tab.Screen name="ChatRoom" component={PublicRoomStackScreen}
+            <Tab.Screen name="RoomChat" component={RoomChatStackScreen}
                 options={{
                     tabBarLabel: 'Phòng chat',
                     tabBarIcon: ({ color, size }) => (
@@ -244,6 +251,7 @@ export default () => {
                                     return;
                                 }
                                 const user = firestoreDocument.data()
+                                console.log('JSON.stringify(user)', JSON.stringify(user))
                                 AsyncStorage.setItem('User', JSON.stringify(user))
                                 dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
                             })
@@ -273,7 +281,8 @@ export default () => {
                             id: uid,
                             email,
                             fullName,
-                            avatarURL: avatarURL
+                            avatarURL: avatarURL,
+                            level: 2
                         };
                         const usersRef = firebase.firestore().collection('users')
                         usersRef

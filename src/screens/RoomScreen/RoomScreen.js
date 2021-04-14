@@ -6,59 +6,95 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { ListItem, Avatar, Badge } from 'react-native-elements';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
-
+import { StackActions } from '@react-navigation/native';
 
 import { firebase } from '../../firebase/config'
 import { notificationManager } from '../../utils/NotificationManager'
 
-import { listDataElement } from '../../constants/dataTest'
 import styles from './styles';
 
-const db = firebase.firestore()
-const entityRef = db.collection('rooms')
-
 const RoomScreen = ({ navigation, route }) => {
+
+    const db = firebase.firestore()
+    const entityRef = db.collection('rooms')
+    const entityChatRef = db.collection('chats')
+
     const [state, setState] = useState({
         userID: '',
         userName: '',
         isActivedLocalPushNotify: false
     })
     const [rooms, setRooms] = useState([])
+    const [users, setUsers] = useState([])
 
     useEffect(() => {
         const focusListener = navigation.addListener('focus', async () => {
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             setState(prev => { return { ...prev, userID: user.id, userName: user.fullName } })
-            getCollectionList()
+            Promise.all([getCollectionRoomList(user.id), getCollectionChatList(user.id)])
+            // getCollectionRoomList(user.id)
+            // getCollectionChatList(user.id)
         });
         return () => focusListener
-    }, [navigation])
+    }, [])
 
-    const getCollectionList = () => {
-        entityRef
-            .get()
-            .then((querySnapshot) => {
-                const listFireStore = []
-                querySnapshot.forEach((doc) => {
-                    // doc.data() is never undefined for query doc snapshots
-                    const room = doc.data()
-                    console.log("querySnapshot=> ", room);
-                    listFireStore.push({
-                        ...room,
-                        name: room.currentUser,
-                        subtitle: room.currentMessage,
-                        avatar_url: room.currentAvatar,
-                    })
-                });
-                console.log("listFireStore => ", listFireStore);
-                setRooms(listFireStore)
-            });
+    const getCollectionRoomList = async (userID) => {
+        const querySnapshot = await entityRef.get()
+        let listFireStore = []
+        querySnapshot.forEach(async (doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            const room = doc.data()
+            const querySnapshot2 = await entityRef
+                .doc(`${room.roomID}`)
+                .collection('users')
+                .where("userID", "==", userID)
+                .get()
+
+            if (querySnapshot2.docs.length > 0) {
+                listFireStore.push({
+                    ...room,
+                    name: room.currentUser,
+                    subtitle: room.currentMessage,
+                    avatar_url: room.currentAvatar,
+                })
+            }
+            console.log('1111111', listFireStore)
+            setRooms(listFireStore)
+        });
+    }
+
+    const getCollectionChatList = async (userID) => {
+        const querySnapshot = await entityChatRef.get()
+        let listFireStore = []
+        querySnapshot.forEach(async (doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            const room = doc.data()
+            // const querySnapshot2 = await entityChatRef
+            //     .doc(`${room.connectID}`)
+            //     .collection('users')
+            //     .where("userID", "==", userID)
+            //     .get()
+            const querySnapshot2 = doc.id.split('|')
+
+            if (querySnapshot2.includes(userID)) {
+                listFireStore.push({
+                    ...room,
+                    name: room.currentUser,
+                    subtitle: room.currentMessage,
+                    avatar_url: room.currentAvatar,
+                })
+            }
+            console.log('222222222', listFireStore)
+            setUsers(listFireStore)
+        });
     }
 
     const onHandlerJoinRoom = (roomID) => {
         console.log('onHandlerJoinRoom', roomID)
-        navigation.push('RoomChatDetail', { roomID: roomID})
+        const pushAction = StackActions.push('RoomChatDetail', { id: roomID })
+
+        navigation.dispatch(pushAction)
     }
 
     const keyExtractor = (item, index) => index.toString()
@@ -103,7 +139,7 @@ const RoomScreen = ({ navigation, route }) => {
                         heading={
                             <TabHeading style={{ backgroundColor: '#fff' }}>
                                 <Text style={{ color: '#000' }}>{`Phòng chat`}</Text>
-                                <Badge status='error' value={listDataElement.length}
+                                <Badge status='error' value={rooms.length}
                                     containerStyle={{
                                         position: 'absolute', top: 5, right: 5,
                                         justifyContent: 'center', alignItems: 'center'
@@ -119,7 +155,7 @@ const RoomScreen = ({ navigation, route }) => {
                     >
                         <FlatList
                             keyExtractor={keyExtractor}
-                            data={!!rooms ? rooms : listDataElement}
+                            data={rooms}
                             renderItem={renderItem}
                         />
                     </Tab>
@@ -128,7 +164,7 @@ const RoomScreen = ({ navigation, route }) => {
                             <TabHeading style={{ backgroundColor: '#fff' }}>
                                 <Text style={{ color: '#000' }}>{`Bạn bè`}</Text>
                                 <Badge status='primary'
-                                    value={listDataElement.length}
+                                    value={users.length}
                                     containerStyle={{
                                         position: 'absolute', top: 5, right: 5,
                                         justifyContent: 'center', alignItems: 'center'
@@ -144,7 +180,7 @@ const RoomScreen = ({ navigation, route }) => {
                     >
                         <FlatList
                             keyExtractor={keyExtractor}
-                            data={!!rooms ? rooms : listDataElement}
+                            data={users}
                             renderItem={renderItem}
                         />
                     </Tab>
@@ -152,7 +188,7 @@ const RoomScreen = ({ navigation, route }) => {
                         heading={
                             <TabHeading style={{ backgroundColor: '#fff' }}>
                                 <Text style={{ color: '#000' }}>{`Danh bạ`}</Text>
-                                <Badge status='success' value={listDataElement.length}
+                                <Badge status='success' value={rooms.length}
                                     containerStyle={{
                                         position: 'absolute', top: 5, right: 5,
                                         justifyContent: 'center', alignItems: 'center',
@@ -168,7 +204,7 @@ const RoomScreen = ({ navigation, route }) => {
                     >
                         <FlatList
                             keyExtractor={keyExtractor}
-                            data={!!rooms ? rooms : listDataElement}
+                            data={rooms}
                             renderItem={renderItem}
                         />
                     </Tab>

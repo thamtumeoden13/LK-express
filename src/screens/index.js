@@ -8,9 +8,11 @@ import AuthLoadingScreen from './AuthLoadingScreen/AuthLoadingScreen'
 
 import RoomScreen from './RoomScreen/RoomScreen'
 
+import RoomChatScreen from './RoomScreen/RoomChatScreen'
+
 import ChatScreen from './ChatScreen/ChatScreen'
 
-import RoomChatScreen from './ChatScreen/RoomChatScreen'
+import ChatDetailScreen from './ChatScreen/ChatDetailScreen'
 
 import ProfileScreen from './ProfileScreen/ProfileScreen'
 
@@ -18,6 +20,6 @@ import CategoryScreen from './CategoryScreen/CategoryScreen'
 
 export {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
-    HomeScreen, RoomScreen, ChatScreen, RoomChatScreen,
+    HomeScreen, RoomScreen, RoomChatScreen, ChatScreen, ChatDetailScreen,
     ProfileScreen, CategoryScreen
 }

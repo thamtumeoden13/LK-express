@@ -46,10 +46,10 @@ const items = [
     81,
     42,
 ];
-const db = firebase.firestore()
-const entityRef = db.collection('rooms')
-
 const RoomChatScreen = ({ route, navigation }) => {
+
+    const db = firebase.firestore()
+    const entityRef = db.collection('rooms')
 
     const actionSheetRef = useRef();
     const scrollViewRef = useRef();
@@ -84,7 +84,7 @@ const RoomChatScreen = ({ route, navigation }) => {
 
     useEffect(() => {
         setTimeout(async () => {
-            const roomID = route.params.roomID
+            const roomID = route.params.id
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             setState(prev => {
@@ -103,7 +103,7 @@ const RoomChatScreen = ({ route, navigation }) => {
     }, [])
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: () => <HeaderTitle title={`Phòng chat ${state.roomID}`} />
+            headerTitle: () => <HeaderTitle title={`${state.roomID}`} />
         });
     }, [navigation, state.roomID])
 

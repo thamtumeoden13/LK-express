@@ -27,6 +27,7 @@ const DrawerContentComponents = ({ navigation}) => {
     }
 
     const navigateToScreen = (route) => {
+        console.log('route', route)
         InteractionManager.runAfterInteractions(() => {
             navigation.navigate(route)
             navigation.closeDrawer()
@@ -47,16 +48,16 @@ const DrawerContentComponents = ({ navigation}) => {
                 </View>
             </View>
             <View style={styles.screenContainer}>
-                <TouchableOpacity onPress={() => navigateToScreen('Home')}>
+                <TouchableOpacity onPress={() => navigateToScreen('HomeDrawer')}>
                     <View style={[styles.screenStyle, (state.activeItemKey == 'Home') ? styles.activeBackgroundColor : null]}>
                         <Icon name="home" type="antdesign" size={scale(22)} color={(state.activeItemKey == 'Home') ? '#00adff' : '#000'} />
                         <Text style={[styles.screenTextStyle, (state.activeItemKey == 'Home') ? styles.selectedTextStyle : null]}>{`Trang chủ`}</Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigateToScreen('ChatRoom')}>
-                    <View style={[styles.screenStyle, (state.activeItemKey == 'ChatRoom') ? styles.activeBackgroundColor : null]}>
-                        <Icon name="sort" type="material" size={scale(22)} color={(state.activeItemKey == 'ChatRoom') ? '#00adff' : '#000'} />
-                        <Text style={[styles.screenTextStyle, (state.activeItemKey == 'ChatRoom') ? styles.selectedTextStyle : null]}>{`Phòng chat`}</Text>
+                <TouchableOpacity onPress={() => navigateToScreen('RoomChat')}>
+                    <View style={[styles.screenStyle, (state.activeItemKey == 'RoomChat') ? styles.activeBackgroundColor : null]}>
+                        <Icon name="sort" type="material" size={scale(22)} color={(state.activeItemKey == 'RoomChat') ? '#00adff' : '#000'} />
+                        <Text style={[styles.screenTextStyle, (state.activeItemKey == 'RoomChat') ? styles.selectedTextStyle : null]}>{`Phòng chat`}</Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigateToScreen('Category')}>

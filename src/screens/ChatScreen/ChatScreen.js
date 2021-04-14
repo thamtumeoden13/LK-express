@@ -7,15 +7,10 @@ import { notificationManager } from '../../utils/NotificationManager'
 
 import styles from './styles';
 
-const db = firebase.firestore()
-const entityRef = db.collection('chats')
-
 const ChatScreen = (props) => {
-    // // const focusedOptions = props.descriptors[props.state.routes[state.index].key].options;
 
-    // if (props.tabBarVisible === false) {
-    //     return null;
-    // }
+    const db = firebase.firestore()
+    const entityRef = db.collection('chats')
 
     const [state, setState] = useState({
         connectID: '',
@@ -31,7 +26,7 @@ const ChatScreen = (props) => {
 
     useEffect(() => {
         setTimeout(async () => {
-            const connectUser = props.route.params.connectUser
+            const connectUser = props.route.params.id
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             setState(prev => {
@@ -119,7 +114,7 @@ const ChatScreen = (props) => {
     }
 
     const getUsersInfo = () => {
-        db.collection('users')
+        entityRef.collection('users')
             .where("email", "==", state.connectUser)
             .get()
             .then((querySnapshot) => {

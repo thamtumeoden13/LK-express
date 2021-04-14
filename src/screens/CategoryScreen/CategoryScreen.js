@@ -27,19 +27,8 @@ import HeaderTitle from 'components/common/Header/HeaderTitle'
 import ListHorizontal from 'components/common/listCommon/ListHorizontal'
 import ListVertical from 'components/common/listCommon/ListVertical'
 import { moderateScale, verticalScale, calcWidth } from 'utils/scaleSize';
-
 class CategoryScreen extends Component {
-    // static navigationOptions = ({ navigation, screenProps }) => ({
-    //     header: props => <Search navigation={navigation} />,
-    // })
-    // static navigationOptions = ({ navigation, screenProps }) => {
-    //     return {
-    //         headerLeft: () => <DrawerIcon navigation={navigation} />,
-    //         headerRight: () => <BagIcon navigation={navigation} />,
-    //         headerTitle: () => <HeaderTitle title={`Sản phẩm`} />,
-    //     };
-    // };
-
+    
     constructor(props) {
         super(props);
         this.state = {

@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { withNavigation } from '@react-navigation/compat'
 import { View } from 'react-native'
-import Icon from 'react-native-vector-icons/SimpleLineIcons';
+import AntDesignIcons from 'react-native-vector-icons/AntDesign';
 import { moderateScale, scale } from 'utils/scaleSize';
 
-const BagIcon = ({ navigation }) => {
+const ActionSheetIcon = (props) => {
     const openBag = () => {
-        console.log('openBag')
+        console.log('openBag', props)
+        props.onOpen()
         // navigation.openDrawer()
     }
 
@@ -15,9 +16,9 @@ const BagIcon = ({ navigation }) => {
             width: moderateScale(44), height: moderateScale(44), marginRight: moderateScale(10),
             justifyContent: 'center', alignItems: 'center'
         }}>
-            <Icon
-                name='bell'
-                size={scale(16)}
+            <AntDesignIcons
+                name='addusergroup'
+                size={scale(20)}
                 color='black'
                 onPress={openBag}
             />
@@ -26,4 +27,4 @@ const BagIcon = ({ navigation }) => {
 };
 
 // export default (BagIcon);
-export default withNavigation(BagIcon);
+export default withNavigation(ActionSheetIcon);
