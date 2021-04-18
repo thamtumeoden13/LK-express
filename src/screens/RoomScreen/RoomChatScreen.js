@@ -16,41 +16,18 @@ import HeaderTitle from 'components/common/Header/HeaderTitle'
 import ActionSheetIcon from 'components/common/icon/ActionSheetIcon'
 
 import styles from './styles';
+import { scale } from 'utils/scaleSize';
+import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 
-const items = [
-    100,
-    60,
-    150,
-    200,
-    170,
-    80,
-    41,
-    101,
-    61,
-    151,
-    202,
-    172,
-    82,
-    43,
-    103,
-    64,
-    155,
-    205,
-    176,
-    86,
-    46,
-    106,
-    66,
-    152,
-    203,
-    173,
-    81,
-    42,
-];
+function Difference(arr = [], oarr = []) {
+    return arr.reduce((t, v) => oarr.find(e => { return e.email == v.email }) ? t : [...t, v], []);
+}
+
 const RoomChatScreen = ({ route, navigation }) => {
 
     const db = firebase.firestore()
     const entityRef = db.collection('rooms')
+    const entityRefUser = db.collection('users')
 
     const actionSheetRef = useRef();
     const scrollViewRef = useRef();
@@ -79,8 +56,11 @@ const RoomChatScreen = ({ route, navigation }) => {
         userName: '',
         avatarURL: '',
         isActivedLocalPushNotify: false,
-        isExistsUser: false
+        level: ''
     })
+    const [usersExists, setUsersExists] = useState([])
+    const [users, setUsers] = useState([])
+    const [otherUsers, setOtherUsers] = useState([])
     const [messages, setMessages] = useState([])
 
     useEffect(() => {
@@ -91,9 +71,11 @@ const RoomChatScreen = ({ route, navigation }) => {
             setState(prev => {
                 return {
                     ...prev,
-                    roomID, userID: user.id,
+                    roomID,
+                    userID: user.id,
                     userName: user.fullName,
-                    avatarURL: user.avatarURL
+                    avatarURL: user.avatarURL,
+                    level: user.level,
                 }
             })
         })
@@ -103,19 +85,34 @@ const RoomChatScreen = ({ route, navigation }) => {
         };
     }, [])
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         navigation.setOptions({
             headerTitle: () => <HeaderTitle title={`${state.roomID}`} />,
-            headerRight: () => <ActionSheetIcon navigation={navigation} onOpen={() => actionSheetRef.current?.show()} />,
+            headerRight: () => null,
         });
     }, [navigation, state.roomID])
 
     useEffect(() => {
+        console.log('state.level', state.level)
+        if (state.level == 1) {
+            navigation.setOptions({
+                headerRight: () => <ActionSheetIcon navigation={navigation} onOpen={() => actionSheetRef.current?.show()} />,
+            });
+        }
+    }, [state.level])
+
+    useEffect(() => {
         if (!!state.userID && !!state.roomID) {
-            getRealtimeCollection()
-            getUsersCollection()
+            Promise.all([getRealtimeCollection(), getCollectionUsersExistsList(), getCollectionUsersList()])
         }
     }, [state.userID, state.roomID])
+
+    useEffect(() => {
+        if (!!users && !!usersExists) {
+            const newArray = Difference(users, usersExists)
+            setOtherUsers(newArray)
+        }
+    }, [users, usersExists])
 
     const getRealtimeCollection = () => {
         entityRef
@@ -153,23 +150,24 @@ const RoomChatScreen = ({ route, navigation }) => {
             });
     }
 
-    const getUsersCollection = () => {
-        entityRef
-            .doc(`${state.roomID}`)
-            .collection('users')
-            .where("userID", "==", state.userID)
-            .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    if (doc.exists) {
-                        console.log(doc.id, "=>Exists", doc.data());
-                        setState(prev => { return { ...prev, isExistsUser: true } })
-                        return
-                    } else {
-                        console.log("No such document!");
-                    }
-                });
-            });
+    const getCollectionUsersExistsList = async () => {
+        const querySnapshot = await entityRef.doc(state.roomID).collection('users').get()
+        const reads = querySnapshot.docs.map((doc) => {
+            const user = doc.data()
+            return { ...user, doc: doc.id }
+        })
+        console.log('reads', reads)
+        setUsersExists(reads)
+    }
+
+    const getCollectionUsersList = async (userID) => {
+        const querySnapshot = await entityRefUser.get()
+        let users = querySnapshot.docs.map((doc) => {
+            const user = doc.data()
+            return { ...user, doc: doc.id }
+        })
+        console.log('users', users)
+        setUsers(users)
     }
 
     const appendMessages = useCallback((messages, userID, roomID) => {
@@ -198,7 +196,6 @@ const RoomChatScreen = ({ route, navigation }) => {
     const onSend = (messages = []) => {
         const { text, _id, createdAt } = messages[0]
         // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-
         const currentValue = {
             roomID: state.roomID,
             currentUser: state.userName,
@@ -214,22 +211,6 @@ const RoomChatScreen = ({ route, navigation }) => {
             .catch((error) => {
                 alert(error)
             })
-
-        if (!state.isExistsUser) {
-            const user = {
-                userID: state.userID,
-                userName: state.userName
-            }
-            entityRef.doc(`${state.roomID}`).collection('users')
-                .doc().set(user)
-                .then(_doc => {
-                    Keyboard.dismiss()
-                })
-                .catch((error) => {
-                    alert(error)
-                })
-
-        }
 
         const data = {
             _id: _id,
@@ -251,6 +232,35 @@ const RoomChatScreen = ({ route, navigation }) => {
                 alert(error)
             })
     }
+
+    const onAddUser = (user) => {
+        // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        entityRef.doc(`${state.roomID}`).collection('users')
+            .doc().set(user)
+            .then(_doc => {
+                getCollectionUsersExistsList()
+                Keyboard.dismiss()
+            })
+            .catch((error) => {
+                alert(error)
+            })
+
+    }
+
+    const onRemoveUser = (user) => {
+        // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        entityRef.doc(`${state.roomID}`).collection('users')
+            .doc(user.doc).delete()
+            .then(_doc => {
+                getCollectionUsersExistsList()
+                Keyboard.dismiss()
+            })
+            .catch((error) => {
+                alert(error)
+            })
+
+    }
+
 
     const handlerLongPressMessage = (action, message) => {
         console.log('handlerLongPressMessage', message)
@@ -309,54 +319,60 @@ const RoomChatScreen = ({ route, navigation }) => {
                         actionSheetRef.current?.handleChildScrollEnd()
                     }
                     style={styles.scrollview}>
-                    <View style={styles.container}>
-                        {['#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71'].map(
-                            color => (
+                    <View style={styles.containerActionSheet}>
+                        {usersExists.map((item, index) => (
+                            <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', paddingVertical: scale(10) }}>
+                                <Text style={{ color: '#0e9aa7', padding: scale(5), width: '80%' }}>{item.email}</Text>
+                                <TouchableOpacity
+                                    key={index}
+                                    style={{
+                                        width: scale(20),
+                                        height: scale(20),
+                                        borderRadius: scale(10),
+                                        backgroundColor: '#fe8a71',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}
+                                    onPress={() => {
+                                        actionSheetRef.current?.hide();
+                                        onRemoveUser(item)
+                                    }}
+                                >
+                                    <AntDesignIcon
+                                        name='minus'
+                                        size={14}
+                                        color='#0e9aa7'
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                        {otherUsers.map((item, index) => (
+                            <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', paddingVertical: scale(10) }}>
+                                <Text style={{ width: '80%', color: '#4a4e4d', padding: scale(5) }}>{item.email}</Text>
                                 <TouchableOpacity
                                     onPress={() => {
                                         actionSheetRef.current?.hide();
+                                        onAddUser(item)
                                     }}
-                                    key={color}
+                                    key={index}
                                     style={{
-                                        width: 60,
-                                        height: 60,
-                                        borderRadius: 100,
-                                        backgroundColor: color,
+                                        width: scale(20),
+                                        height: scale(20),
+                                        borderRadius: scale(10),
+                                        backgroundColor: '#f6cd61',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
                                     }}
-                                />
-                            ),
-                        )}
-                    </View>
-
-                    <TextInput
-                        style={styles.input}
-                        multiline={true}
-                        placeholder="Write your text here"
-                    />
-
-                    <View>
-                        {items.map(item => (
-                            <TouchableOpacity
-                                key={item}
-                                onPress={() => {
-                                    actionSheetRef.current?.hide();
-                                }}
-                                style={styles.listItem}>
-                                <View
-                                    style={{
-                                        width: item,
-                                        height: 15,
-                                        backgroundColor: '#f0f0f0',
-                                        marginVertical: 15,
-                                        borderRadius: 5,
-                                    }}
-                                />
-
-                                <View style={styles.btnLeft} />
-                            </TouchableOpacity>
+                                >
+                                    <AntDesignIcon
+                                        name='plus'
+                                        size={14}
+                                        color='#0e9aa7'
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         ))}
                     </View>
-
                     {/*  Add a Small Footer at Bottom */}
                     <View style={styles.footer} />
                 </ScrollView>

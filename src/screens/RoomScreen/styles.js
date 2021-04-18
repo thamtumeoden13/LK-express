@@ -53,10 +53,10 @@ export default StyleSheet.create({
         fontSize: 20,
         color: '#333333'
     },
-    container: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+    containerActionSheet: {
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        // alignItems: 'center',
         marginBottom: 15,
     },
     scrollview: {

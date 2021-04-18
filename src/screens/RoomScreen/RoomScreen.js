@@ -13,8 +13,7 @@ import { notificationManager } from '../../utils/NotificationManager'
 
 import styles from './styles';
 
-const RoomScreen = ({ navigation, route }) => {
-
+const RoomScreen = (props) => {
     const db = firebase.firestore()
     const entityRef = db.collection('rooms')
     const entityChatRef = db.collection('chats')
@@ -22,71 +21,64 @@ const RoomScreen = ({ navigation, route }) => {
     const [state, setState] = useState({
         userID: '',
         userName: '',
-        isActivedLocalPushNotify: false
+        isActivedLocalPushNotify: false,
+        page: 0
     })
     const [rooms, setRooms] = useState([])
     const [users, setUsers] = useState([])
 
     useEffect(() => {
-        const focusListener = navigation.addListener('focus', async () => {
+        const focusListener = props.navigation.addListener('focus', async () => {
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             setState(prev => { return { ...prev, userID: user.id, userName: user.fullName } })
-            Promise.all([getCollectionRoomList(user.id), getCollectionChatList(user.id)])
-            // getCollectionRoomList(user.id)
-            // getCollectionChatList(user.id)
+            Promise.all([
+                getCollectionRoomList(user.id),
+                getCollectionChatList(user.id)
+            ])
         });
         return () => focusListener
     }, [])
 
+    useEffect(()=>{
+        console.log('props.route', props.route)
+    }, [props.route])
+
     const getCollectionRoomList = async (userID) => {
         const querySnapshot = await entityRef.get()
-        let listFireStore = []
-        querySnapshot.forEach(async (doc) => {
-            // doc.data() is never undefined for query doc snapshots
+        const reads = querySnapshot.docs.map(async (doc) => {
             const room = doc.data()
-            const querySnapshot2 = await entityRef
-                .doc(`${room.roomID}`)
-                .collection('users')
-                .where("userID", "==", userID)
-                .get()
-
+            const querySnapshot2 = await entityRef.doc(doc.id).collection('users').where("id", "==", userID).get()
             if (querySnapshot2.docs.length > 0) {
-                listFireStore.push({
+                return {
                     ...room,
                     name: room.currentUser,
                     subtitle: room.currentMessage,
                     avatar_url: room.currentAvatar,
-                })
+                }
             }
-            console.log('1111111', listFireStore)
-            setRooms(listFireStore)
-        });
+        })
+        let result = await Promise.all(reads)
+        const rooms = result.filter(e => { return !!e && Object.keys(e).length > 0 });
+        setRooms(rooms)
     }
 
     const getCollectionChatList = async (userID) => {
         const querySnapshot = await entityChatRef.get()
-        let listFireStore = []
+        let users = []
         querySnapshot.forEach(async (doc) => {
             // doc.data() is never undefined for query doc snapshots
-            const room = doc.data()
-            // const querySnapshot2 = await entityChatRef
-            //     .doc(`${room.connectID}`)
-            //     .collection('users')
-            //     .where("userID", "==", userID)
-            //     .get()
+            const user = doc.data()
             const querySnapshot2 = doc.id.split('|')
-
             if (querySnapshot2.includes(userID)) {
-                listFireStore.push({
-                    ...room,
-                    name: room.currentUser,
-                    subtitle: room.currentMessage,
-                    avatar_url: room.currentAvatar,
+                users.push({
+                    ...user,
+                    name: user.currentUser,
+                    subtitle: user.currentMessage,
+                    avatar_url: user.currentAvatar,
                 })
+                setUsers(users)
             }
-            console.log('222222222', listFireStore)
-            setUsers(listFireStore)
         });
     }
 
@@ -94,12 +86,41 @@ const RoomScreen = ({ navigation, route }) => {
         console.log('onHandlerJoinRoom', roomID)
         const pushAction = StackActions.push('RoomChatDetail', { id: roomID })
 
-        navigation.dispatch(pushAction)
+        props.navigation.dispatch(pushAction)
     }
 
     const keyExtractor = (item, index) => index.toString()
 
-    const renderItem = ({ item }) => (
+    const renderItemRoomChat = ({ item }) => (
+        <ListItem
+            Component={TouchableScale}
+            friction={90} //
+            tension={100} // These props are passed to the parent component (here TouchableScale)
+            activeScale={0.95} //
+            linearGradientProps={{
+                colors: ['#9ede73', '#007580'],
+                start: { x: 1, y: 0 },
+                end: { x: 0.2, y: 0 },
+            }}
+            ViewComponent={LinearGradient} // Only if no expo
+            style={{ marginVertical: 5 }}
+            containerStyle={{ paddingVertical: 10 }}
+            onPress={() => onHandlerJoinRoom(item.roomID)}
+        >
+            <Avatar rounded source={{ uri: item.avatar_url }} />
+            <ListItem.Content>
+                <ListItem.Title style={{ color: '#fff', fontWeight: 'bold' }}>
+                    {item.roomID}
+                </ListItem.Title>
+                <ListItem.Subtitle style={{ color: '#fff' }}>
+                    {`${item.name} - ${item.subtitle}`}
+                </ListItem.Subtitle>
+            </ListItem.Content>
+            <ListItem.Chevron color="#fff" />
+        </ListItem>
+    )
+
+    const renderItemChat = ({ item }) => (
         <ListItem
             Component={TouchableScale}
             friction={90} //
@@ -121,19 +142,23 @@ const RoomScreen = ({ navigation, route }) => {
                     {item.name}
                 </ListItem.Title>
                 <ListItem.Subtitle style={{ color: '#fff' }}>
-                    {item.subtitle}
+                    {`${item.subtitle}`}
                 </ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Chevron color="#fff" />
         </ListItem>
     )
 
+
+    console.log('rooms', rooms)
+    console.log('rooms.length', rooms.length)
     return (
         <SafeAreaView style={{ flex: 1 }} >
             <Container>
                 <Tabs
                     locked
                     tabBarUnderlineStyle={{ backgroundColor: '#00f' }}
+                    page={state.page}
                 >
                     <Tab
                         heading={
@@ -156,7 +181,8 @@ const RoomScreen = ({ navigation, route }) => {
                         <FlatList
                             keyExtractor={keyExtractor}
                             data={rooms}
-                            renderItem={renderItem}
+                            extraData={rooms}
+                            renderItem={renderItemRoomChat}
                         />
                     </Tab>
                     <Tab
@@ -181,7 +207,8 @@ const RoomScreen = ({ navigation, route }) => {
                         <FlatList
                             keyExtractor={keyExtractor}
                             data={users}
-                            renderItem={renderItem}
+                            extraData={users}
+                            renderItem={renderItemChat}
                         />
                     </Tab>
                     <Tab
@@ -205,7 +232,8 @@ const RoomScreen = ({ navigation, route }) => {
                         <FlatList
                             keyExtractor={keyExtractor}
                             data={rooms}
-                            renderItem={renderItem}
+                            extraData={rooms}
+                            renderItem={renderItemChat}
                         />
                     </Tab>
                 </Tabs>

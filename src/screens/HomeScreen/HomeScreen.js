@@ -1,7 +1,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView, Keyboard } from 'react-native'
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView, Keyboard, Alert } from 'react-native'
 import AntDesignIcons from 'react-native-vector-icons/AntDesign'
 import IonIcons from 'react-native-vector-icons/Ionicons'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -16,6 +16,8 @@ const HomeScreen = (props) => {
 
     const db = firebase.firestore()
     const entityRef = db.collection('rooms')
+    const entityUserRef = db.collection('users')
+    const entityChatRef = db.collection('chats')
 
     const { signOut } = useContext(AuthContext);
     const [state, setState] = useState({
@@ -23,8 +25,10 @@ const HomeScreen = (props) => {
         userID: '',
         userName: '',
         avatarURL: '',
-        connectUser: '',
-        level: ''
+        connectUser: 'ltv3.mrvu@gmail.com',
+        level: '',
+        user: {},
+        userConnect: {}
     })
 
     useEffect(() => {
@@ -37,12 +41,13 @@ const HomeScreen = (props) => {
                     userID: user.id,
                     userName: user.fullName,
                     avatarURL: user.avatarURL,
-                    level: user.level
+                    level: user.level,
+                    email: user.email,
+                    user: user
                 }
             })
         })
     }, [])
-
 
     const onHandlerInput = (name, value) => {
         setState(prev => { return { ...prev, [name]: value } })
@@ -53,21 +58,57 @@ const HomeScreen = (props) => {
         notificationManager.cancelAllLocalNotification()
     }
 
-    const handlerContinue = (typeRoomName) => {
+    const handlerContinue = async (typeRoomName) => {
         if (typeRoomName == 'roomID') {
             if (state.level == 1) {
-                onSend()
-                props.navigation.navigate(`RoomChat`, { 'id': state.roomID })
+                onCreateNewGoup()
+                props.navigation.navigate(`RoomChat`, { page: 0 })
             } else {
                 props.navigation.navigate(`RoomChatDetail`, { 'id': state.roomID })
             }
 
         } else {
-            props.navigation.navigate(`ChatDetail`, { 'id': state.userID })
+            const usersConnect = await getUsersInfo(state.connectUser)
+            const userConnect = !!usersConnect ? usersConnect[0] : {}
+            setState(prev => { return { ...prev, usersConnect } })
+            if (!!userConnect && Object.keys(userConnect).length > 0) {
+                let document = `${userConnect.id}|${state.userID}`
+                let documentRevert = `${state.userID}|${userConnect.id}`
+                const isExistsCollection = await checkExistsCollection(document, documentRevert)
+                console.log('isExistsCollection', isExistsCollection)
+                if (!isExistsCollection) {
+                    onCreateNewConnect(state.user, userConnect)
+                } else {
+                    props.navigation.navigate(`RoomChat`, { page: 1 })
+                }
+            } else {
+                Alert.alert(`Không tồn tại ${state.connectUser}`)
+            }
         }
     }
 
-    const onSend = () => {
+    const checkExistsCollection = async (document, documentRevert) => {
+        // const reads = [document, documentRevert].map(doc => entityChatRef.doc(doc).collection('messages').get())
+        // let result = await Promise.all(reads)
+
+        const isExistsCollection = await entityChatRef.doc(document).collection('messages').get()
+        const isExistsCollectionRevert = await entityChatRef.doc(documentRevert).collection('messages').get()
+        console.log('isExistsCollection', isExistsCollection.docs.length)
+        console.log('isExistsCollectionRevert', isExistsCollectionRevert.docs.length)
+        return isExistsCollection.docs.length > 0 || isExistsCollectionRevert.docs.length > 0
+    }
+
+
+    const getUsersInfo = async () => {
+        const querySnapshot = await entityUserRef.where("email", "==", state.connectUser).get()
+        let users = querySnapshot.docs.map((doc) => {
+            const user = doc.data()
+            return { ...user, doc: doc.id }
+        })
+        return users
+    }
+
+    const onCreateNewGoup = () => {
         // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
         const _id = 1
         const currentValue = {
@@ -86,19 +127,14 @@ const HomeScreen = (props) => {
                 alert(error)
             })
 
-        const user = {
-            userID: state.userID,
-            userName: state.userName
-        }
         entityRef.doc(`${state.roomID}`).collection('users')
-            .doc().set(user)
+            .doc().set(state.user)
             .then(_doc => {
                 Keyboard.dismiss()
             })
             .catch((error) => {
                 alert(error)
             })
-
 
         const data = {
             _id: _id,
@@ -111,10 +147,73 @@ const HomeScreen = (props) => {
                 avatar: state.avatarURL
             },
         }
+
         entityRef.doc(`${state.roomID}`).collection('messages')
             .doc().set(data)
             .then((doc) => {
                 Keyboard.dismiss()
+                props.navigation.navigate(`RoomChat`, { page: 0 })
+            })
+            .catch((error) => {
+                alert(error)
+            })
+    }
+
+    const onCreateNewConnect = (user, userConnect) => {
+        // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        const _id = 1
+        const currentValue = {
+            currentID: user.id,
+            currentUser: user.email,
+            currentAvatar: user.avatarURL,
+            currentMessage: 'Hello, World!',
+            currentMessageID: _id,
+            currentCreatedAt: new Date()
+        }
+        const document = `${user.id}|${userConnect.id}`
+        entityChatRef.doc(document).set(currentValue)
+            .then(_doc => {
+                Keyboard.dismiss()
+            })
+            .catch((error) => {
+                alert(error)
+            })
+
+        entityChatRef.doc(document).collection('users')
+            .doc().set(user)
+            .then(_doc => {
+                Keyboard.dismiss()
+            })
+            .catch((error) => {
+                alert(error)
+            })
+
+        entityChatRef.doc(document).collection('users')
+            .doc().set(userConnect)
+            .then(_doc => {
+                Keyboard.dismiss()
+            })
+            .catch((error) => {
+                alert(error)
+            })
+
+        const data = {
+            _id: _id,
+            authorID: state.userID,
+            createdAt: new Date(),
+            text: 'Hello, World!',
+            user: {
+                _id: state.userID,
+                name: state.userName,
+                avatar: state.avatarURL
+            },
+        }
+
+        entityChatRef.doc(document).collection('messages')
+            .doc().set(data)
+            .then((doc) => {
+                Keyboard.dismiss()
+                props.navigation.navigate(`RoomChat`, { page: 1 })
             })
             .catch((error) => {
                 alert(error)
@@ -129,6 +228,8 @@ const HomeScreen = (props) => {
                     source={!!state.avatarURL ? { uri: state.avatarURL } : require('../../../assets/bootsplash_logo.png')}
                     style={{ width: moderateScale(100), height: moderateScale(100), alignSelf: 'center' }}
                 />
+                <Text style={{ alignSelf: 'center' }}>{state.userID}</Text>
+                <Text style={{ alignSelf: 'center' }}>{state.email}</Text>
             </View>
             <View style={{ marginHorizontal: moderateScale(32) }}>
                 <Text style={styles.header}>{state.level == 1 ? `Tạo phòng` : `Vào phòng`}</Text>
