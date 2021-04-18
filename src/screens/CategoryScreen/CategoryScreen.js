@@ -28,7 +28,7 @@ import ListHorizontal from 'components/common/listCommon/ListHorizontal'
 import ListVertical from 'components/common/listCommon/ListVertical'
 import { moderateScale, verticalScale, calcWidth } from 'utils/scaleSize';
 class CategoryScreen extends Component {
-    
+
     constructor(props) {
         super(props);
         this.state = {
@@ -52,8 +52,35 @@ class CategoryScreen extends Component {
                 <StatusBar backgroundColor="gray" barStyle="dark-content" hidden />
                 <View style={styles.container}>
                     <ScrollView
+                        contentContainerStyle={{ flexGrow: 1 }}
                         scrollEventThrottle={16}
                     >
+                        <CarouselStackLayout
+                            data={ENTRIES1}
+                            title={`Stack Layout `}
+                            subtitle={`Stack of cards layout | Loop`}
+                            onPressItem={this.onPressItem}
+                        />
+                        <CarouselTinderLayout
+                            data={ENTRIES2}
+                            title={`Tinder Layout `}
+                            subtitle={`Tinder of cards layout | Loop`}
+                            onPressItem={this.onPressItem}
+                        />
+                        <View style={{ flex: 2 }}>
+                            <CarouselMainLayout
+                                data={ENTRIES1}
+                                title={`Main Layout`}
+                                subtitle={`Default layout | Loop | Autoplay | Parallax | Scale | Opacity | Pagination with tappable dots`}
+                                onPressItem={this.onPressItem}
+                            />
+                        </View>
+                        <CarouselCustomLayout
+                            data={ENTRIES2}
+                            title={`Custom Layout `}
+                            subtitle={`Animation of cards layout | Loop`}
+                            onPressItem={this.onPressItem}
+                        />
                         <View style={{ flex: 1, paddingTop: verticalScale(20), marginBottom: verticalScale(20), paddingHorizontal: moderateScale(10) }}>
                             <ListHorizontal
                                 title={`Categories`}
@@ -68,14 +95,6 @@ class CategoryScreen extends Component {
                                 data={ENTRIES2}
                                 containerStyle={styles.containerStyleListVertical}
                                 itemStyle={styles.itemStyleListVertical}
-                            />
-                        </View>
-                        <View style={{ flex: 2 }}>
-                            <CarouselMainLayout
-                                data={ENTRIES1}
-                                title={`Main Layout`}
-                                subtitle={`Default layout | Loop | Autoplay | Parallax | Scale | Opacity | Pagination with tappable dots`}
-                                onPressItem={this.onPressItem}
                             />
                         </View>
                     </ScrollView>

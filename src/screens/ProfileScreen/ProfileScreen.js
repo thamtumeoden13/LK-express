@@ -225,7 +225,7 @@ const ProfileScreen = (props) => {
             tension={100} // These props are passed to the parent component (here TouchableScale)
             activeScale={0.95} //
             linearGradientProps={{
-                colors: ['#BCD0F0', '#2CB1EE'],
+                colors: ['#f9f7f7', '#f9f7f7'],
                 start: { x: 1, y: 0 },
                 end: { x: 0.2, y: 0 },
             }}
@@ -235,17 +235,17 @@ const ProfileScreen = (props) => {
             
         // onPress={() => onHandlerJoinRoom(item.roomID)}
         >
-            <Icon name={item.icon} />
+            <Icon name={item.icon} color='#112d4e' />
             <Avatar rounded source={{ uri: item.avatar_url }} />
             <ListItem.Content>
-                <ListItem.Title style={{ color: '#000', fontWeight: 'bold' }}>
+                <ListItem.Title style={{ color: '#112d4e', fontWeight: 'bold' }}>
                     {item.title}
                 </ListItem.Title>
                 {/* <ListItem.Subtitle style={{ color: '#fff' }}>
                     {item.subtitle}
                 </ListItem.Subtitle> */}
             </ListItem.Content>
-            <ListItem.Chevron color="#000" />
+            <ListItem.Chevron color="#112d4e" />
         </ListItem>
     )
 

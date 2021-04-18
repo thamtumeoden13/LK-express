@@ -17,6 +17,7 @@ const RoomScreen = (props) => {
     const db = firebase.firestore()
     const entityRef = db.collection('rooms')
     const entityChatRef = db.collection('chats')
+    const entityUserRef = db.collection('users')
 
     const [state, setState] = useState({
         userID: '',
@@ -25,6 +26,7 @@ const RoomScreen = (props) => {
         page: 0
     })
     const [rooms, setRooms] = useState([])
+    const [usersByChat, setUsersByChat] = useState([])
     const [users, setUsers] = useState([])
 
     useEffect(() => {
@@ -34,15 +36,12 @@ const RoomScreen = (props) => {
             setState(prev => { return { ...prev, userID: user.id, userName: user.fullName } })
             Promise.all([
                 getCollectionRoomList(user.id),
-                getCollectionChatList(user.id)
+                getCollectionChatList(user.id),
+                getCollectionUsersList(user.id)
             ])
         });
         return () => focusListener
     }, [])
-
-    useEffect(()=>{
-        console.log('props.route', props.route)
-    }, [props.route])
 
     const getCollectionRoomList = async (userID) => {
         const querySnapshot = await entityRef.get()
@@ -77,9 +76,19 @@ const RoomScreen = (props) => {
                     subtitle: user.currentMessage,
                     avatar_url: user.currentAvatar,
                 })
-                setUsers(users)
+                setUsersByChat(users)
             }
         });
+    }
+
+    const getCollectionUsersList = async (userID) => {
+        const querySnapshot = await entityUserRef.where("id", "!=", userID).get()
+        let users = querySnapshot.docs.map((doc) => {
+            const user = doc.data()
+            return { ...user, doc: doc.id }
+        })
+        console.log('users', users)
+        setUsers(users)
     }
 
     const onHandlerJoinRoom = (roomID) => {
@@ -98,7 +107,7 @@ const RoomScreen = (props) => {
             tension={100} // These props are passed to the parent component (here TouchableScale)
             activeScale={0.95} //
             linearGradientProps={{
-                colors: ['#9ede73', '#007580'],
+                colors: ['#29bb89', '#007580'],
                 start: { x: 1, y: 0 },
                 end: { x: 0.2, y: 0 },
             }}
@@ -127,7 +136,7 @@ const RoomScreen = (props) => {
             tension={100} // These props are passed to the parent component (here TouchableScale)
             activeScale={0.95} //
             linearGradientProps={{
-                colors: ['#9ede73', '#007580'],
+                colors: ['#a5ecd7', '#0278ae'],
                 start: { x: 1, y: 0 },
                 end: { x: 0.2, y: 0 },
             }}
@@ -149,9 +158,35 @@ const RoomScreen = (props) => {
         </ListItem>
     )
 
+    const renderItemUser = ({ item }) => (
+        <ListItem
+            Component={TouchableScale}
+            friction={90} //
+            tension={100} // These props are passed to the parent component (here TouchableScale)
+            activeScale={0.95} //
+            linearGradientProps={{
+                colors: ['#fdbaf8', '#ffaaa7'],
+                start: { x: 1, y: 0 },
+                end: { x: 0.2, y: 0 },
+            }}
+            ViewComponent={LinearGradient} // Only if no expo
+            style={{ marginVertical: 5 }}
+            containerStyle={{ paddingVertical: 10 }}
+            // onPress={() => onHandlerJoinRoom(item.roomID)}
+        >
+            <Avatar rounded source={{ uri: item.avatarURL }} />
+            <ListItem.Content>
+                <ListItem.Title style={{ color: '#fff', fontWeight: 'bold' }}>
+                    {item.email}
+                </ListItem.Title>
+                <ListItem.Subtitle style={{ color: '#fff' }}>
+                    {`${item.fullName}`}
+                </ListItem.Subtitle>
+            </ListItem.Content>
+            <ListItem.Chevron name="addusergroup" type='antdesign' color="#fff" />
+        </ListItem>
+    )
 
-    console.log('rooms', rooms)
-    console.log('rooms.length', rooms.length)
     return (
         <SafeAreaView style={{ flex: 1 }} >
             <Container>
@@ -190,7 +225,7 @@ const RoomScreen = (props) => {
                             <TabHeading style={{ backgroundColor: '#fff' }}>
                                 <Text style={{ color: '#000' }}>{`Bạn bè`}</Text>
                                 <Badge status='primary'
-                                    value={users.length}
+                                    value={usersByChat.length}
                                     containerStyle={{
                                         position: 'absolute', top: 5, right: 5,
                                         justifyContent: 'center', alignItems: 'center'
@@ -206,8 +241,8 @@ const RoomScreen = (props) => {
                     >
                         <FlatList
                             keyExtractor={keyExtractor}
-                            data={users}
-                            extraData={users}
+                            data={usersByChat}
+                            extraData={usersByChat}
                             renderItem={renderItemChat}
                         />
                     </Tab>
@@ -215,7 +250,7 @@ const RoomScreen = (props) => {
                         heading={
                             <TabHeading style={{ backgroundColor: '#fff' }}>
                                 <Text style={{ color: '#000' }}>{`Danh bạ`}</Text>
-                                <Badge status='success' value={rooms.length}
+                                <Badge status='success' value={users.length}
                                     containerStyle={{
                                         position: 'absolute', top: 5, right: 5,
                                         justifyContent: 'center', alignItems: 'center',
@@ -231,9 +266,9 @@ const RoomScreen = (props) => {
                     >
                         <FlatList
                             keyExtractor={keyExtractor}
-                            data={rooms}
-                            extraData={rooms}
-                            renderItem={renderItemChat}
+                            data={users}
+                            extraData={users}
+                            renderItem={renderItemUser}
                         />
                     </Tab>
                 </Tabs>

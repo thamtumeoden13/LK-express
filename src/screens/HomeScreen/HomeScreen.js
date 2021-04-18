@@ -25,7 +25,7 @@ const HomeScreen = (props) => {
         userID: '',
         userName: '',
         avatarURL: '',
-        connectUser: 'ltv3.mrvu@gmail.com',
+        connectUser: '',
         level: '',
         user: {},
         userConnect: {}
@@ -60,31 +60,39 @@ const HomeScreen = (props) => {
 
     const handlerContinue = async (typeRoomName) => {
         if (typeRoomName == 'roomID') {
+            if (!state.roomID || state.roomID.length <= 0) {
+                Alert.alert('Vui lòng nhập tên phòng')
+                return
+            }
             if (state.level == 1) {
                 onCreateNewGoup()
                 props.navigation.navigate(`RoomChat`, { page: 0 })
-            } else {
-                props.navigation.navigate(`RoomChatDetail`, { 'id': state.roomID })
+                return
             }
-
-        } else {
-            const usersConnect = await getUsersInfo(state.connectUser)
-            const userConnect = !!usersConnect ? usersConnect[0] : {}
-            setState(prev => { return { ...prev, usersConnect } })
-            if (!!userConnect && Object.keys(userConnect).length > 0) {
-                let document = `${userConnect.id}|${state.userID}`
-                let documentRevert = `${state.userID}|${userConnect.id}`
-                const isExistsCollection = await checkExistsCollection(document, documentRevert)
-                console.log('isExistsCollection', isExistsCollection)
-                if (!isExistsCollection) {
-                    onCreateNewConnect(state.user, userConnect)
-                } else {
-                    props.navigation.navigate(`RoomChat`, { page: 1 })
-                }
-            } else {
-                Alert.alert(`Không tồn tại ${state.connectUser}`)
-            }
+            props.navigation.navigate(`RoomChatDetail`, { 'id': state.roomID })
+            return
         }
+
+        if (!state.connectUser || state.connectUser.length <= 0) {
+            Alert.alert('Vui lòng nhập tên tài khoản')
+            return
+        }
+        const usersConnect = await getUsersInfo(state.connectUser)
+        const userConnect = !!usersConnect ? usersConnect[0] : {}
+        setState(prev => { return { ...prev, usersConnect } })
+        if (!!userConnect && Object.keys(userConnect).length > 0) {
+            let document = `${userConnect.id}|${state.userID}`
+            let documentRevert = `${state.userID}|${userConnect.id}`
+            const isExistsCollection = await checkExistsCollection(document, documentRevert)
+            console.log('isExistsCollection', isExistsCollection)
+            if (!isExistsCollection) {
+                onCreateNewConnect(state.user, userConnect)
+                return
+            }
+            props.navigation.navigate(`RoomChat`, { page: 1 })
+            return
+        }
+        Alert.alert(`Không tồn tại ${state.connectUser}`)
     }
 
     const checkExistsCollection = async (document, documentRevert) => {
@@ -228,10 +236,10 @@ const HomeScreen = (props) => {
                     source={!!state.avatarURL ? { uri: state.avatarURL } : require('../../../assets/bootsplash_logo.png')}
                     style={{ width: moderateScale(100), height: moderateScale(100), alignSelf: 'center' }}
                 />
-                <Text style={{ alignSelf: 'center' }}>{state.userID}</Text>
+                {/* <Text style={{ alignSelf: 'center' }}>{state.userID}</Text> */}
                 <Text style={{ alignSelf: 'center' }}>{state.email}</Text>
             </View>
-            <View style={{ marginHorizontal: moderateScale(32) }}>
+            {state.level == 1 && <View style={{ marginHorizontal: moderateScale(32) }}>
                 <Text style={styles.header}>{state.level == 1 ? `Tạo phòng` : `Vào phòng`}</Text>
                 <View style={{
                     flexDirection: 'row',
@@ -257,6 +265,8 @@ const HomeScreen = (props) => {
                     </TouchableOpacity>
                 </View>
             </View>
+            }
+
             <View style={{ marginHorizontal: moderateScale(32) }}>
                 <Text style={styles.header}>{`Kết nối`}</Text>
                 <View style={{
@@ -269,7 +279,7 @@ const HomeScreen = (props) => {
                         <TextInput
                             style={styles.input}
                             onChangeText={connectUser => onHandlerInput('connectUser', connectUser)}
-                            placeholder={'Nhập tên'}
+                            placeholder={'Nhập tên bạn bè'}
                             autoCapitalize='none'
                         >
                             {state.connectUser}

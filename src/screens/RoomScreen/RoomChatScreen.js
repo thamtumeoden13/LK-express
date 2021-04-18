@@ -27,7 +27,7 @@ const RoomChatScreen = ({ route, navigation }) => {
 
     const db = firebase.firestore()
     const entityRef = db.collection('rooms')
-    const entityRefUser = db.collection('users')
+    const entityUserRef = db.collection('users')
 
     const actionSheetRef = useRef();
     const scrollViewRef = useRef();
@@ -161,7 +161,7 @@ const RoomChatScreen = ({ route, navigation }) => {
     }
 
     const getCollectionUsersList = async (userID) => {
-        const querySnapshot = await entityRefUser.get()
+        const querySnapshot = await entityUserRef.get()
         let users = querySnapshot.docs.map((doc) => {
             const user = doc.data()
             return { ...user, doc: doc.id }

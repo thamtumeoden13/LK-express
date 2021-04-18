@@ -41,7 +41,7 @@ function HomeStackScreen({ navigation }) {
                 name="HomeDrawer"
                 component={HomeScreen}
                 options={{
-                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerLeft: () => <DrawerIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Trang chủ`} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
@@ -156,15 +156,16 @@ function TabStack() {
                 options={{
                     tabBarLabel: 'Danh mục',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="bell" color={color} size={size} />
+                        <MaterialCommunityIcons name="cart-outline" color={color} size={size} />
                     ),
+                    tabBarBadge: 5,
                 }}
             />
             <Tab.Screen name="Profile" component={ProfileStackScreen}
                 options={{
                     tabBarLabel: 'Cá nhân',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="bell" color={color} size={size} />
+                        <MaterialCommunityIcons name="account-settings-outline" color={color} size={size} />
                     ),
                 }}
             />
