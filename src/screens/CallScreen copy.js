@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { Text, Button, TextInput } from 'react-native-paper';
+import { View, StyleSheet, Alert, Text, Button, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import InCallManager from 'react-native-incall-manager';
