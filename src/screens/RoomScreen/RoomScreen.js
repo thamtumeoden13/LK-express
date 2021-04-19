@@ -7,11 +7,16 @@ import { ListItem, Avatar, Badge } from 'react-native-elements';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
 import { StackActions } from '@react-navigation/native';
+import format from 'date-fns/format'
+import formatDistanceToNow from 'date-fns/formatDistanceToNow'
+import { vi } from 'date-fns/locale/vi'
+
 
 import { firebase } from '../../firebase/config'
 import { notificationManager } from '../../utils/NotificationManager'
 
 import styles from './styles';
+import { scale, verticalScale } from 'utils/scaleSize';
 
 const RoomScreen = (props) => {
     const db = firebase.firestore()
@@ -21,8 +26,10 @@ const RoomScreen = (props) => {
 
     const [state, setState] = useState({
         userID: '',
+        connectID: '',
         userName: '',
         isActivedLocalPushNotify: false,
+        user: {},
         page: 0
     })
     const [rooms, setRooms] = useState([])
@@ -33,7 +40,14 @@ const RoomScreen = (props) => {
         const focusListener = props.navigation.addListener('focus', async () => {
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
-            setState(prev => { return { ...prev, userID: user.id, userName: user.fullName } })
+            setState(prev => {
+                return {
+                    ...prev,
+                    userID: user.id,
+                    userName: user.fullName,
+                    user: user
+                }
+            })
             Promise.all([
                 getCollectionRoomList(user.id),
                 getCollectionChatList(user.id),
@@ -42,6 +56,18 @@ const RoomScreen = (props) => {
         });
         return () => focusListener
     }, [])
+
+    useEffect(() => {
+        if (!!users && !!usersByChat) {
+            usersByChat.map(e => {
+                const find = users.find(f => e.connectID == f.id)
+                e.userConnect = find
+                return e
+            })
+            setUsersByChat(usersByChat)
+            console.log('usersByChat', usersByChat)
+        }
+    }, [users, usersByChat])
 
     const getCollectionRoomList = async (userID) => {
         const querySnapshot = await entityRef.get()
@@ -53,32 +79,38 @@ const RoomScreen = (props) => {
                     ...room,
                     name: room.currentUser,
                     subtitle: room.currentMessage,
-                    avatar_url: room.currentAvatar,
+                    avatarURL: room.currentAvatar,
                 }
             }
         })
         let result = await Promise.all(reads)
         const rooms = result.filter(e => { return !!e && Object.keys(e).length > 0 });
         setRooms(rooms)
+        console.log('rooms', rooms)
     }
 
     const getCollectionChatList = async (userID) => {
         const querySnapshot = await entityChatRef.get()
         let users = []
-        querySnapshot.forEach(async (doc) => {
+        querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
             const user = doc.data()
+            const docID = doc.id
             const querySnapshot2 = doc.id.split('|')
             if (querySnapshot2.includes(userID)) {
+                const connectID = querySnapshot2.find(e => e != userID)
                 users.push({
                     ...user,
+                    docID: docID,
+                    connectID: connectID,
                     name: user.currentUser,
                     subtitle: user.currentMessage,
-                    avatar_url: user.currentAvatar,
+                    avatarURL: user.currentAvatar,
                 })
-                setUsersByChat(users)
             }
         });
+        console.log('getCollectionChatList', users)
+        setUsersByChat(users)
     }
 
     const getCollectionUsersList = async (userID) => {
@@ -94,9 +126,15 @@ const RoomScreen = (props) => {
     const onHandlerJoinRoom = (roomID) => {
         console.log('onHandlerJoinRoom', roomID)
         const pushAction = StackActions.push('RoomChatDetail', { id: roomID })
-
         props.navigation.dispatch(pushAction)
     }
+
+    const onHandlerConnectRoom = (docID) => {
+        console.log('onHandlerConnectRoom', docID)
+        const pushAction = StackActions.push('ChatDetail', { id: docID })
+        props.navigation.dispatch(pushAction)
+    }
+
 
     const keyExtractor = (item, index) => index.toString()
 
@@ -107,23 +145,31 @@ const RoomScreen = (props) => {
             tension={100} // These props are passed to the parent component (here TouchableScale)
             activeScale={0.95} //
             linearGradientProps={{
-                colors: ['#29bb89', '#007580'],
+                colors: ['#007580', '#007580'],
                 start: { x: 1, y: 0 },
                 end: { x: 0.2, y: 0 },
             }}
             ViewComponent={LinearGradient} // Only if no expo
-            style={{ marginVertical: 5 }}
-            containerStyle={{ paddingVertical: 10 }}
+            style={{ marginTop: verticalScale(5) }}
+            containerStyle={{ paddingVertical: verticalScale(10) }}
             onPress={() => onHandlerJoinRoom(item.roomID)}
         >
-            <Avatar rounded source={{ uri: item.avatar_url }} />
+            <Avatar rounded source={{ uri: item.currentAvatar }} />
             <ListItem.Content>
                 <ListItem.Title style={{ color: '#fff', fontWeight: 'bold' }}>
-                    {item.roomID}
+                    {`Phòng: ${item.roomID}`}
                 </ListItem.Title>
-                <ListItem.Subtitle style={{ color: '#fff' }}>
-                    {`${item.name} - ${item.subtitle}`}
-                </ListItem.Subtitle>
+                <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+                    <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(14) }}>
+                        {`${item.currentMessage}`}
+                    </ListItem.Subtitle>
+                    <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(10) }}>
+                        {` • ${format(item.currentCreatedAt.toDate(), 'yyyy-MM-dd HH:mm', { locale: vi })}`}
+                    </ListItem.Subtitle>
+                </View>
+                {/* <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(12) }}>
+                    {`•${formatDistanceToNow(item.currentCreatedAt.toDate(), { locale: vi })}`}
+                </ListItem.Subtitle> */}
             </ListItem.Content>
             <ListItem.Chevron color="#fff" />
         </ListItem>
@@ -136,23 +182,28 @@ const RoomScreen = (props) => {
             tension={100} // These props are passed to the parent component (here TouchableScale)
             activeScale={0.95} //
             linearGradientProps={{
-                colors: ['#a5ecd7', '#0278ae'],
+                colors: ['#0278ae', '#0278ae'],
                 start: { x: 1, y: 0 },
                 end: { x: 0.2, y: 0 },
             }}
             ViewComponent={LinearGradient} // Only if no expo
-            style={{ marginVertical: 5 }}
-            containerStyle={{ paddingVertical: 10 }}
-            onPress={() => onHandlerJoinRoom(item.roomID)}
+            style={{ marginTop: verticalScale(5) }}
+            containerStyle={{ paddingVertical: verticalScale(10) }}
+            onPress={() => onHandlerConnectRoom(item.docID)}
         >
-            <Avatar rounded source={{ uri: item.avatar_url }} />
+            <Avatar rounded source={{ uri: item.userConnect.avatarURL }} />
             <ListItem.Content>
                 <ListItem.Title style={{ color: '#fff', fontWeight: 'bold' }}>
-                    {item.name}
+                    {item.userConnect.email}
                 </ListItem.Title>
-                <ListItem.Subtitle style={{ color: '#fff' }}>
-                    {`${item.subtitle}`}
-                </ListItem.Subtitle>
+                <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+                    <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(14) }}>
+                        {`${item.currentMessage}`}
+                    </ListItem.Subtitle>
+                    <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(10) }}>
+                        {` • ${format(item.currentCreatedAt.toDate(), 'yyyy-MM-dd HH:mm', { locale: vi })}`}
+                    </ListItem.Subtitle>
+                </View>
             </ListItem.Content>
             <ListItem.Chevron color="#fff" />
         </ListItem>
@@ -165,25 +216,25 @@ const RoomScreen = (props) => {
             tension={100} // These props are passed to the parent component (here TouchableScale)
             activeScale={0.95} //
             linearGradientProps={{
-                colors: ['#fdbaf8', '#ffaaa7'],
+                colors: ['#fdbaf8', '#fdbaf8'],
                 start: { x: 1, y: 0 },
                 end: { x: 0.2, y: 0 },
             }}
             ViewComponent={LinearGradient} // Only if no expo
-            style={{ marginVertical: 5 }}
-            containerStyle={{ paddingVertical: 10 }}
-            // onPress={() => onHandlerJoinRoom(item.roomID)}
+            style={{ marginTop: verticalScale(5) }}
+            containerStyle={{ paddingVertical: verticalScale(10) }}
+        // onPress={() => onHandlerJoinRoom(item.roomID)}
         >
             <Avatar rounded source={{ uri: item.avatarURL }} />
             <ListItem.Content>
-                <ListItem.Title style={{ color: '#fff', fontWeight: 'bold' }}>
+                <ListItem.Title style={{ color: '#0a043c', fontWeight: 'bold', fontSize: scale(14) }}>
                     {item.email}
                 </ListItem.Title>
-                <ListItem.Subtitle style={{ color: '#fff' }}>
+                <ListItem.Subtitle style={{ color: '#0a043c', fontStyle: 'italic', fontSize: scale(12) }}>
                     {`${item.fullName}`}
                 </ListItem.Subtitle>
             </ListItem.Content>
-            <ListItem.Chevron name="addusergroup" type='antdesign' color="#fff" />
+            <ListItem.Chevron name="addusergroup" type='antdesign' color="#0a043c" />
         </ListItem>
     )
 
@@ -192,8 +243,8 @@ const RoomScreen = (props) => {
             <Container>
                 <Tabs
                     locked
-                    tabBarUnderlineStyle={{ backgroundColor: '#00f' }}
-                    page={state.page}
+                    tabBarUnderlineStyle={{ backgroundColor: '#0a043c' }}
+                    // page={2}
                 >
                     <Tab
                         heading={
@@ -201,17 +252,18 @@ const RoomScreen = (props) => {
                                 <Text style={{ color: '#000' }}>{`Phòng chat`}</Text>
                                 <Badge status='error' value={rooms.length}
                                     containerStyle={{
-                                        position: 'absolute', top: 5, right: 5,
+                                        position: 'absolute', top: scale(5), right: scale(5),
                                         justifyContent: 'center', alignItems: 'center'
                                     }}
-                                    textStyle={{ fontSize: 8 }}
+                                    badgeStyle={{ backgroundColor: '#007580' }}
+                                    textStyle={{ fontSize: scale(8) }}
                                 />
                             </TabHeading>
                         }
                         tabStyle={{ backgroundColor: '#fff' }}
                         activeTabStyle={{ backgroundColor: '#eff1f4' }}
-                        textStyle={{ fontSize: 12, color: '#000' }}
-                        activeTextStyle={{ fontSize: 14, color: '#00f' }}
+                        textStyle={{ fontSize: scale(12), color: '#000' }}
+                        activeTextStyle={{ fontSize: scale(14), color: '#007580' }}
                     >
                         <FlatList
                             keyExtractor={keyExtractor}
@@ -224,20 +276,21 @@ const RoomScreen = (props) => {
                         heading={
                             <TabHeading style={{ backgroundColor: '#fff' }}>
                                 <Text style={{ color: '#000' }}>{`Bạn bè`}</Text>
-                                <Badge status='primary'
-                                    value={usersByChat.length}
+                                <Badge 
+                                value={usersByChat.length}
                                     containerStyle={{
-                                        position: 'absolute', top: 5, right: 5,
+                                        position: 'absolute', top: scale(5), right: scale(5),
                                         justifyContent: 'center', alignItems: 'center'
                                     }}
-                                    textStyle={{ fontSize: 8 }}
+                                    badgeStyle={{ backgroundColor: '#0278ae' }}
+                                    textStyle={{ fontSize: scale(8) }}
                                 />
                             </TabHeading>
                         }
                         tabStyle={{ backgroundColor: '#fff' }}
                         activeTabStyle={{ backgroundColor: '#eff1f4' }}
                         textStyle={{ fontSize: 12, color: '#000' }}
-                        activeTextStyle={{ fontSize: 14, color: '#00f' }}
+                        activeTextStyle={{ fontSize: 14, color: '#0278ae' }}
                     >
                         <FlatList
                             keyExtractor={keyExtractor}
@@ -250,19 +303,21 @@ const RoomScreen = (props) => {
                         heading={
                             <TabHeading style={{ backgroundColor: '#fff' }}>
                                 <Text style={{ color: '#000' }}>{`Danh bạ`}</Text>
-                                <Badge status='success' value={users.length}
+                                <Badge
+                                    value={users.length}
                                     containerStyle={{
-                                        position: 'absolute', top: 5, right: 5,
+                                        position: 'absolute', top: scale(5), right: scale(5),
                                         justifyContent: 'center', alignItems: 'center',
                                     }}
-                                    textStyle={{ fontSize: 8 }}
+                                    badgeStyle={{ backgroundColor: '#fdbaf8' }}
+                                    textStyle={{ fontSize: scale(8) }}
                                 />
                             </TabHeading>
                         }
                         tabStyle={{ backgroundColor: '#fff' }}
                         activeTabStyle={{ backgroundColor: '#eff1f4' }}
                         textStyle={{ fontSize: 12, color: '#000' }}
-                        activeTextStyle={{ fontSize: 14, color: '#00f' }}
+                        activeTextStyle={{ fontSize: 14, color: '#fdbaf8' }}
                     >
                         <FlatList
                             keyExtractor={keyExtractor}

@@ -150,6 +150,7 @@ function TabStack() {
                         <MaterialCommunityIcons name="battlenet" color={color} size={size} />
                     ),
                     tabBarBadge: 3,
+                    tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
                 }}
             />
             <Tab.Screen name="Category" component={CategoryStackScreen}
@@ -159,6 +160,7 @@ function TabStack() {
                         <MaterialCommunityIcons name="cart-outline" color={color} size={size} />
                     ),
                     tabBarBadge: 5,
+                    tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
                 }}
             />
             <Tab.Screen name="Profile" component={ProfileStackScreen}

@@ -13,43 +13,17 @@ import ActionSheet, {
 import { firebase } from '../../firebase/config'
 import { notificationManager } from 'utils/NotificationManager'
 import HeaderTitle from 'components/common/Header/HeaderTitle'
+import ActionSheetIcon from 'components/common/icon/ActionSheetIcon'
 
 import styles from './styles';
+import { scale } from 'utils/scaleSize';
+import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 
-const items = [
-    100,
-    60,
-    150,
-    200,
-    170,
-    80,
-    41,
-    101,
-    61,
-    151,
-    202,
-    172,
-    82,
-    43,
-    103,
-    64,
-    155,
-    205,
-    176,
-    86,
-    46,
-    106,
-    66,
-    152,
-    203,
-    173,
-    81,
-    42,
-];
 const RoomChatScreen = ({ route, navigation }) => {
 
     const db = firebase.firestore()
-    const entityRef = db.collection('rooms')
+    const entityChatRef = db.collection('chats')
+    const entityUserRef = db.collection('users')
 
     const actionSheetRef = useRef();
     const scrollViewRef = useRef();
@@ -73,26 +47,35 @@ const RoomChatScreen = ({ route, navigation }) => {
         });
     };
     const [state, setState] = useState({
-        roomID: '',
         userID: '',
+        connectID: '',
+        documentID: '',
         userName: '',
         avatarURL: '',
         isActivedLocalPushNotify: false,
-        isExistsUser: false
+        level: '',
+        user: {},
+        userConnect: {}
     })
     const [messages, setMessages] = useState([])
 
     useEffect(() => {
         setTimeout(async () => {
-            const roomID = route.params.id
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
+            const documentID = route.params.id
+            const split = documentID.split('|')
+            const connectID = split.find(e => e != user.id)
             setState(prev => {
                 return {
                     ...prev,
-                    roomID, userID: user.id,
+                    documentID,
+                    connectID,
+                    userID: user.id,
                     userName: user.fullName,
-                    avatarURL: user.avatarURL
+                    avatarURL: user.avatarURL,
+                    level: user.level,
+                    user
                 }
             })
         })
@@ -101,25 +84,34 @@ const RoomChatScreen = ({ route, navigation }) => {
             removeHasReachedTopListener(onHasReachedTop);
         };
     }, [])
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerTitle: () => <HeaderTitle title={`${state.roomID}`} />
-        });
-    }, [navigation, state.roomID])
 
     useEffect(() => {
-        if (!!state.userID && !!state.roomID) {
-            getRealtimeCollection()
-            getUsersCollection()
+        navigation.setOptions({
+            headerTitle: () => null,// <HeaderTitle title={`${state.connectID}`} />,
+            headerRight: () => <ActionSheetIcon navigation={navigation} onOpen={() => actionSheetRef.current?.show()} />,
+        });
+    }, [navigation])
+
+    useEffect(() => {
+        if (!!state.connectID && state.connectID.length > 0) {
+            getUsersInfo()
         }
-    }, [state.userID, state.roomID])
+    }, [state.connectID])
+
+    useEffect(() => {
+        if (!!state.userConnect && Object.keys(state.userConnect).length > 0) {
+            navigation.setOptions({
+                headerTitle: () => <HeaderTitle title={`${state.userConnect.email}`} />,
+            });
+            getRealtimeCollection()
+        }
+    }, [state.userConnect])
 
     const getRealtimeCollection = () => {
-        entityRef
-            .doc(`${state.roomID}`)
+        entityChatRef
+            .doc(`${state.documentID}`)
             .collection('messages')
             .onSnapshot((querySnapshot) => {
-
                 let messagesFireStore = []
                 querySnapshot.docChanges().forEach(change => {
                     const message = change.doc.data()
@@ -144,48 +136,41 @@ const RoomChatScreen = ({ route, navigation }) => {
                 })
                 messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
                 console.log('messagesFireStore', messagesFireStore)
-                appendMessages(messagesFireStore, state.userID, state.roomID)
+                console.log('state.userConnect', state.userConnect)
+                appendMessages(messagesFireStore, state.user, state.userConnect)
             }, (error) => {
                 Alert.alert(error)
             });
     }
 
-    const getUsersCollection = () => {
-        entityRef
-            .doc(`${state.roomID}`)
-            .collection('users')
-            .where("userID", "==", state.userID)
-            .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    if (doc.exists) {
-                        console.log(doc.id, "=>Exists", doc.data());
-                        setState(prev => { return { ...prev, isExistsUser: true } })
-                        return
-                    } else {
-                        console.log("No such document!");
-                    }
-                });
-            });
+    const getUsersInfo = async () => {
+        const querySnapshot = await entityUserRef.where("id", "==", state.connectID).get()
+        let users = querySnapshot.docs.map((doc) => {
+            const user = doc.data()
+            return { ...user, doc: doc.id }
+        })
+        console.log(' users[0] ', users[0])
+        setState(prev => { return { ...prev, userConnect: users[0] } })
     }
 
-    const appendMessages = useCallback((messages, userID, roomID) => {
+    const appendMessages = useCallback((messages, user, userConnect) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-        console.log('appendMessages', messages)
-        if (!!messages && messages.length > 0 && userID != messages[0].authorID) {
-            handlerLocalPushNotify(messages[0], roomID)
+        console.log('appendMessages', messages, user, state.userConnect)
+        if (!!messages && messages.length > 0 && user.id != messages[0].authorID) {
+            handlerLocalPushNotify(messages[0], state.userConnect)
         }
-    }, [messages])
+    }, [messages, state.userConnect])
 
-    const handlerLocalPushNotify = (message, roomID) => {
+    const handlerLocalPushNotify = (message, userConnect) => {
         const options = {
             soundName: "default",
             playSound: true,
             vibrate: true
         }
+        console.log('notificationManager', messages, userConnect)
         notificationManager.showNotification(
             Math.random(),
-            `${roomID}`,
+            `${userConnect.fullName}`,
             `${message.text}`,
             {}, // data
             options //options
@@ -195,38 +180,21 @@ const RoomChatScreen = ({ route, navigation }) => {
     const onSend = (messages = []) => {
         const { text, _id, createdAt } = messages[0]
         // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-
         const currentValue = {
-            roomID: state.roomID,
+            currentID: state.userID,
             currentUser: state.userName,
             currentAvatar: state.avatarURL,
             currentMessage: text,
             currentMessageID: _id,
             currentCreatedAt: createdAt
         }
-        entityRef.doc(`${state.roomID}`).set(currentValue)
+        entityChatRef.doc(`${state.documentID}`).set(currentValue)
             .then(_doc => {
                 Keyboard.dismiss()
             })
             .catch((error) => {
                 alert(error)
             })
-
-        if (!state.isExistsUser) {
-            const user = {
-                userID: state.userID,
-                userName: state.userName
-            }
-            entityRef.doc(`${state.roomID}`).collection('users')
-                .doc().set(user)
-                .then(_doc => {
-                    Keyboard.dismiss()
-                })
-                .catch((error) => {
-                    alert(error)
-                })
-
-        }
 
         const data = {
             _id: _id,
@@ -239,7 +207,7 @@ const RoomChatScreen = ({ route, navigation }) => {
                 avatar: state.avatarURL
             },
         }
-        entityRef.doc(`${state.roomID}`).collection('messages')
+        entityChatRef.doc(`${state.documentID}`).collection('messages')
             .doc().set(data)
             .then((doc) => {
                 Keyboard.dismiss()
@@ -273,15 +241,10 @@ const RoomChatScreen = ({ route, navigation }) => {
         onLongPress={handlerLongPressMessage}
         onPressAvatar={() => Alert.alert('yyy')}
     />
-    // if (Platform.OS === 'android') {
-    //     return (
-    //         <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' KeyboardAvoidingView={30} enabled>
-    //             {chat}
-    //         </KeyboardAvoidingView>
-    //     )
-    // }
+
+    console.log('userConnect-------end', state.userConnect)
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: 'red' }} >
+        <SafeAreaView style={{ flex: 1 }} >
             {chat}
             <ActionSheet
                 initialOffsetFromBottom={0.6}
@@ -306,7 +269,7 @@ const RoomChatScreen = ({ route, navigation }) => {
                         actionSheetRef.current?.handleChildScrollEnd()
                     }
                     style={styles.scrollview}>
-                    <View style={styles.container}>
+                    <View style={styles.containerActionSheet}>
                         {['#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71'].map(
                             color => (
                                 <TouchableOpacity
@@ -324,36 +287,6 @@ const RoomChatScreen = ({ route, navigation }) => {
                             ),
                         )}
                     </View>
-
-                    <TextInput
-                        style={styles.input}
-                        multiline={true}
-                        placeholder="Write your text here"
-                    />
-
-                    <View>
-                        {items.map(item => (
-                            <TouchableOpacity
-                                key={item}
-                                onPress={() => {
-                                    actionSheetRef.current?.hide();
-                                }}
-                                style={styles.listItem}>
-                                <View
-                                    style={{
-                                        width: item,
-                                        height: 15,
-                                        backgroundColor: '#f0f0f0',
-                                        marginVertical: 15,
-                                        borderRadius: 5,
-                                    }}
-                                />
-
-                                <View style={styles.btnLeft} />
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
                     {/*  Add a Small Footer at Bottom */}
                     <View style={styles.footer} />
                 </ScrollView>

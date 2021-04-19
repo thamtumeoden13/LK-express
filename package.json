@@ -22,6 +22,7 @@
     "appcenter-analytics": "^4.1.0",
     "appcenter-crashes": "^4.1.0",
     "base-64": "^1.0.0",
+    "date-fns": "^2.21.1",
     "firebase": "^8.2.10",
     "native-base": "^2.13.12",
     "react": "16.13.1",

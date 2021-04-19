@@ -69,7 +69,7 @@ const HomeScreen = (props) => {
                 props.navigation.navigate(`RoomChat`, { page: 0 })
                 return
             }
-            props.navigation.navigate(`RoomChatDetail`, { 'id': state.roomID })
+            props.navigation.navigate(`RoomChat`, { page: 0 })
             return
         }
 
@@ -105,7 +105,6 @@ const HomeScreen = (props) => {
         console.log('isExistsCollectionRevert', isExistsCollectionRevert.docs.length)
         return isExistsCollection.docs.length > 0 || isExistsCollectionRevert.docs.length > 0
     }
-
 
     const getUsersInfo = async () => {
         const querySnapshot = await entityUserRef.where("email", "==", state.connectUser).get()
