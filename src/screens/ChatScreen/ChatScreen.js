@@ -20,7 +20,7 @@ const ChatScreen = (props) => {
         avatarURL: '',
         isActivedLocalPushNotify: false,
         isExistsUser: false,
-        document:''
+        document: ''
     })
     const [messages, setMessages] = useState([])
 
@@ -57,7 +57,13 @@ const ChatScreen = (props) => {
                     document = `${state.userID}|${state.connectID}`
                 }
                 setState(prev => { return { ...prev, document } })
-                getRealtimeCollection(document)
+                const query = entityRef
+                    .doc(`${document}`)
+                    .collection('messages')
+                const unsubscribe = query.onSnapshot(getRealtimeCollection, err => Alert.alert(error));
+                return () => {
+                    unsubscribe();
+                }
             });
         }
     }, [state.userID, state.connectID])
@@ -78,39 +84,31 @@ const ChatScreen = (props) => {
         return isExistsCollectionRevert
     }
 
-    const getRealtimeCollection = (document) => {
-        entityRef
-            .doc(`${document}`)
-            .collection('messages')
-            .onSnapshot((querySnapshot) => {
-                let messagesFireStore = []
-                querySnapshot.docChanges().forEach(change => {
-                    const message = change.doc.data()
-                    if (change.type === "added") {
-                        console.log("New message: ", change.doc.data());
-                        messagesFireStore.push({
-                            ...message,
-                            createdAt: message.createdAt.toDate(),
-                            user: {
-                                _id: message.user._id,
-                                name: message.user.name,
-                                avatar: message.user.avatar,
-                            }
-                        })
-                    }
-                    if (change.type === "modified") {
-                        console.log("Modified message: ", change.doc.data());
-                    }
-                    if (change.type === "removed") {
-                        console.log("Removed message: ", change.doc.data());
+    const getRealtimeCollection = (querySnapshot) => {
+        querySnapshot.docChanges().forEach(change => {
+            const message = change.doc.data()
+            if (change.type === "added") {
+                console.log("New message: ", change.doc.data());
+                messagesFireStore.push({
+                    ...message,
+                    createdAt: message.createdAt.toDate(),
+                    user: {
+                        _id: message.user._id,
+                        name: message.user.name,
+                        avatar: message.user.avatar,
                     }
                 })
-                messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-                console.log('messagesFireStore', messagesFireStore)
-                appendMessages(messagesFireStore, state.userID, state.connectID)
-            }, (error) => {
-                Alert.alert(error)
-            });
+            }
+            if (change.type === "modified") {
+                console.log("Modified message: ", change.doc.data());
+            }
+            if (change.type === "removed") {
+                console.log("Removed message: ", change.doc.data());
+            }
+        })
+        messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        console.log('messagesFireStore', messagesFireStore)
+        appendMessages(messagesFireStore, state.userID, state.connectID)
     }
 
     const getUsersInfo = () => {

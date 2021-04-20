@@ -54,7 +54,9 @@ const RoomScreen = (props) => {
                 getCollectionUsersList(user.id)
             ])
         });
-        return () => focusListener
+        return () => {
+            focusListener
+        }
     }, [])
 
     useEffect(() => {
@@ -106,6 +108,7 @@ const RoomScreen = (props) => {
                     name: user.currentUser,
                     subtitle: user.currentMessage,
                     avatarURL: user.currentAvatar,
+                    userConnect:{}
                 })
             }
         });
@@ -237,14 +240,16 @@ const RoomScreen = (props) => {
             <ListItem.Chevron name="addusergroup" type='antdesign' color="#0a043c" />
         </ListItem>
     )
-
+    console.log(rooms)
+    console.log(usersByChat)
+    console.log(users)
     return (
         <SafeAreaView style={{ flex: 1 }} >
             <Container>
                 <Tabs
                     locked
                     tabBarUnderlineStyle={{ backgroundColor: '#0a043c' }}
-                    // page={2}
+                // page={2}
                 >
                     <Tab
                         heading={
@@ -265,19 +270,21 @@ const RoomScreen = (props) => {
                         textStyle={{ fontSize: scale(12), color: '#000' }}
                         activeTextStyle={{ fontSize: scale(14), color: '#007580' }}
                     >
-                        <FlatList
-                            keyExtractor={keyExtractor}
-                            data={rooms}
-                            extraData={rooms}
-                            renderItem={renderItemRoomChat}
-                        />
+                        {!!rooms && rooms.length > 0 &&
+                            <FlatList
+                                keyExtractor={keyExtractor}
+                                data={rooms}
+                                extraData={rooms}
+                                renderItem={renderItemRoomChat}
+                            />
+                        }
                     </Tab>
                     <Tab
                         heading={
                             <TabHeading style={{ backgroundColor: '#fff' }}>
                                 <Text style={{ color: '#000' }}>{`Bạn bè`}</Text>
-                                <Badge 
-                                value={usersByChat.length}
+                                <Badge
+                                    value={usersByChat.length}
                                     containerStyle={{
                                         position: 'absolute', top: scale(5), right: scale(5),
                                         justifyContent: 'center', alignItems: 'center'
@@ -292,12 +299,14 @@ const RoomScreen = (props) => {
                         textStyle={{ fontSize: 12, color: '#000' }}
                         activeTextStyle={{ fontSize: 14, color: '#0278ae' }}
                     >
-                        <FlatList
-                            keyExtractor={keyExtractor}
-                            data={usersByChat}
-                            extraData={usersByChat}
-                            renderItem={renderItemChat}
-                        />
+                        {!!usersByChat && usersByChat.length > 0 &&
+                            <FlatList
+                                keyExtractor={keyExtractor}
+                                data={usersByChat}
+                                extraData={usersByChat}
+                                renderItem={renderItemChat}
+                            />
+                        }
                     </Tab>
                     <Tab
                         heading={
@@ -319,12 +328,14 @@ const RoomScreen = (props) => {
                         textStyle={{ fontSize: 12, color: '#000' }}
                         activeTextStyle={{ fontSize: 14, color: '#fdbaf8' }}
                     >
-                        <FlatList
-                            keyExtractor={keyExtractor}
-                            data={users}
-                            extraData={users}
-                            renderItem={renderItemUser}
-                        />
+                        {!!users && users.length > 0 &&
+                            <FlatList
+                                keyExtractor={keyExtractor}
+                                data={users}
+                                extraData={users}
+                                renderItem={renderItemUser}
+                            />
+                        }
                     </Tab>
                 </Tabs>
             </Container>

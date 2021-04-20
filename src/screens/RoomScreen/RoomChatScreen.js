@@ -9,6 +9,7 @@ import ActionSheet, {
     addHasReachedTopListener,
     removeHasReachedTopListener,
 } from "react-native-actions-sheet";
+import TouchableScale from 'react-native-touchable-scale';
 
 import { firebase } from '../../firebase/config'
 import { notificationManager } from 'utils/NotificationManager'
@@ -103,7 +104,14 @@ const RoomChatScreen = ({ route, navigation }) => {
 
     useEffect(() => {
         if (!!state.userID && !!state.roomID) {
-            Promise.all([getRealtimeCollection(), getCollectionUsersExistsList(), getCollectionUsersList()])
+            Promise.all([getCollectionUsersExistsList(), getCollectionUsersList()])
+            const query = entityRef
+                .doc(`${state.roomID}`)
+                .collection('messages')
+            const unsubscribe = query.onSnapshot(getRealtimeCollection, err => Alert.alert(error));
+            return () => {
+                unsubscribe();
+            }
         }
     }, [state.userID, state.roomID])
 
@@ -114,40 +122,32 @@ const RoomChatScreen = ({ route, navigation }) => {
         }
     }, [users, usersExists])
 
-    const getRealtimeCollection = () => {
-        entityRef
-            .doc(`${state.roomID}`)
-            .collection('messages')
-            .onSnapshot((querySnapshot) => {
-
-                let messagesFireStore = []
-                querySnapshot.docChanges().forEach(change => {
-                    const message = change.doc.data()
-                    if (change.type === "added") {
-                        console.log("New message: ", change.doc.data());
-                        messagesFireStore.push({
-                            ...message,
-                            createdAt: message.createdAt.toDate(),
-                            user: {
-                                _id: message.user._id,
-                                name: message.user.name,
-                                avatar: message.user.avatar,
-                            }
-                        })
-                    }
-                    if (change.type === "modified") {
-                        console.log("Modified message: ", change.doc.data());
-                    }
-                    if (change.type === "removed") {
-                        console.log("Removed message: ", change.doc.data());
+    const getRealtimeCollection = (querySnapshot) => {
+        let messagesFireStore = []
+        querySnapshot.docChanges().forEach(change => {
+            const message = change.doc.data()
+            if (change.type === "added") {
+                console.log("New message: ", change.doc.data());
+                messagesFireStore.push({
+                    ...message,
+                    createdAt: message.createdAt.toDate(),
+                    user: {
+                        _id: message.user._id,
+                        name: message.user.name,
+                        avatar: message.user.avatar,
                     }
                 })
-                messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-                console.log('messagesFireStore', messagesFireStore)
-                appendMessages(messagesFireStore, state.userID, state.roomID)
-            }, (error) => {
-                Alert.alert(error)
-            });
+            }
+            if (change.type === "modified") {
+                console.log("Modified message: ", change.doc.data());
+            }
+            if (change.type === "removed") {
+                console.log("Removed message: ", change.doc.data());
+            }
+        })
+        messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        console.log('messagesFireStore', messagesFireStore)
+        appendMessages(messagesFireStore, state.userID, state.roomID)
     }
 
     const getCollectionUsersExistsList = async () => {
@@ -321,56 +321,82 @@ const RoomChatScreen = ({ route, navigation }) => {
                     style={styles.scrollview}>
                     <View style={styles.containerActionSheet}>
                         {usersExists.map((item, index) => (
-                            <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', paddingVertical: scale(10) }}>
-                                <Text style={{ color: '#0e9aa7', padding: scale(5), width: '80%' }}>{item.email}</Text>
-                                <TouchableOpacity
-                                    key={index}
-                                    style={{
-                                        width: scale(20),
-                                        height: scale(20),
-                                        borderRadius: scale(10),
-                                        backgroundColor: '#fe8a71',
-                                        justifyContent: 'center',
-                                        alignItems: 'center'
-                                    }}
-                                    onPress={() => {
-                                        actionSheetRef.current?.hide();
-                                        onRemoveUser(item)
-                                    }}
-                                >
-                                    <AntDesignIcon
-                                        name='minus'
-                                        size={14}
-                                        color='#0e9aa7'
-                                    />
-                                </TouchableOpacity>
-                            </View>
+                            <TouchableScale
+                                // style={style.button}
+                                // onPress={() => selectPhotoTapped(item, index)}
+                                activeScale={0.9}
+                            >
+                                <View style={{
+                                    backgroundColor: '#fe8a71', width: '100%',
+                                    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
+                                    paddingVertical: scale(10),
+                                    marginVertical: scale(5),
+                                    borderRadius: scale(10)
+                                }}>
+                                    <Text style={{ color: '#0e9aa7', padding: scale(5), width: '80%' }}>{item.email}</Text>
+                                    <TouchableScale
+                                        activeScale={2}
+                                        key={index}
+                                        style={{
+                                            // width: scale(20),
+                                            // height: scale(20),
+                                            // borderRadius: scale(10),
+                                            // backgroundColor: '#fe8a71',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}
+                                        onPress={() => {
+                                            actionSheetRef.current?.hide();
+                                            onRemoveUser(item)
+                                        }}
+                                    >
+                                        <AntDesignIcon
+                                            name='minus'
+                                            size={scale(16)}
+                                            color='#0e9aa7'
+                                        />
+                                    </TouchableScale>
+                                </View>
+                            </TouchableScale>
                         ))}
                         {otherUsers.map((item, index) => (
-                            <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', paddingVertical: scale(10) }}>
-                                <Text style={{ width: '80%', color: '#4a4e4d', padding: scale(5) }}>{item.email}</Text>
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        actionSheetRef.current?.hide();
-                                        onAddUser(item)
-                                    }}
-                                    key={index}
-                                    style={{
-                                        width: scale(20),
-                                        height: scale(20),
-                                        borderRadius: scale(10),
-                                        backgroundColor: '#f6cd61',
-                                        justifyContent: 'center',
-                                        alignItems: 'center'
-                                    }}
-                                >
-                                    <AntDesignIcon
-                                        name='plus'
-                                        size={14}
-                                        color='#0e9aa7'
-                                    />
-                                </TouchableOpacity>
-                            </View>
+                            <TouchableScale
+                                // style={style.button}
+                                // onPress={() => selectPhotoTapped(item, index)}
+                                activeScale={0.9}
+                            >
+                                <View style={{
+                                    backgroundColor: '#f6cd61',
+                                    width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
+                                    paddingVertical: scale(10),
+                                    marginVertical: scale(5),
+                                    borderRadius: scale(10)
+                                }}>
+                                    <Text style={{ width: '80%', color: '#4a4e4d', padding: scale(5) }}>{item.email}</Text>
+                                    <TouchableScale
+                                        activeScale={2}
+                                        onPress={() => {
+                                            actionSheetRef.current?.hide();
+                                            onAddUser(item)
+                                        }}
+                                        key={index}
+                                        style={{
+                                            // width: scale(20),
+                                            // height: scale(20),
+                                            // borderRadius: scale(10),
+                                            backgroundColor: '#f6cd61',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}
+                                    >
+                                        <AntDesignIcon
+                                            name='plus'
+                                            size={scale(16)}
+                                            color='#0e9aa7'
+                                        />
+                                    </TouchableScale>
+                                </View>
+                            </TouchableScale>
                         ))}
                     </View>
                     {/*  Add a Small Footer at Bottom */}

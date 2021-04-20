@@ -99,48 +99,48 @@ const RoomChatScreen = ({ route, navigation }) => {
     }, [state.connectID])
 
     useEffect(() => {
+        // let unsubscribe
         if (!!state.userConnect && Object.keys(state.userConnect).length > 0) {
             navigation.setOptions({
                 headerTitle: () => <HeaderTitle title={`${state.userConnect.email}`} />,
             });
-            getRealtimeCollection()
+            const query = entityChatRef
+                .doc(`${state.documentID}`)
+                .collection('messages')
+            const unsubscribe = query.onSnapshot(getRealtimeCollection, err => Alert.alert(error));
+            return () => {
+                unsubscribe();
+            }
         }
     }, [state.userConnect])
 
-    const getRealtimeCollection = () => {
-        entityChatRef
-            .doc(`${state.documentID}`)
-            .collection('messages')
-            .onSnapshot((querySnapshot) => {
-                let messagesFireStore = []
-                querySnapshot.docChanges().forEach(change => {
-                    const message = change.doc.data()
-                    if (change.type === "added") {
-                        console.log("New message: ", change.doc.data());
-                        messagesFireStore.push({
-                            ...message,
-                            createdAt: message.createdAt.toDate(),
-                            user: {
-                                _id: message.user._id,
-                                name: message.user.name,
-                                avatar: message.user.avatar,
-                            }
-                        })
-                    }
-                    if (change.type === "modified") {
-                        console.log("Modified message: ", change.doc.data());
-                    }
-                    if (change.type === "removed") {
-                        console.log("Removed message: ", change.doc.data());
+    const getRealtimeCollection = (querySnapshot) => {
+        let messagesFireStore = []
+        querySnapshot.docChanges().forEach(change => {
+            const message = change.doc.data()
+            if (change.type === "added") {
+                console.log("New message: ", change.doc.data());
+                messagesFireStore.push({
+                    ...message,
+                    createdAt: message.createdAt.toDate(),
+                    user: {
+                        _id: message.user._id,
+                        name: message.user.name,
+                        avatar: message.user.avatar,
                     }
                 })
-                messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-                console.log('messagesFireStore', messagesFireStore)
-                console.log('state.userConnect', state.userConnect)
-                appendMessages(messagesFireStore, state.user, state.userConnect)
-            }, (error) => {
-                Alert.alert(error)
-            });
+            }
+            if (change.type === "modified") {
+                console.log("Modified message: ", change.doc.data());
+            }
+            if (change.type === "removed") {
+                console.log("Removed message: ", change.doc.data());
+            }
+        })
+        messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        console.log('messagesFireStore', messagesFireStore)
+        console.log('state.userConnect', state.userConnect)
+        appendMessages(messagesFireStore, state.user, state.userConnect)
     }
 
     const getUsersInfo = async () => {
