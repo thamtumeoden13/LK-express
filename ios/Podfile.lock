@@ -110,6 +110,10 @@ PODS:
     - GoogleUtilities/Logger
   - JWT (3.0.0-beta.12):
     - Base64 (~> 1.1.2)
+  - lottie-ios (3.1.8)
+  - lottie-react-native (3.5.0):
+    - lottie-ios (~> 3.1.8)
+    - React
   - nanopb (2.30907.0):
     - nanopb/decode (= 2.30907.0)
     - nanopb/encode (= 2.30907.0)
@@ -449,6 +453,8 @@ DEPENDENCIES:
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - lottie-ios (from `../node_modules/lottie-ios`)
+  - lottie-react-native (from `../node_modules/lottie-react-native`)
   - Permission-BluetoothPeripheral (from `../node_modules/react-native-permissions/ios/BluetoothPeripheral.podspec`)
   - Permission-Calendars (from `../node_modules/react-native-permissions/ios/Calendars.podspec`)
   - Permission-Camera (from `../node_modules/react-native-permissions/ios/Camera.podspec`)
@@ -545,6 +551,10 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/Folly.podspec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
+  lottie-ios:
+    :path: "../node_modules/lottie-ios"
+  lottie-react-native:
+    :path: "../node_modules/lottie-react-native"
   Permission-BluetoothPeripheral:
     :path: "../node_modules/react-native-permissions/ios/BluetoothPeripheral.podspec"
   Permission-Calendars:
@@ -673,6 +683,8 @@ SPEC CHECKSUMS:
   GoogleDataTransport: b006084b73915a42c28a3466961a4edda3065da6
   GoogleUtilities: abda45f519bc4073aa1171d2f8742108def46017
   JWT: 9b5c05abbcc1a0e69c3c91e1655b3387fc7e581d
+  lottie-ios: 48fac6be217c76937e36e340e2d09cf7b10b7f5f
+  lottie-react-native: 1fb4ce21d6ad37dab8343eaff8719df76035bd93
   nanopb: 59221d7f958fb711001e6a449489542d92ae113e
   Permission-BluetoothPeripheral: 2c8ce842373ae7162e41428d66831247fdd660c5
   Permission-Calendars: a451703f55ae46a53be140407b8ae18dcfaf89da

@@ -6,11 +6,11 @@ import AntDesignIcons from 'react-native-vector-icons/AntDesign'
 import IonIcons from 'react-native-vector-icons/Ionicons'
 import AsyncStorage from '@react-native-community/async-storage';
 
-import styles from './styles';
 import { AuthContext } from '../../utils'
 import { notificationManager } from '../../utils/NotificationManager'
-import { moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import { firebase } from '../../firebase/config'
+import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
+import styles from './styles';
 
 const HomeScreen = (props) => {
 
@@ -28,7 +28,8 @@ const HomeScreen = (props) => {
         connectUser: '',
         level: '',
         user: {},
-        userConnect: {}
+        userConnect: {},
+        isDataFetched: false
     })
 
     useEffect(() => {
@@ -235,7 +236,6 @@ const HomeScreen = (props) => {
                     source={!!state.avatarURL ? { uri: state.avatarURL } : require('../../../assets/bootsplash_logo.png')}
                     style={{ width: moderateScale(100), height: moderateScale(100), alignSelf: 'center' }}
                 />
-                {/* <Text style={{ alignSelf: 'center' }}>{state.userID}</Text> */}
                 <Text style={{ alignSelf: 'center' }}>{state.email}</Text>
             </View>
             {state.level == 1 && <View style={{ marginHorizontal: moderateScale(32) }}>
@@ -265,7 +265,6 @@ const HomeScreen = (props) => {
                 </View>
             </View>
             }
-
             <View style={{ marginHorizontal: moderateScale(32) }}>
                 <Text style={styles.header}>{`Kết nối`}</Text>
                 <View style={{

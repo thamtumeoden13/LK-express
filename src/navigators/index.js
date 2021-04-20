@@ -1,10 +1,12 @@
 import React, { useReducer, useEffect, useRef, useState } from 'react'
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView, Keyboard, Alert } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack'
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AsyncStorage from '@react-native-community/async-storage';
+import LottieView from 'lottie-react-native';
 
 import {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
@@ -20,6 +22,7 @@ import DrawerContentComponents from './DrawerContentComponents'
 
 import { AuthContext } from '../utils'
 import { firebase } from '../firebase/config'
+import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 
 const StackAuth = createStackNavigator();
 
@@ -139,7 +142,22 @@ function TabStack() {
                 options={{
                     tabBarLabel: 'Home',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="home" color={color} size={size} />
+                        // <MaterialCommunityIcons name="home" color={color} size={size} />
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <LottieView
+                                source={require('@assets/animations/home.json')}
+                                colorFilters={[{
+                                    keypath: "button",
+                                    color: "#F00000"
+                                }, {
+                                    keypath: "Sending Loader",
+                                    color: "#F00000"
+                                }]}
+                                style={{ width: scale(30), height: scale(30), justifyContent: 'center' }}
+                                autoPlay
+                                loop
+                            />
+                        </View>
                     )
                 }}
             />
@@ -147,7 +165,22 @@ function TabStack() {
                 options={{
                     tabBarLabel: 'Phòng chat',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="battlenet" color={color} size={size} />
+                        // <MaterialCommunityIcons name="battlenet" color={color} size={size} />
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <LottieView
+                                source={require('@assets/animations/chat.json')}
+                                colorFilters={[{
+                                    keypath: "button",
+                                    color: "#F00000"
+                                }, {
+                                    keypath: "Sending Loader",
+                                    color: "#F00000"
+                                }]}
+                                style={{ width: scale(30), height: scale(30), justifyContent: 'center' }}
+                                autoPlay
+                                loop
+                            />
+                        </View>
                     ),
                     tabBarBadge: 3,
                     tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
@@ -157,7 +190,22 @@ function TabStack() {
                 options={{
                     tabBarLabel: 'Danh mục',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="cart-outline" color={color} size={size} />
+                        // <MaterialCommunityIcons name="cart-outline" color={color} size={size} />
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <LottieView
+                                source={require('@assets/animations/products.json')}
+                                colorFilters={[{
+                                    keypath: "button",
+                                    color: "#F00000"
+                                }, {
+                                    keypath: "Sending Loader",
+                                    color: "#F00000"
+                                }]}
+                                style={{ width: scale(30), height: scale(30), justifyContent: 'center' }}
+                                autoPlay
+                                loop
+                            />
+                        </View>
                     ),
                     tabBarBadge: 5,
                     tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
@@ -167,7 +215,22 @@ function TabStack() {
                 options={{
                     tabBarLabel: 'Cá nhân',
                     tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="account-settings-outline" color={color} size={size} />
+                        // <MaterialCommunityIcons name="account-settings-outline" color={color} size={size} />
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <LottieView
+                                source={require('@assets/animations/profile.json')}
+                                colorFilters={[{
+                                    keypath: "button",
+                                    color: "#F00000"
+                                }, {
+                                    keypath: "Sending Loader",
+                                    color: "#F00000"
+                                }]}
+                                style={{ width: scale(30), height: scale(30), justifyContent: 'center' }}
+                                autoPlay
+                                loop
+                            />
+                        </View>
                     ),
                 }}
             />

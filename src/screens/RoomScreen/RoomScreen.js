@@ -7,16 +7,15 @@ import { ListItem, Avatar, Badge } from 'react-native-elements';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
 import { StackActions } from '@react-navigation/native';
+import LottieView from 'lottie-react-native';
 import format from 'date-fns/format'
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import { vi } from 'date-fns/locale/vi'
 
-
 import { firebase } from '../../firebase/config'
 import { notificationManager } from '../../utils/NotificationManager'
-
+import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import styles from './styles';
-import { scale, verticalScale } from 'utils/scaleSize';
 
 const RoomScreen = (props) => {
     const db = firebase.firestore()
@@ -30,7 +29,10 @@ const RoomScreen = (props) => {
         userName: '',
         isActivedLocalPushNotify: false,
         user: {},
-        page: 0
+        page: 0,
+        isDataFetchedRoomList: false,
+        isDataFetchedChatList: false,
+        isDataFetchedUserList: false,
     })
     const [rooms, setRooms] = useState([])
     const [usersByChat, setUsersByChat] = useState([])
@@ -62,29 +64,15 @@ const RoomScreen = (props) => {
             /////////////////
             const unsubscribeChatList = entityChatRef.onSnapshot(getRealtimeCollectionChatList, err => Alert.alert(error))
             /////////////////
-            const queryUsersList = entityUserRef.where("id", "!=", state.userID)
-            const unsubscribeUsersList = queryUsersList.onSnapshot(getRealtimeCollectionUsersList, err => Alert.alert(error))
+            const queryUserList = entityUserRef.where("id", "!=", state.userID)
+            const unsubscribeUserList = queryUserList.onSnapshot(getRealtimeCollectionUserList, err => Alert.alert(error))
             return () => {
                 unsubscribeRoomList()
                 unsubscribeChatList()
-                unsubscribeUsersList()
+                unsubscribeUserList()
             }
         }
     }, [state.userID])
-
-    // useEffect(() => {
-    //     if (!!users && users.length > 0 && !!usersByChat && usersByChat.length > 0) {
-    //         usersByChat.map(e => {
-    //             const find = users.find(f => e.connectID == f.id)
-    //             e.userConnect = find
-    //             e.connectName = find.email
-    //             e.connectAvatarURL = find.avatarURL
-    //             return e
-    //         })
-    //         setUsersByChat(usersByChat)
-    //         console.log('usersByChat', usersByChat)
-    //     }
-    // }, [users, usersByChat])
 
     const getRealtimeCollectionRoomList = async (querySnapshot) => {
         const reads = querySnapshot.docs.map(async (doc) => {
@@ -103,6 +91,7 @@ const RoomScreen = (props) => {
         const rooms = result.filter(e => { return !!e && Object.keys(e).length > 0 });
         setRooms(rooms)
         console.log('rooms', rooms)
+        setState(prev => { return { ...prev, isDataFetchedRoomList: true } })
     }
 
     const getRealtimeCollectionChatList = async (querySnapshot) => {
@@ -127,7 +116,6 @@ const RoomScreen = (props) => {
                 })
             }
         });
-        console.log('getCollectionChatList', UsersByChat,users)
         UsersByChat.map(e => {
             const find = users.find(f => e.connectID == f.id)
             e.userConnect = find
@@ -136,15 +124,17 @@ const RoomScreen = (props) => {
             return e
         })
         setUsersByChat(UsersByChat)
+        setState(prev => { return { ...prev, isDataFetchedChatList: true } })
     }
 
-    const getRealtimeCollectionUsersList = async (querySnapshot) => {
+    const getRealtimeCollectionUserList = async (querySnapshot) => {
         let users = querySnapshot.docs.map((doc) => {
             const user = doc.data()
             return { ...user, doc: doc.id }
         })
         console.log('users', users)
         setUsers(users)
+        setState(prev => { return { ...prev, isDataFetchedUserList: true } })
     }
 
     const onHandlerJoinRoom = (roomID) => {
@@ -263,6 +253,26 @@ const RoomScreen = (props) => {
             <ListItem.Chevron name="addusergroup" type='antdesign' color="#0a043c" />
         </ListItem>
     )
+
+    if (!state.isDataFetchedRoomList || !state.isDataFetchedChatList || !state.isDataFetchedUserList) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <LottieView
+                    source={require('@assets/animations/890-loading-animation.json')}
+                    colorFilters={[{
+                        keypath: "button",
+                        color: "#F00000"
+                    }, {
+                        keypath: "Sending Loader",
+                        color: "#F00000"
+                    }]}
+                    style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+                    autoPlay
+                    loop
+                />
+            </View>
+        )
+    }
 
     return (
         <SafeAreaView style={{ flex: 1 }} >

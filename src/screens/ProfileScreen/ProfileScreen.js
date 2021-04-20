@@ -5,9 +5,11 @@ import AsyncStorage from '@react-native-community/async-storage';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
 import { ListItem, Avatar, Icon } from 'react-native-elements';
+import LottieView from 'lottie-react-native';
 
 import { firebase } from '../../firebase/config'
 import { notificationManager } from '../../utils/NotificationManager'
+import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 
 import styles from './styles';
 
