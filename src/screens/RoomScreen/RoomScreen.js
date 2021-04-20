@@ -48,34 +48,48 @@ const RoomScreen = (props) => {
                     user: user
                 }
             })
-            Promise.all([
-                getCollectionRoomList(user.id),
-                getCollectionChatList(user.id),
-                getCollectionUsersList(user.id)
-            ])
         });
         return () => {
             focusListener
         }
     }, [])
 
-    useEffect(() => {
-        if (!!users && !!usersByChat) {
-            usersByChat.map(e => {
-                const find = users.find(f => e.connectID == f.id)
-                e.userConnect = find
-                return e
-            })
-            setUsersByChat(usersByChat)
-            console.log('usersByChat', usersByChat)
-        }
-    }, [users, usersByChat])
 
-    const getCollectionRoomList = async (userID) => {
-        const querySnapshot = await entityRef.get()
+    useEffect(() => {
+        if (!!state.userID) {
+            /////////////////
+            const unsubscribeRoomList = entityRef.onSnapshot(getRealtimeCollectionRoomList, err => Alert.alert(error))
+            /////////////////
+            const unsubscribeChatList = entityChatRef.onSnapshot(getRealtimeCollectionChatList, err => Alert.alert(error))
+            /////////////////
+            const queryUsersList = entityUserRef.where("id", "!=", state.userID)
+            const unsubscribeUsersList = queryUsersList.onSnapshot(getRealtimeCollectionUsersList, err => Alert.alert(error))
+            return () => {
+                unsubscribeRoomList()
+                unsubscribeChatList()
+                unsubscribeUsersList()
+            }
+        }
+    }, [state.userID])
+
+    // useEffect(() => {
+    //     if (!!users && users.length > 0 && !!usersByChat && usersByChat.length > 0) {
+    //         usersByChat.map(e => {
+    //             const find = users.find(f => e.connectID == f.id)
+    //             e.userConnect = find
+    //             e.connectName = find.email
+    //             e.connectAvatarURL = find.avatarURL
+    //             return e
+    //         })
+    //         setUsersByChat(usersByChat)
+    //         console.log('usersByChat', usersByChat)
+    //     }
+    // }, [users, usersByChat])
+
+    const getRealtimeCollectionRoomList = async (querySnapshot) => {
         const reads = querySnapshot.docs.map(async (doc) => {
             const room = doc.data()
-            const querySnapshot2 = await entityRef.doc(doc.id).collection('users').where("id", "==", userID).get()
+            const querySnapshot2 = await entityRef.doc(doc.id).collection('users').where("id", "==", state.userID).get()
             if (querySnapshot2.docs.length > 0) {
                 return {
                     ...room,
@@ -91,33 +105,40 @@ const RoomScreen = (props) => {
         console.log('rooms', rooms)
     }
 
-    const getCollectionChatList = async (userID) => {
-        const querySnapshot = await entityChatRef.get()
-        let users = []
+    const getRealtimeCollectionChatList = async (querySnapshot) => {
+        let UsersByChat = []
         querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
             const user = doc.data()
             const docID = doc.id
             const querySnapshot2 = doc.id.split('|')
-            if (querySnapshot2.includes(userID)) {
-                const connectID = querySnapshot2.find(e => e != userID)
-                users.push({
+            if (querySnapshot2.includes(state.userID)) {
+                const connectID = querySnapshot2.find(e => e != state.userID)
+                UsersByChat.push({
                     ...user,
                     docID: docID,
-                    connectID: connectID,
                     name: user.currentUser,
                     subtitle: user.currentMessage,
                     avatarURL: user.currentAvatar,
-                    userConnect:{}
+                    userConnect: {},
+                    connectID: connectID,
+                    connectName: '',
+                    connectAvatarURL: '',
                 })
             }
         });
-        console.log('getCollectionChatList', users)
-        setUsersByChat(users)
+        console.log('getCollectionChatList', UsersByChat,users)
+        UsersByChat.map(e => {
+            const find = users.find(f => e.connectID == f.id)
+            e.userConnect = find
+            e.connectName = find.email
+            e.connectAvatarURL = find.avatarURL
+            return e
+        })
+        setUsersByChat(UsersByChat)
     }
 
-    const getCollectionUsersList = async (userID) => {
-        const querySnapshot = await entityUserRef.where("id", "!=", userID).get()
+    const getRealtimeCollectionUsersList = async (querySnapshot) => {
         let users = querySnapshot.docs.map((doc) => {
             const user = doc.data()
             return { ...user, doc: doc.id }
@@ -137,7 +158,6 @@ const RoomScreen = (props) => {
         const pushAction = StackActions.push('ChatDetail', { id: docID })
         props.navigation.dispatch(pushAction)
     }
-
 
     const keyExtractor = (item, index) => index.toString()
 
@@ -178,39 +198,42 @@ const RoomScreen = (props) => {
         </ListItem>
     )
 
-    const renderItemChat = ({ item }) => (
-        <ListItem
-            Component={TouchableScale}
-            friction={90} //
-            tension={100} // These props are passed to the parent component (here TouchableScale)
-            activeScale={0.95} //
-            linearGradientProps={{
-                colors: ['#0278ae', '#0278ae'],
-                start: { x: 1, y: 0 },
-                end: { x: 0.2, y: 0 },
-            }}
-            ViewComponent={LinearGradient} // Only if no expo
-            style={{ marginTop: verticalScale(5) }}
-            containerStyle={{ paddingVertical: verticalScale(10) }}
-            onPress={() => onHandlerConnectRoom(item.docID)}
-        >
-            <Avatar rounded source={{ uri: item.userConnect.avatarURL }} />
-            <ListItem.Content>
-                <ListItem.Title style={{ color: '#fff', fontWeight: 'bold' }}>
-                    {item.userConnect.email}
-                </ListItem.Title>
-                <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
-                    <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(14) }}>
-                        {`${item.currentMessage}`}
-                    </ListItem.Subtitle>
-                    <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(10) }}>
-                        {` • ${format(item.currentCreatedAt.toDate(), 'yyyy-MM-dd HH:mm', { locale: vi })}`}
-                    </ListItem.Subtitle>
-                </View>
-            </ListItem.Content>
-            <ListItem.Chevron color="#fff" />
-        </ListItem>
-    )
+    const renderItemChat = ({ item }) => {
+        console.log('item.userConnect', item.connectAvatarURL)
+        return (
+            <ListItem
+                Component={TouchableScale}
+                friction={90} //
+                tension={100} // These props are passed to the parent component (here TouchableScale)
+                activeScale={0.95} //
+                linearGradientProps={{
+                    colors: ['#0278ae', '#0278ae'],
+                    start: { x: 1, y: 0 },
+                    end: { x: 0.2, y: 0 },
+                }}
+                ViewComponent={LinearGradient} // Only if no expo
+                style={{ marginTop: verticalScale(5) }}
+                containerStyle={{ paddingVertical: verticalScale(10) }}
+                onPress={() => onHandlerConnectRoom(item.docID)}
+            >
+                <Avatar rounded source={{ uri: item.connectAvatarURL }} />
+                <ListItem.Content>
+                    <ListItem.Title style={{ color: '#fff', fontWeight: 'bold' }}>
+                        {item.connectName}
+                    </ListItem.Title>
+                    <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+                        <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(14) }}>
+                            {`${item.currentMessage}`}
+                        </ListItem.Subtitle>
+                        <ListItem.Subtitle style={{ color: '#999999', fontStyle: 'italic', fontSize: scale(10) }}>
+                            {` • ${format(item.currentCreatedAt.toDate(), 'yyyy-MM-dd HH:mm', { locale: vi })}`}
+                        </ListItem.Subtitle>
+                    </View>
+                </ListItem.Content>
+                <ListItem.Chevron color="#fff" />
+            </ListItem>
+        )
+    }
 
     const renderItemUser = ({ item }) => (
         <ListItem
@@ -240,9 +263,7 @@ const RoomScreen = (props) => {
             <ListItem.Chevron name="addusergroup" type='antdesign' color="#0a043c" />
         </ListItem>
     )
-    console.log(rooms)
-    console.log(usersByChat)
-    console.log(users)
+
     return (
         <SafeAreaView style={{ flex: 1 }} >
             <Container>
