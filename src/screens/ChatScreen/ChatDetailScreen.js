@@ -9,6 +9,8 @@ import ActionSheet, {
     addHasReachedTopListener,
     removeHasReachedTopListener,
 } from "react-native-actions-sheet";
+import Geolocation from 'react-native-geolocation-service';
+import { PERMISSIONS, request } from 'react-native-permissions';
 
 import { firebase } from '../../firebase/config'
 import { notificationManager } from 'utils/NotificationManager'
@@ -55,7 +57,11 @@ const RoomChatScreen = ({ route, navigation }) => {
         isActivedLocalPushNotify: false,
         level: '',
         user: {},
-        userConnect: {}
+        userConnect: {},
+        actionSheetType: 0,
+        latitude: null,//10.851836,
+        longitude: null,//106.797520
+        geolocation: '',
     })
     const [messages, setMessages] = useState([])
 
@@ -79,6 +85,7 @@ const RoomChatScreen = ({ route, navigation }) => {
                 }
             })
         })
+        requestLocationPermission()
         addHasReachedTopListener(onHasReachedTop);
         return () => {
             removeHasReachedTopListener(onHasReachedTop);
@@ -88,7 +95,7 @@ const RoomChatScreen = ({ route, navigation }) => {
     useEffect(() => {
         navigation.setOptions({
             headerTitle: () => null,// <HeaderTitle title={`${state.connectID}`} />,
-            headerRight: () => <ActionSheetIcon navigation={navigation} onOpen={() => actionSheetRef.current?.show()} />,
+            headerRight: () => null // <ActionSheetIcon navigation={navigation} onOpen={() => actionSheetRef.current?.show()} />,
         });
     }, [navigation])
 
@@ -201,6 +208,7 @@ const RoomChatScreen = ({ route, navigation }) => {
             authorID: state.userID,
             createdAt: createdAt,
             text: text,
+            geolocation: state.geolocation,
             user: {
                 _id: state.userID,
                 name: state.userName,
@@ -220,6 +228,49 @@ const RoomChatScreen = ({ route, navigation }) => {
     const handlerLongPressMessage = (action, message) => {
         console.log('handlerLongPressMessage', message)
         actionSheetRef.current?.show()
+    }
+
+    const requestLocationPermission = async () => {
+        if (Platform.OS === 'ios') {
+            const response = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+            if (response === 'granted') {
+                localCurrentPosition()
+            }
+        }
+        else {
+            const response = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+            if (response === 'granted') {
+                localCurrentPosition()
+            }
+        }
+    }
+
+    const localCurrentPosition = () => {
+        Geolocation.getCurrentPosition(
+            (position) => {
+                setState(prev => {
+                    return {
+                        ...prev,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        geolocation: `${position.coords.latitude},${position.coords.longitude}`,
+                    }
+                })
+                console.log('geolocation', `${position.coords.latitude},${position.coords.longitude}`)
+            },
+            (error) => {
+                setState(prev => {
+                    return {
+                        ...prev,
+                        latitude: null,//10.851836,
+                        longitude: null,//106.797520
+                        geolocation: state.geolocation,
+                    }
+                })
+                console.log('geolocation-error', error)
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
     }
 
     const options = [

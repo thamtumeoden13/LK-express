@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef, useLayoutEffect } from 'react'
 import {
     FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity,
-    View, KeyboardAvoidingView, Alert, ScrollView
+    View, KeyboardAvoidingView, Alert, ScrollView, Platform
 } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -10,6 +10,8 @@ import ActionSheet, {
     removeHasReachedTopListener,
 } from "react-native-actions-sheet";
 import TouchableScale from 'react-native-touchable-scale';
+import Geolocation from 'react-native-geolocation-service';
+import { PERMISSIONS, request } from 'react-native-permissions';
 
 import { firebase } from '../../firebase/config'
 import { notificationManager } from 'utils/NotificationManager'
@@ -57,7 +59,11 @@ const RoomChatScreen = ({ route, navigation }) => {
         userName: '',
         avatarURL: '',
         isActivedLocalPushNotify: false,
-        level: ''
+        level: '',
+        actionSheetType: 0,
+        latitude: null,//10.851836,
+        longitude: null,//106.797520
+        geolocation: '',
     })
     const [usersExists, setUsersExists] = useState([])
     const [users, setUsers] = useState([])
@@ -80,6 +86,7 @@ const RoomChatScreen = ({ route, navigation }) => {
                 }
             })
         })
+        requestLocationPermission()
         addHasReachedTopListener(onHasReachedTop);
         return () => {
             removeHasReachedTopListener(onHasReachedTop);
@@ -217,6 +224,7 @@ const RoomChatScreen = ({ route, navigation }) => {
             authorID: state.userID,
             createdAt: createdAt,
             text: text,
+            geolocation: state.geolocation,
             user: {
                 _id: state.userID,
                 name: state.userName,
@@ -261,10 +269,52 @@ const RoomChatScreen = ({ route, navigation }) => {
 
     }
 
-
     const handlerLongPressMessage = (action, message) => {
         console.log('handlerLongPressMessage', message)
         actionSheetRef.current?.show()
+    }
+
+    const requestLocationPermission = async () => {
+        if (Platform.OS === 'ios') {
+            const response = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+            if (response === 'granted') {
+                localCurrentPosition()
+            }
+        }
+        else {
+            const response = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+            if (response === 'granted') {
+                localCurrentPosition()
+            }
+        }
+    }
+
+    const localCurrentPosition = () => {
+        Geolocation.getCurrentPosition(
+            (position) => {
+                setState(prev => {
+                    return {
+                        ...prev,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        geolocation: `${position.coords.latitude},${position.coords.longitude}`,
+                    }
+                })
+                console.log('geolocation', `${position.coords.latitude},${position.coords.longitude}`)
+            },
+            (error) => {
+                setState(prev => {
+                    return {
+                        ...prev,
+                        latitude: null,//10.851836,
+                        longitude: null,//106.797520
+                        geolocation: state.geolocation,
+                    }
+                })
+                console.log('geolocation-error', error)
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
     }
 
     const options = [
@@ -305,7 +355,8 @@ const RoomChatScreen = ({ route, navigation }) => {
                 bounciness={4}
                 gestureEnabled={true}
                 onClose={onClose}
-                defaultOverlayOpacity={0.3}>
+                defaultOverlayOpacity={0.3}
+            >
                 <ScrollView
                     ref={scrollViewRef}
                     nestedScrollEnabled={true}
@@ -318,7 +369,8 @@ const RoomChatScreen = ({ route, navigation }) => {
                     onMomentumScrollEnd={() =>
                         actionSheetRef.current?.handleChildScrollEnd()
                     }
-                    style={styles.scrollview}>
+                    style={styles.scrollview}
+                >
                     <View style={styles.containerActionSheet}>
                         {usersExists.map((item, index) => (
                             <TouchableScale

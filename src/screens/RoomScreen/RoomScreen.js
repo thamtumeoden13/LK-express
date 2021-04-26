@@ -61,18 +61,27 @@ const RoomScreen = (props) => {
         if (!!state.userID) {
             /////////////////
             const unsubscribeRoomList = entityRef.onSnapshot(getRealtimeCollectionRoomList, err => Alert.alert(error))
-            /////////////////
-            const unsubscribeChatList = entityChatRef.onSnapshot(getRealtimeCollectionChatList, err => Alert.alert(error))
+            // /////////////////
+            // const unsubscribeChatList = entityChatRef.onSnapshot(getRealtimeCollectionChatList, err => Alert.alert(error))
             /////////////////
             const queryUserList = entityUserRef.where("id", "!=", state.userID)
             const unsubscribeUserList = queryUserList.onSnapshot(getRealtimeCollectionUserList, err => Alert.alert(error))
             return () => {
                 unsubscribeRoomList()
-                unsubscribeChatList()
+                // unsubscribeChatList()
                 unsubscribeUserList()
             }
         }
     }, [state.userID])
+
+    useEffect(() => {
+        if (!!users && users.length > 0) {
+            const unsubscribeChatList = entityChatRef.onSnapshot(getRealtimeCollectionChatList, err => Alert.alert(error))
+            return () => {
+                unsubscribeChatList()
+            }
+        }
+    }, [users])
 
     const getRealtimeCollectionRoomList = async (querySnapshot) => {
         const reads = querySnapshot.docs.map(async (doc) => {
@@ -117,7 +126,9 @@ const RoomScreen = (props) => {
             }
         });
         UsersByChat.map(e => {
+            console.log('users', users)
             const find = users.find(f => e.connectID == f.id)
+            console.log('find', find)
             e.userConnect = find
             e.connectName = find.email
             e.connectAvatarURL = find.avatarURL
@@ -254,25 +265,25 @@ const RoomScreen = (props) => {
         </ListItem>
     )
 
-    if (!state.isDataFetchedRoomList || !state.isDataFetchedChatList || !state.isDataFetchedUserList) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <LottieView
-                    source={require('@assets/animations/890-loading-animation.json')}
-                    colorFilters={[{
-                        keypath: "button",
-                        color: "#F00000"
-                    }, {
-                        keypath: "Sending Loader",
-                        color: "#F00000"
-                    }]}
-                    style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
-                    autoPlay
-                    loop
-                />
-            </View>
-        )
-    }
+    // if (!state.isDataFetchedRoomList || !state.isDataFetchedChatList || !state.isDataFetchedUserList) {
+    //     return (
+    //         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    //             <LottieView
+    //                 source={require('@assets/animations/890-loading-animation.json')}
+    //                 colorFilters={[{
+    //                     keypath: "button",
+    //                     color: "#F00000"
+    //                 }, {
+    //                     keypath: "Sending Loader",
+    //                     color: "#F00000"
+    //                 }]}
+    //                 style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+    //                 autoPlay
+    //                 loop
+    //             />
+    //         </View>
+    //     )
+    // }
 
     return (
         <SafeAreaView style={{ flex: 1 }} >
@@ -301,13 +312,33 @@ const RoomScreen = (props) => {
                         textStyle={{ fontSize: scale(12), color: '#000' }}
                         activeTextStyle={{ fontSize: scale(14), color: '#007580' }}
                     >
-                        {!!rooms && rooms.length > 0 &&
-                            <FlatList
-                                keyExtractor={keyExtractor}
-                                data={rooms}
-                                extraData={rooms}
-                                renderItem={renderItemRoomChat}
-                            />
+                        {!state.isDataFetchedRoomList ?
+                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                <LottieView
+                                    source={require('@assets/animations/890-loading-animation.json')}
+                                    colorFilters={[{
+                                        keypath: "button",
+                                        color: "#F00000"
+                                    }, {
+                                        keypath: "Sending Loader",
+                                        color: "#F00000"
+                                    }]}
+                                    style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+                                    autoPlay
+                                    loop
+                                />
+                            </View>
+                            :
+                            <>
+                                {!!rooms && rooms.length > 0 &&
+                                    <FlatList
+                                        keyExtractor={keyExtractor}
+                                        data={rooms}
+                                        extraData={rooms}
+                                        renderItem={renderItemRoomChat}
+                                    />
+                                }
+                            </>
                         }
                     </Tab>
                     <Tab
@@ -330,13 +361,33 @@ const RoomScreen = (props) => {
                         textStyle={{ fontSize: 12, color: '#000' }}
                         activeTextStyle={{ fontSize: 14, color: '#0278ae' }}
                     >
-                        {!!usersByChat && usersByChat.length > 0 &&
-                            <FlatList
-                                keyExtractor={keyExtractor}
-                                data={usersByChat}
-                                extraData={usersByChat}
-                                renderItem={renderItemChat}
-                            />
+                        {!state.isDataFetchedChatList ?
+                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                <LottieView
+                                    source={require('@assets/animations/890-loading-animation.json')}
+                                    colorFilters={[{
+                                        keypath: "button",
+                                        color: "#F00000"
+                                    }, {
+                                        keypath: "Sending Loader",
+                                        color: "#F00000"
+                                    }]}
+                                    style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+                                    autoPlay
+                                    loop
+                                />
+                            </View>
+                            :
+                            <>
+                                {!!usersByChat && usersByChat.length > 0 &&
+                                    <FlatList
+                                        keyExtractor={keyExtractor}
+                                        data={usersByChat}
+                                        extraData={usersByChat}
+                                        renderItem={renderItemChat}
+                                    />
+                                }
+                            </>
                         }
                     </Tab>
                     <Tab
@@ -359,13 +410,33 @@ const RoomScreen = (props) => {
                         textStyle={{ fontSize: 12, color: '#000' }}
                         activeTextStyle={{ fontSize: 14, color: '#fdbaf8' }}
                     >
-                        {!!users && users.length > 0 &&
-                            <FlatList
-                                keyExtractor={keyExtractor}
-                                data={users}
-                                extraData={users}
-                                renderItem={renderItemUser}
-                            />
+                        {!state.isDataFetchedUserList ?
+                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                <LottieView
+                                    source={require('@assets/animations/890-loading-animation.json')}
+                                    colorFilters={[{
+                                        keypath: "button",
+                                        color: "#F00000"
+                                    }, {
+                                        keypath: "Sending Loader",
+                                        color: "#F00000"
+                                    }]}
+                                    style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+                                    autoPlay
+                                    loop
+                                />
+                            </View>
+                            :
+                            <>
+                                {!!users && users.length > 0 &&
+                                    <FlatList
+                                        keyExtractor={keyExtractor}
+                                        data={users}
+                                        extraData={users}
+                                        renderItem={renderItemUser}
+                                    />
+                                }
+                            </>
                         }
                     </Tab>
                 </Tabs>
