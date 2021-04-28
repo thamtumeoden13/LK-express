@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
-import { GiftedChat } from 'react-native-gifted-chat'
+import { StackActions } from '@react-navigation/native';
 import { Container, Tab, Tabs, TabHeading } from 'native-base';
 import AsyncStorage from '@react-native-community/async-storage';
+import { GiftedChat } from 'react-native-gifted-chat'
 import { ListItem, Avatar, Badge } from 'react-native-elements';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
-import { StackActions } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import format from 'date-fns/format'
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
@@ -264,26 +264,6 @@ const RoomScreen = (props) => {
             <ListItem.Chevron name="addusergroup" type='antdesign' color="#0a043c" />
         </ListItem>
     )
-
-    // if (!state.isDataFetchedRoomList || !state.isDataFetchedChatList || !state.isDataFetchedUserList) {
-    //     return (
-    //         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    //             <LottieView
-    //                 source={require('@assets/animations/890-loading-animation.json')}
-    //                 colorFilters={[{
-    //                     keypath: "button",
-    //                     color: "#F00000"
-    //                 }, {
-    //                     keypath: "Sending Loader",
-    //                     color: "#F00000"
-    //                 }]}
-    //                 style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
-    //                 autoPlay
-    //                 loop
-    //             />
-    //         </View>
-    //     )
-    // }
 
     return (
         <SafeAreaView style={{ flex: 1 }} >

@@ -71,6 +71,19 @@ const RoomChatScreen = ({ route, navigation }) => {
     const [messages, setMessages] = useState([])
 
     useEffect(() => {
+        const options = {
+            soundName: "default",
+            playSound: true,
+            vibrate: true
+        }
+        notificationManager.showNotificationSchedule(
+            Math.random(),
+            `Alert`,
+            `Time to launch`,
+            `${new Date()}`,
+            {}, // data
+            options //options
+        )
         setTimeout(async () => {
             const roomID = route.params.id
             const userToken = await AsyncStorage.getItem('User');
@@ -336,125 +349,129 @@ const RoomChatScreen = ({ route, navigation }) => {
         onLongPress={handlerLongPressMessage}
         onPressAvatar={() => Alert.alert('yyy')}
     />
+    const actionSheet = <ActionSheet
+        initialOffsetFromBottom={0.6}
+        ref={actionSheetRef}
+        onOpen={onOpen}
+        statusBarTranslucent
+        bounceOnOpen={true}
+        bounciness={4}
+        gestureEnabled={true}
+        onClose={onClose}
+        defaultOverlayOpacity={0.3}
+    >
+        <ScrollView
+            ref={scrollViewRef}
+            nestedScrollEnabled={true}
+            onScrollEndDrag={() =>
+                actionSheetRef.current?.handleChildScrollEnd()
+            }
+            onScrollAnimationEnd={() =>
+                actionSheetRef.current?.handleChildScrollEnd()
+            }
+            onMomentumScrollEnd={() =>
+                actionSheetRef.current?.handleChildScrollEnd()
+            }
+            style={styles.scrollview}
+        >
+            <View style={styles.containerActionSheet}>
+                {usersExists.map((item, index) => (
+                    <TouchableScale
+                        // style={style.button}
+                        // onPress={() => selectPhotoTapped(item, index)}
+                        activeScale={0.9}
+                        key={`${item.email.toString()}-${index.toString()}`}
+                    >
+                        <View style={{
+                            backgroundColor: '#fe8a71', width: '100%',
+                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
+                            paddingVertical: scale(10),
+                            marginVertical: scale(5),
+                            borderRadius: scale(10)
+                        }}>
+                            <Text style={{ color: '#0e9aa7', padding: scale(5), width: '80%' }}>{item.email}</Text>
+                            <TouchableScale
+                                activeScale={2}
+                                key={index}
+                                style={{
+                                    // width: scale(20),
+                                    // height: scale(20),
+                                    // borderRadius: scale(10),
+                                    // backgroundColor: '#fe8a71',
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}
+                                onPress={() => {
+                                    actionSheetRef.current?.hide();
+                                    onRemoveUser(item)
+                                }}
+                            >
+                                <AntDesignIcon
+                                    name='minus'
+                                    size={scale(16)}
+                                    color='#0e9aa7'
+                                />
+                            </TouchableScale>
+                        </View>
+                    </TouchableScale>
+                ))}
+                {otherUsers.map((item, index) => (
+                    <TouchableScale
+                        // style={style.button}
+                        // onPress={() => selectPhotoTapped(item, index)}
+                        activeScale={0.9}
+                        key={`${item.email.toString()}-${index.toString()}`}
+                    >
+                        <View style={{
+                            backgroundColor: '#f6cd61',
+                            width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
+                            paddingVertical: scale(10),
+                            marginVertical: scale(5),
+                            borderRadius: scale(10)
+                        }}>
+                            <Text style={{ width: '80%', color: '#4a4e4d', padding: scale(5) }}>{item.email}</Text>
+                            <TouchableScale
+                                activeScale={2}
+                                onPress={() => {
+                                    actionSheetRef.current?.hide();
+                                    onAddUser(item)
+                                }}
+                                key={index}
+                                style={{
+                                    // width: scale(20),
+                                    // height: scale(20),
+                                    // borderRadius: scale(10),
+                                    backgroundColor: '#f6cd61',
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}
+                            >
+                                <AntDesignIcon
+                                    name='plus'
+                                    size={scale(16)}
+                                    color='#0e9aa7'
+                                />
+                            </TouchableScale>
+                        </View>
+                    </TouchableScale>
+                ))}
+            </View>
+            {/*  Add a Small Footer at Bottom */}
+            <View style={styles.footer} />
+        </ScrollView>
+    </ActionSheet>
     // if (Platform.OS === 'android') {
     //     return (
     //         <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' KeyboardAvoidingView={30} enabled>
     //             {chat}
+    //             {actionSheet}
     //         </KeyboardAvoidingView>
     //     )
     // }
     return (
         <SafeAreaView style={{ flex: 1 }} >
             {chat}
-            <ActionSheet
-                initialOffsetFromBottom={0.6}
-                ref={actionSheetRef}
-                onOpen={onOpen}
-                statusBarTranslucent
-                bounceOnOpen={true}
-                bounciness={4}
-                gestureEnabled={true}
-                onClose={onClose}
-                defaultOverlayOpacity={0.3}
-            >
-                <ScrollView
-                    ref={scrollViewRef}
-                    nestedScrollEnabled={true}
-                    onScrollEndDrag={() =>
-                        actionSheetRef.current?.handleChildScrollEnd()
-                    }
-                    onScrollAnimationEnd={() =>
-                        actionSheetRef.current?.handleChildScrollEnd()
-                    }
-                    onMomentumScrollEnd={() =>
-                        actionSheetRef.current?.handleChildScrollEnd()
-                    }
-                    style={styles.scrollview}
-                >
-                    <View style={styles.containerActionSheet}>
-                        {usersExists.map((item, index) => (
-                            <TouchableScale
-                                // style={style.button}
-                                // onPress={() => selectPhotoTapped(item, index)}
-                                activeScale={0.9}
-                            >
-                                <View style={{
-                                    backgroundColor: '#fe8a71', width: '100%',
-                                    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
-                                    paddingVertical: scale(10),
-                                    marginVertical: scale(5),
-                                    borderRadius: scale(10)
-                                }}>
-                                    <Text style={{ color: '#0e9aa7', padding: scale(5), width: '80%' }}>{item.email}</Text>
-                                    <TouchableScale
-                                        activeScale={2}
-                                        key={index}
-                                        style={{
-                                            // width: scale(20),
-                                            // height: scale(20),
-                                            // borderRadius: scale(10),
-                                            // backgroundColor: '#fe8a71',
-                                            justifyContent: 'center',
-                                            alignItems: 'center'
-                                        }}
-                                        onPress={() => {
-                                            actionSheetRef.current?.hide();
-                                            onRemoveUser(item)
-                                        }}
-                                    >
-                                        <AntDesignIcon
-                                            name='minus'
-                                            size={scale(16)}
-                                            color='#0e9aa7'
-                                        />
-                                    </TouchableScale>
-                                </View>
-                            </TouchableScale>
-                        ))}
-                        {otherUsers.map((item, index) => (
-                            <TouchableScale
-                                // style={style.button}
-                                // onPress={() => selectPhotoTapped(item, index)}
-                                activeScale={0.9}
-                            >
-                                <View style={{
-                                    backgroundColor: '#f6cd61',
-                                    width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
-                                    paddingVertical: scale(10),
-                                    marginVertical: scale(5),
-                                    borderRadius: scale(10)
-                                }}>
-                                    <Text style={{ width: '80%', color: '#4a4e4d', padding: scale(5) }}>{item.email}</Text>
-                                    <TouchableScale
-                                        activeScale={2}
-                                        onPress={() => {
-                                            actionSheetRef.current?.hide();
-                                            onAddUser(item)
-                                        }}
-                                        key={index}
-                                        style={{
-                                            // width: scale(20),
-                                            // height: scale(20),
-                                            // borderRadius: scale(10),
-                                            backgroundColor: '#f6cd61',
-                                            justifyContent: 'center',
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        <AntDesignIcon
-                                            name='plus'
-                                            size={scale(16)}
-                                            color='#0e9aa7'
-                                        />
-                                    </TouchableScale>
-                                </View>
-                            </TouchableScale>
-                        ))}
-                    </View>
-                    {/*  Add a Small Footer at Bottom */}
-                    <View style={styles.footer} />
-                </ScrollView>
-            </ActionSheet>
+            {actionSheet}
         </SafeAreaView>
     )
 }

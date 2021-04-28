@@ -119,6 +119,23 @@ class NotificationManager {
         })
     }
 
+    showNotificationSchedule = (id, title, message, date,data, options) => {
+        PushNotification.localNotificationSchedule({
+            // Only Android Properties
+            ...this._buildAndroidNotification(id, title, message, data, options),
+            // Only IOS Properties
+            ...this._buildIOSNotification(id, title, message, data, options),
+            // IOS and Android Properties
+            title: title,
+            message: message,
+            date: new Date(new Date(date).getTime() + 15 * 1000), // in 60 secs
+            allowWhileIdle: false, // (optional) set notification to work while on doze, default: false
+            playSound: options.playSound || false,
+            soundName: options.soundName || "default",
+            userInteraction: false,
+        })
+    }
+
     cancelAllLocalNotification = () => {
         if (Platform.OS === 'ios') {
             PushNotificationIOS.removeAllDeliveredNotifications()

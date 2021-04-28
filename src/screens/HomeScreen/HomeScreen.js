@@ -5,6 +5,9 @@ import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaVie
 import AntDesignIcons from 'react-native-vector-icons/AntDesign'
 import IonIcons from 'react-native-vector-icons/Ionicons'
 import AsyncStorage from '@react-native-community/async-storage';
+import TouchableScale from 'react-native-touchable-scale';
+import LinearGradient from 'react-native-linear-gradient';
+import LottieView from 'lottie-react-native';
 
 import { AuthContext } from '../../utils'
 import { notificationManager } from '../../utils/NotificationManager'
@@ -19,7 +22,6 @@ const HomeScreen = (props) => {
     const entityUserRef = db.collection('users')
     const entityChatRef = db.collection('chats')
 
-    const { signOut } = useContext(AuthContext);
     const [state, setState] = useState({
         roomID: '',
         userID: '',
@@ -52,11 +54,6 @@ const HomeScreen = (props) => {
 
     const onHandlerInput = (name, value) => {
         setState(prev => { return { ...prev, [name]: value } })
-    }
-
-    const handlerSignOut = () => {
-        signOut()
-        notificationManager.cancelAllLocalNotification()
     }
 
     const handlerContinue = async (typeRoomName) => {
@@ -256,12 +253,31 @@ const HomeScreen = (props) => {
                             {state.roomID}
                         </TextInput>
                     </View>
-                    <TouchableOpacity
+                    <TouchableScale
+                        // style={{ backgroundColor: 'red', width: calcWidth(15), height: calcWidth(15),}}
+                        onPress={() => handlerContinue('roomID')}
+                        activeScale={1.5}
+                    >
+                        <LottieView
+                            source={require('@assets/animations/plus.json')}
+                            colorFilters={[{
+                                keypath: "button",
+                                color: "#F00000"
+                            }, {
+                                keypath: "Sending Loader",
+                                color: "#F00000"
+                            }]}
+                            style={{ width: calcWidth(15), height: calcWidth(15), justifyContent: 'center' }}
+                            autoPlay
+                            loop
+                        />
+                    </TouchableScale>
+                    {/* <TouchableOpacity
                         style={styles.continue}
                         onPress={() => handlerContinue('roomID')}
                     >
                         <AntDesignIcons name={state.level == 1 ? "plus" : "arrowright"} size={scale(24)} color="#fff" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </View>
             }
@@ -283,21 +299,32 @@ const HomeScreen = (props) => {
                             {state.connectUser}
                         </TextInput>
                     </View>
-                    <TouchableOpacity
+                    <TouchableScale
+                        // style={style.button}
+                        onPress={() => handlerContinue('connectUser')}
+                        activeScale={1.5}
+                    >
+                        <LottieView
+                            source={require('@assets/animations/add-user.json')}
+                            colorFilters={[{
+                                keypath: "button",
+                                color: "#F00000"
+                            }, {
+                                keypath: "Sending Loader",
+                                color: "#F00000"
+                            }]}
+                            style={{ width: calcWidth(15), height: calcWidth(15), justifyContent: 'center' }}
+                            autoPlay
+                            loop
+                        />
+                    </TouchableScale>
+                    {/* <TouchableOpacity
                         style={styles.continue}
                         onPress={() => handlerContinue('connectUser')}
                     >
                         <AntDesignIcons name="sharealt" size={scale(24)} color="#fff" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
-            </View>
-            <View style={{ flexDirection: 'column', position: 'absolute', bottom: moderateScale(10), left: moderateScale(10) }} >
-                <TouchableOpacity
-                    style={styles.continue}
-                    onPress={() => handlerSignOut()}
-                >
-                    <IonIcons name="arrow-undo-outline" size={scale(24)} color="#fff" />
-                </TouchableOpacity>
             </View>
         </SafeAreaView>
     )

@@ -298,6 +298,7 @@ export default () => {
     const authContext = React.useMemo(
         () => ({
             signIn: async ({ email, password }) => {
+                console.log('email, password', email, password)
                 // In a production app, we need to send some data (usually username, password) to server and get a token
                 // We will also need to handle errors if sign in failed
                 // After getting token, we need to persist the token using `SecureStore`

@@ -1,13 +1,22 @@
 import React, { useState, useContext } from 'react'
+import { SafeAreaView, Modal } from 'react-native';
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import TouchableScale from 'react-native-touchable-scale';
+import LinearGradient from 'react-native-linear-gradient';
+import LottieView from 'lottie-react-native';
+
 import { AuthContext } from '../../utils'
 
 import styles from './styles';
+import { calcWidth } from 'utils/scaleSize';
 
 const LoginScreen = (props) => {
     const [email, setEmail] = useState('ltv.mrvu@gmail.com')
     const [password, setPassword] = useState('123456')
+    const [state, setState] = useState({
+        isLoading: false
+    })
 
     const onFooterLinkPress = () => {
         props.navigation.navigate('Registration')
@@ -15,14 +24,44 @@ const LoginScreen = (props) => {
     const { signIn } = useContext(AuthContext);
 
     const onLoginPress = () => {
+        setState(prev => { return { ...prev, isLoading: true } })
         signIn({ email, password })
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={!!state.isLoading}
+            >
+                <SafeAreaView style={{
+                    flex: 1,
+                    justifyContent: 'center', alignItems: 'center', position: 'absolute',
+                    backgroundColor: '#0003',
+                    top: 0, bottom: 0, left: 0, right: 0
+                }}>
+                    <LottieView
+                        source={require('@assets/animations/loading.json')}
+                        colorFilters={[{
+                            keypath: "button",
+                            color: "#F00000"
+                        }, {
+                            keypath: "Sending Loader",
+                            color: "#F00000"
+                        }]}
+                        style={{ width: calcWidth(50), height: calcWidth(50), justifyContent: 'center', alignItems: 'center' }}
+                        autoPlay
+                        loop
+                    />
+                </SafeAreaView>
+            </Modal>
             <KeyboardAwareScrollView
                 style={{ flex: 1, width: '100%' }}
-                keyboardShouldPersistTaps="always">
+                keyboardShouldPersistTaps="always"
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={100}
+            >
                 <Image
                     style={styles.logo}
                     source={require('../../../assets/bootsplash_logo.png')}
@@ -56,7 +95,7 @@ const LoginScreen = (props) => {
                     <Text style={styles.footerText}>Don't have an account? <Text onPress={onFooterLinkPress} style={styles.footerLink}>Sign up</Text></Text>
                 </View>
             </KeyboardAwareScrollView>
-        </View>
+        </SafeAreaView>
     )
 }
 
