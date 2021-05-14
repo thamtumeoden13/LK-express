@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import {
     StyleSheet,
     View,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Text, Button, Icon } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 import {
     CarouselMainLayout,
@@ -26,82 +27,113 @@ import HeaderTitle from 'components/common/Header/HeaderTitle'
 
 import ListHorizontal from 'components/common/listCommon/ListHorizontal'
 import ListVertical from 'components/common/listCommon/ListVertical'
-import { moderateScale, verticalScale, calcWidth } from 'utils/scaleSize';
-class CategoryScreen extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            isLoading: true,
-        }
+import { AuthContext } from '../../utils'
+import { firebase } from '../../firebase/config'
+import { notificationManager } from '../../utils/NotificationManager'
+import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
+
+const db = firebase.firestore()
+const entityRef = db.collection('chats')
+
+const CategoryScreen = () => {
+
+    const [state, setState] = useState({ isLoading: true, })
+    const [response, setResponse] = React.useState(null);
+
+    const onPressItem = (item, index) => {
+        // Alert.alert('CarouselMainLayout', `You've clicked ${item.title}`);
+        onChooseUploadFile()
     }
 
-    componentDidMount() {
+    const onChooseUploadFile = () => {
+        launchImageLibrary(
+            {
+                mediaType: 'photo',
+                includeBase64: true,
+                maxHeight: 200,
+                maxWidth: 200,
+            },
+            (response) => {
+                setResponse(response);
+                console.log('response', response)
+                uploadImage(response)
+            },
+        )
     }
 
-    componentWillUnmount() {
+    const uploadImage = (image) => {
+        const data = {
+            name: image.fileName,
+            type: image.type,
+            base64: image.base64
+        };
+        const imagesRef = firebase.firestore().collection('images')
+        imagesRef
+            .doc()
+            .set(data)
+            .then(() => {
+                console.log("Document successfully upload!");
+            })
+            .catch((error) => {
+                alert(error)
+            });
     }
 
-    onPressItem = (item, index) => {
-        Alert.alert('CarouselMainLayout', `You've clicked ${item.title}`);
-    }
-
-    render() {
-        return (
-            <SafeAreaView style={styles.safeArea}>
-                <StatusBar backgroundColor="gray" barStyle="dark-content" hidden />
-                <View style={styles.container}>
-                    <ScrollView
-                        contentContainerStyle={{ flexGrow: 1 }}
-                        scrollEventThrottle={16}
-                    >
-                        <CarouselStackLayout
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <StatusBar backgroundColor="gray" barStyle="dark-content" hidden />
+            <View style={styles.container}>
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    scrollEventThrottle={16}
+                >
+                    <CarouselStackLayout
+                        data={ENTRIES1}
+                        title={`Stack Layout `}
+                        subtitle={`Stack of cards layout | Loop`}
+                        onPressItem={onPressItem}
+                    />
+                    <CarouselTinderLayout
+                        data={ENTRIES2}
+                        title={`Tinder Layout `}
+                        subtitle={`Tinder of cards layout | Loop`}
+                        onPressItem={onPressItem}
+                    />
+                    <View style={{ flex: 2 }}>
+                        <CarouselMainLayout
                             data={ENTRIES1}
-                            title={`Stack Layout `}
-                            subtitle={`Stack of cards layout | Loop`}
-                            onPressItem={this.onPressItem}
+                            title={`Main Layout`}
+                            subtitle={`Default layout | Loop | Autoplay | Parallax | Scale | Opacity | Pagination with tappable dots`}
+                            onPressItem={onPressItem}
                         />
-                        <CarouselTinderLayout
+                    </View>
+                    <CarouselCustomLayout
+                        data={ENTRIES2}
+                        title={`Custom Layout `}
+                        subtitle={`Animation of cards layout | Loop`}
+                        onPressItem={onPressItem}
+                    />
+                    <View style={{ flex: 1, paddingTop: verticalScale(20), marginBottom: verticalScale(20), paddingHorizontal: moderateScale(10) }}>
+                        <ListHorizontal
+                            title={`Categories`}
+                            data={ENTRIES1}
+                            containerStyle={styles.containerStyleListHorizontal}
+                            itemStyle={styles.itemStyleListHorizontal}
+                        />
+                    </View>
+                    <View style={{ flex: 1, paddingTop: verticalScale(20), marginBottom: verticalScale(20), }}>
+                        <ListVertical
+                            title={`House`}
                             data={ENTRIES2}
-                            title={`Tinder Layout `}
-                            subtitle={`Tinder of cards layout | Loop`}
-                            onPressItem={this.onPressItem}
+                            containerStyle={styles.containerStyleListVertical}
+                            itemStyle={styles.itemStyleListVertical}
                         />
-                        <View style={{ flex: 2 }}>
-                            <CarouselMainLayout
-                                data={ENTRIES1}
-                                title={`Main Layout`}
-                                subtitle={`Default layout | Loop | Autoplay | Parallax | Scale | Opacity | Pagination with tappable dots`}
-                                onPressItem={this.onPressItem}
-                            />
-                        </View>
-                        <CarouselCustomLayout
-                            data={ENTRIES2}
-                            title={`Custom Layout `}
-                            subtitle={`Animation of cards layout | Loop`}
-                            onPressItem={this.onPressItem}
-                        />
-                        <View style={{ flex: 1, paddingTop: verticalScale(20), marginBottom: verticalScale(20), paddingHorizontal: moderateScale(10) }}>
-                            <ListHorizontal
-                                title={`Categories`}
-                                data={ENTRIES1}
-                                containerStyle={styles.containerStyleListHorizontal}
-                                itemStyle={styles.itemStyleListHorizontal}
-                            />
-                        </View>
-                        <View style={{ flex: 1, paddingTop: verticalScale(20), marginBottom: verticalScale(20), }}>
-                            <ListVertical
-                                title={`House`}
-                                data={ENTRIES2}
-                                containerStyle={styles.containerStyleListVertical}
-                                itemStyle={styles.itemStyleListVertical}
-                            />
-                        </View>
-                    </ScrollView>
-                </View>
-            </SafeAreaView>
-        );
-    }
+                    </View>
+                </ScrollView>
+            </View>
+        </SafeAreaView>
+    );
 }
 
 export default CategoryScreen;
