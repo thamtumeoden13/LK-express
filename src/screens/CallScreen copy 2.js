@@ -17,7 +17,6 @@ import {
     mediaDevices,
     registerGlobals,
 } from 'react-native-webrtc';
-// import {acc} from 'react-native-reanimated';
 
 const STUN_SERVER = 'stun:webrtc.skyrockets.space:3478';
 const SOCKET_URL = 'wss://webrtc.skyrockets.space:8080';

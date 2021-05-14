@@ -17,7 +17,6 @@ import {
     mediaDevices,
     registerGlobals,
 } from 'react-native-webrtc';
-// import {acc} from 'react-native-reanimated';
 
 const MOZILLA_SERVER = 'stun:stun.services.mozilla.com';
 const GOOGLE_SERVER = 'stun:stun.l.google.com:19302';
