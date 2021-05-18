@@ -6,131 +6,179 @@ import {
     SafeAreaView,
     Image,
     StatusBar,
-    Alert
+    Alert,
+    FlatList
 } from 'react-native';
-import { Text, Button, Icon } from 'react-native-elements';
+import { ListItem, Avatar, Badge } from 'react-native-elements';
+import TouchableScale from 'react-native-touchable-scale';
+import LinearGradient from 'react-native-linear-gradient';
+import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
-import {
-    CarouselMainLayout,
-    CarouselMomentumLayout,
-    CarouselStackLayout,
-    CarouselTinderLayout,
-    CarouselCustomLayout
-} from 'components/carousel/layout';
-import { ENTRIES1, ENTRIES2 } from 'constants/entries';
-
-import DrawerIcon from 'components/common/icon/DrawerIcon'
-import BagIcon from 'components/common/icon/BagIcon'
-import HeaderTitle from 'components/common/Header/HeaderTitle'
-
-import ListHorizontal from 'components/common/listCommon/ListHorizontal'
-import ListVertical from 'components/common/listCommon/ListVertical'
-
-import { AuthContext } from '../../utils'
 import { firebase } from '../../firebase/config'
-import { notificationManager } from '../../utils/NotificationManager'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
+import AddIcon from 'components/common/icon/AddIcon'
+import { ModalCenterAlert } from "components/common/modal/ModalCenterAlert";
+import { AddCategory } from 'components/category/modalInputForm'
 
 const db = firebase.firestore()
-const entityRef = db.collection('chats')
+const entityRef = db.collection('categories')
 
-const CategoryScreen = () => {
+const CategoryScreen = (props) => {
 
-    const [state, setState] = useState({ isLoading: true, })
-    const [response, setResponse] = React.useState(null);
+    const [state, setState] = useState({
+        isLoading: true,
+        userID: '',
+        level: ''
+    })
 
-    const onPressItem = (item, index) => {
-        // Alert.alert('CarouselMainLayout', `You've clicked ${item.title}`);
-        onChooseUploadFile()
-    }
+    const [alert, setAlert] = useState({
+        isVisible: false,
+        disabledIcon: false,
+        modalAlert: {
+            type: 'error',
+            title: '',
+            content: '',
+        },
+        typeModalInputForm: -1
+    })
 
-    const onChooseUploadFile = () => {
-        launchImageLibrary(
-            {
-                mediaType: 'photo',
-                includeBase64: true,
-                maxHeight: 200,
-                maxWidth: 200,
-            },
-            (response) => {
-                setResponse(response);
-                console.log('response', response)
-                uploadImage(response)
-            },
-        )
-    }
+    const [categories, setCategories] = useState([])
 
-    const uploadImage = (image) => {
-        const data = {
-            name: image.fileName,
-            type: image.type,
-            base64: image.base64
-        };
-        const imagesRef = firebase.firestore().collection('images')
-        imagesRef
-            .doc()
-            .set(data)
-            .then(() => {
-                console.log("Document successfully upload!");
+    useEffect(() => {
+        setTimeout(async () => {
+            const userToken = await AsyncStorage.getItem('User');
+            const user = JSON.parse(userToken)
+            setState(prev => {
+                return {
+                    ...prev,
+                    userID: user.id,
+                    level: user.level,
+                }
             })
-            .catch((error) => {
-                alert(error)
+        });
+        const unsubscribeCategorieList = entityRef.onSnapshot(getRealtimeCollectionCategoriList, err => Alert.alert(error))
+        return () => {
+            unsubscribeCategorieList()
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!!state.level && state.level == 1) {
+            props.navigation.setOptions({
+                headerRight: () => <AddIcon onOpen={() => onAddCategory()} />,
             });
+        }
+    }, [state.level])
+
+    const getRealtimeCollectionCategoriList = async (querySnapshot) => {
+        const reads = querySnapshot.docs.map(async (doc) => {
+            const room = doc.data()
+            return {
+                ...room,
+                doc: doc.id
+            }
+        })
+        let result = await Promise.all(reads)
+        const categories = result.filter(e => { return !!e && Object.keys(e).length > 0 });
+        setCategories(categories)
+        console.log('categories', categories)
+        // setState(prev => { return { ...prev, isDataFetchedRoomList: true } })
     }
 
+    const onHandlerJoinCategory = (categoryID, categoryName) => {
+        console.log('onHandlerJoinRoom', categoryID)
+        const pushAction = StackActions.push('CategoryDetail', { id: categoryID, name: categoryName })
+        props.navigation.dispatch(pushAction)
+    }
+
+    const onAddCategory = () => {
+        const pushAction = StackActions.push('AddCategory')
+        props.navigation.dispatch(pushAction)
+    }
+
+    const renderModalInputForm = (typeModalInputForm) => {
+        let ModalInputForm
+        switch (typeModalInputForm) {
+            case 1:
+                ModalInputForm = (
+                    <AddCategory
+
+                    />
+                )
+                break;
+            default:
+                ModalInputForm = null
+                break;
+        }
+        return ModalInputForm
+    }
+
+    const onCloseModalAlert = () => {
+        setAlert(prev => {
+            return {
+                ...prev,
+                isVisible: false,
+                modalAlert: {
+                    type: 'error',
+                    content: ''
+                },
+                typeModalInputForm: -1
+            }
+        })
+    }
+
+    const renderChild = ({ item }) => (
+        <ListItem
+            Component={TouchableScale}
+            friction={90} //
+            tension={100} // These props are passed to the parent component (here TouchableScale)
+            activeScale={0.95} //
+            linearGradientProps={{
+                colors: ['#fdbaf8', '#fdbaf8'],
+                start: { x: 1, y: 0 },
+                end: { x: 0.2, y: 0 },
+            }}
+            ViewComponent={LinearGradient} // Only if no expo
+            style={{ marginTop: verticalScale(5) }}
+            containerStyle={{ paddingVertical: verticalScale(10) }}
+            onPress={() => onHandlerJoinCategory(item.doc, item.name)}
+        >
+            <Avatar rounded source={{ uri: item.avatarURL }} />
+            <ListItem.Content>
+                <ListItem.Title style={{ color: '#0a043c', fontWeight: 'bold', fontSize: scale(14) }}>
+                    {item.name}
+                </ListItem.Title>
+                <ListItem.Subtitle style={{ color: '#0a043c', fontStyle: 'italic', fontSize: scale(12) }}>
+                    {`${item.createdByName}`}
+                </ListItem.Subtitle>
+            </ListItem.Content>
+            <ListItem.Chevron name="right" type='antdesign' color="#0a043c" />
+        </ListItem>
+    )
+
+    const keyExtractor = (item, index) => index.toString()
+
+    const { isVisible, disabledIcon, typeModalInputForm, modalAlert } = alert
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar backgroundColor="gray" barStyle="dark-content" hidden />
+            <ModalCenterAlert
+                isVisible={isVisible}
+                disabledIcon={disabledIcon}
+                typeModal={modalAlert.type}
+                titleModal={modalAlert.title}
+                contentModal={modalAlert.content}
+                childComponent={renderModalInputForm(typeModalInputForm)}
+                onCloseModalAlert={onCloseModalAlert}
+            />
             <View style={styles.container}>
-                <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    scrollEventThrottle={16}
-                >
-                    <CarouselStackLayout
-                        data={ENTRIES1}
-                        title={`Stack Layout `}
-                        subtitle={`Stack of cards layout | Loop`}
-                        onPressItem={onPressItem}
-                    />
-                    <CarouselTinderLayout
-                        data={ENTRIES2}
-                        title={`Tinder Layout `}
-                        subtitle={`Tinder of cards layout | Loop`}
-                        onPressItem={onPressItem}
-                    />
-                    <View style={{ flex: 2 }}>
-                        <CarouselMainLayout
-                            data={ENTRIES1}
-                            title={`Main Layout`}
-                            subtitle={`Default layout | Loop | Autoplay | Parallax | Scale | Opacity | Pagination with tappable dots`}
-                            onPressItem={onPressItem}
-                        />
-                    </View>
-                    <CarouselCustomLayout
-                        data={ENTRIES2}
-                        title={`Custom Layout `}
-                        subtitle={`Animation of cards layout | Loop`}
-                        onPressItem={onPressItem}
-                    />
-                    <View style={{ flex: 1, paddingTop: verticalScale(20), marginBottom: verticalScale(20), paddingHorizontal: moderateScale(10) }}>
-                        <ListHorizontal
-                            title={`Categories`}
-                            data={ENTRIES1}
-                            containerStyle={styles.containerStyleListHorizontal}
-                            itemStyle={styles.itemStyleListHorizontal}
-                        />
-                    </View>
-                    <View style={{ flex: 1, paddingTop: verticalScale(20), marginBottom: verticalScale(20), }}>
-                        <ListVertical
-                            title={`House`}
-                            data={ENTRIES2}
-                            containerStyle={styles.containerStyleListVertical}
-                            itemStyle={styles.itemStyleListVertical}
-                        />
-                    </View>
-                </ScrollView>
+                <FlatList
+                    keyExtractor={keyExtractor}
+                    data={categories}
+                    extraData={categories}
+                    renderItem={renderChild}
+                />
             </View>
         </SafeAreaView>
     );

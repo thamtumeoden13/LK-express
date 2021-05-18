@@ -11,7 +11,8 @@ import LottieView from 'lottie-react-native';
 import {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
     HomeScreen, ChatScreen, ChatDetailScreen, RoomScreen, RoomChatScreen,
-    ProfileScreen, CategoryScreen
+    ProfileScreen,
+    CategoryScreen, CategoryDetailScreen, AddCategoryScreen
 } from '../screens'
 
 import DrawerIcon from 'components/common/icon/DrawerIcon'
@@ -100,11 +101,28 @@ function CategoryStackScreen({ navigation }) {
                 component={CategoryScreen}
                 options={{
                     // headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Danh Mục`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+            <CategoryStack.Screen
+                name="CategoryDetail"
+                component={CategoryDetailScreen}
+                options={{
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Sản phẩm`} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
-            <CategoryStack.Screen name="CategoryDetail" component={CategoryScreen} />
+            <CategoryStack.Screen
+                name="AddCategory"
+                component={AddCategoryScreen}
+                options={{
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Thêm Danh Mục`} />,
+                    // headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
         </CategoryStack.Navigator>
     );
 }

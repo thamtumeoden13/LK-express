@@ -35,24 +35,6 @@ const RoomChatScreen = ({ route, navigation }) => {
     const actionSheetRef = useRef();
     const scrollViewRef = useRef();
 
-    const onHasReachedTop = hasReachedTop => {
-        if (hasReachedTop)
-            scrollViewRef.current?.setNativeProps({
-                scrollEnabled: hasReachedTop,
-            });
-    };
-
-    const onClose = () => {
-        scrollViewRef.current?.setNativeProps({
-            scrollEnabled: false,
-        });
-    };
-
-    const onOpen = () => {
-        scrollViewRef.current?.setNativeProps({
-            scrollEnabled: false,
-        });
-    };
     const [state, setState] = useState({
         roomID: '',
         userID: '',
@@ -141,6 +123,25 @@ const RoomChatScreen = ({ route, navigation }) => {
             setOtherUsers(newArray)
         }
     }, [users, usersExists])
+
+    const onHasReachedTop = hasReachedTop => {
+        if (hasReachedTop)
+            scrollViewRef.current?.setNativeProps({
+                scrollEnabled: hasReachedTop,
+            });
+    };
+
+    const onClose = () => {
+        scrollViewRef.current?.setNativeProps({
+            scrollEnabled: false,
+        });
+    };
+
+    const onOpen = () => {
+        scrollViewRef.current?.setNativeProps({
+            scrollEnabled: false,
+        });
+    };
 
     const getRealtimeCollection = (querySnapshot) => {
         let messagesFireStore = []
