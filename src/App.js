@@ -3,7 +3,7 @@ import React, { useEffect, useState, useReducer, useRef } from 'react'
 import { Alert, LogBox, AppState, Platform } from 'react-native'
 import { decode, encode } from 'base-64'
 import codePush from "react-native-code-push";
-import { PERMISSIONS, request, openSettings, checkMultiple } from 'react-native-permissions';
+import { PERMISSIONS, request, openSettings, checkNotifications } from 'react-native-permissions';
 import RNExitApp from 'react-native-exit-app';
 import Toast from 'react-native-toast-message';
 
@@ -118,19 +118,29 @@ const App = (props) => {
         typeModalInputForm: -1
     })
 
+    const [state, setState] = useState({
+        locationPermissionDenied: true,
+        notificationPermissionDenied: true,
+    })
+
     useEffect(() => {
         notificationManager.configure(onRegister, onNotification, onOpenNotification)
-        AppState.addEventListener('change', requestLocationPermission)
-        requestLocationPermission()
+        const appLocationState = AppState.addEventListener('change', requestLocationPermission)
+        const appPermission = AppState.addEventListener('change', checkMultiPermission)
         return () => {
-            AppState.removeEventListener('change', requestLocationPermission)
-            // appLocationState2
-            // appPermission
+            appLocationState
+            appPermission
             // handlerOpenURL
             // unsubscribe
         };
 
     }, [])
+
+    useEffect(() => {
+        if (!!state.locationPermissionDenied || !!state.notificationPermissionDenied) {
+            preOpenSettingPermission()
+        }
+    }, [state.locationPermissionDenied, state.notificationPermissionDenied])
 
     const requestLocationPermission = async () => {
         if (Platform.OS === 'ios') {
@@ -138,7 +148,7 @@ const App = (props) => {
             if (response !== 'granted') {
                 preOpenSettingPermission()
             }
-            else{
+            else {
                 onCloseModalAlert()
             }
         }
@@ -153,20 +163,37 @@ const App = (props) => {
         }
     }
 
+    const checkMultiPermission = async () => {
+        if (Platform.OS === 'ios') {
+            const response1 = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+            const response2 = await checkNotifications();
+            console.log(response1, response2)
+            if (response1 !== 'granted' || response2.status !== 'granted') {
+                setState(prev => {
+                    return {
+                        ...prev,
+                        locationPermissionDenied: response1 !== 'granted' ? true : false,
+                        notificationPermissionDenied: response2 !== 'granted' ? true : false,
+                    }
+                })
+                setTimeout(() => {
+
+                }, 500);
+                preOpenSettingPermission()
+            }
+        }
+        else {
+            // checkMultiple([PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION, PERMISSIONS.ANDROID.CAMERA]).then((statuses) => {
+            //     console.log('ACCESS_FINE_LOCATION', statuses[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]);
+            //     console.log('CAMERA', statuses[PERMISSIONS.ANDROID.CAMERA]);
+            // });
+            // checkNotifications().then(({ status }) => {
+            //     console.log('NOTIFICATION', status);
+            // });
+        }
+    }
+
     const preOpenSettingPermission = () => {
-        // Alert.alert(
-        //     "Vui lòng bật định vị để sử dụng ứng dụng",
-        //     "Nhấn Cancel để bỏ qua, nhấn OK để vào cài đặt",
-        //     [
-        //         {
-        //             text: "Cancel",
-        //             onPress: () => openSettingPermission(false),
-        //             style: "cancel"
-        //         },
-        //         { text: "OK", onPress: () => openSettingPermission(true) }
-        //     ],
-        //     { cancelable: false },
-        // );
         setAlert(prev => {
             return {
                 ...prev,
@@ -195,6 +222,8 @@ const App = (props) => {
                 ModalInputForm = (
                     <OpenSetting
                         openSetting={openSettingPermission}
+                        locationPermissionDenied={state.locationPermissionDenied}
+                        notificationPermissionDenied={state.notificationPermissionDenied}
                     />
                 )
                 break;

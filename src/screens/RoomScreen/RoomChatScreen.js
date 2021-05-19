@@ -12,6 +12,7 @@ import ActionSheet, {
 import TouchableScale from 'react-native-touchable-scale';
 import Geolocation from 'react-native-geolocation-service';
 import { PERMISSIONS, request } from 'react-native-permissions';
+import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 
 import { firebase } from '../../firebase/config'
 import { notificationManager } from 'utils/NotificationManager'
@@ -20,7 +21,6 @@ import ActionSheetIcon from 'components/common/icon/ActionSheetIcon'
 
 import styles from './styles';
 import { scale } from 'utils/scaleSize';
-import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 
 function Difference(arr = [], oarr = []) {
     return arr.reduce((t, v) => oarr.find(e => { return e.email == v.email }) ? t : [...t, v], []);
@@ -81,7 +81,7 @@ const RoomChatScreen = ({ route, navigation }) => {
                 }
             })
         })
-        requestLocationPermission()
+        localCurrentPosition()
         addHasReachedTopListener(onHasReachedTop);
         return () => {
             removeHasReachedTopListener(onHasReachedTop);
@@ -286,21 +286,6 @@ const RoomChatScreen = ({ route, navigation }) => {
     const handlerLongPressMessage = (action, message) => {
         console.log('handlerLongPressMessage', message)
         actionSheetRef.current?.show()
-    }
-
-    const requestLocationPermission = async () => {
-        if (Platform.OS === 'ios') {
-            const response = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
-            if (response === 'granted') {
-                localCurrentPosition()
-            }
-        }
-        else {
-            const response = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-            if (response === 'granted') {
-                localCurrentPosition()
-            }
-        }
     }
 
     const localCurrentPosition = () => {

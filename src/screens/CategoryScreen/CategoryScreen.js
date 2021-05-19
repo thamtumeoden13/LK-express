@@ -14,6 +14,7 @@ import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
 import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
+import LottieView from 'lottie-react-native';
 
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
@@ -29,7 +30,8 @@ const CategoryScreen = (props) => {
     const [state, setState] = useState({
         isLoading: true,
         userID: '',
-        level: ''
+        level: '',
+        isDataFetched: false
     })
 
     const [alert, setAlert] = useState({
@@ -46,6 +48,7 @@ const CategoryScreen = (props) => {
     const [categories, setCategories] = useState([])
 
     useEffect(() => {
+        setState(prev => { return { ...prev, isDataFetched: false } })
         setTimeout(async () => {
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
@@ -83,7 +86,7 @@ const CategoryScreen = (props) => {
         const categories = result.filter(e => { return !!e && Object.keys(e).length > 0 });
         setCategories(categories)
         console.log('categories', categories)
-        // setState(prev => { return { ...prev, isDataFetchedRoomList: true } })
+        setState(prev => { return { ...prev, isDataFetched: true } })
     }
 
     const onHandlerJoinCategory = (categoryID, categoryName) => {
@@ -173,12 +176,30 @@ const CategoryScreen = (props) => {
                 onCloseModalAlert={onCloseModalAlert}
             />
             <View style={styles.container}>
-                <FlatList
-                    keyExtractor={keyExtractor}
-                    data={categories}
-                    extraData={categories}
-                    renderItem={renderChild}
-                />
+                {!state.isDataFetched ?
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <LottieView
+                            source={require('@assets/animations/890-loading-animation.json')}
+                            colorFilters={[{
+                                keypath: "button",
+                                color: "#F00000"
+                            }, {
+                                keypath: "Sending Loader",
+                                color: "#F00000"
+                            }]}
+                            style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+                            autoPlay
+                            loop
+                        />
+                    </View>
+                    :
+                    <FlatList
+                        keyExtractor={keyExtractor}
+                        data={categories}
+                        extraData={categories}
+                        renderItem={renderChild}
+                    />
+                }
             </View>
         </SafeAreaView>
     );

@@ -31,7 +31,8 @@ const MainLayout = (props) => {
         slider1ActiveSlide: SLIDER_1_FIRST_ITEM,
         title: '',
         subtitle: '',
-        data: []
+        data: [],
+        loopData: false
     })
 
     const _renderItemWithParallax = ({ item, index }, parallaxProps) => {
@@ -58,28 +59,29 @@ const MainLayout = (props) => {
     }
 
     useEffect(() => {
-        if (!!props.data) {
-            setState(prev => {
-                return { ...prev, data: props.data }
-            })
-        }
+        setState(prev => {
+            return { ...prev, data: !!props.data ? props.data : [] }
+        })
     }, [props.data])
 
     useEffect(() => {
-        if (!!props.title) {
-            setState(prev => {
-                return { ...prev, title: props.title }
-            })
-        }
+        setState(prev => {
+            return { ...prev, title: !!props.title ? props.title : '' }
+        })
     }, [props.title])
 
     useEffect(() => {
-        if (!!props.subtitle) {
-            setState(prev => {
-                return { ...prev, subtitle: props.subtitle }
-            })
-        }
+        setState(prev => {
+            return { ...prev, subtitle: !!props.subtitle ? props.subtitle : '' }
+        })
     }, [props.subtitle])
+
+    useEffect(() => {
+        setState(prev => {
+            return { ...prev, loopData: !!props.loopData ? props.loopData : false }
+        })
+    }, [props.loopData])
+
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -112,7 +114,7 @@ const MainLayout = (props) => {
                                 // inactiveSlideShift={20}
                                 containerCustomStyle={styles.slider}
                                 contentContainerCustomStyle={styles.sliderContentContainer}
-                                loop={true}
+                                loop={state.loopData}
                                 loopClonesPerSide={2}
                                 autoplay={true}
                                 autoplayDelay={500}

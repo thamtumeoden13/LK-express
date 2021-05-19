@@ -157,6 +157,7 @@ const AddCategory = (props) => {
                     {!!listImage && listImage.length > 0 &&
                         <CarouselMainLayout
                             data={listImage}
+                            loopData={true}
                         // title={`Main Layout`}
                         // subtitle={`Default layout | Loop | Autoplay | Parallax | Scale | Opacity | Pagination with tappable dots`}
                         />
