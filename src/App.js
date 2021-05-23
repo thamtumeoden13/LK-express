@@ -119,8 +119,8 @@ const App = (props) => {
     })
 
     const [state, setState] = useState({
-        locationPermissionDenied: true,
-        notificationPermissionDenied: true,
+        locationPermissionDenied: false,
+        notificationPermissionDenied: false,
     })
 
     useEffect(() => {
@@ -176,9 +176,6 @@ const App = (props) => {
                         notificationPermissionDenied: response2 !== 'granted' ? true : false,
                     }
                 })
-                setTimeout(() => {
-
-                }, 500);
                 preOpenSettingPermission()
             }
         }

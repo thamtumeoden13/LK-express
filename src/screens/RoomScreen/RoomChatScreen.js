@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef, useLayoutEffect } from 'react'
 import {
-    FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity,
+    FlatList, Keyboard, SafeAreaView, Text, TextInput, Linking,
     View, KeyboardAvoidingView, Alert, ScrollView, Platform
 } from 'react-native'
 import { GiftedChat } from 'react-native-gifted-chat'
@@ -46,6 +46,7 @@ const RoomChatScreen = ({ route, navigation }) => {
         latitude: null,//10.851836,
         longitude: null,//106.797520
         geolocation: '',
+        geolocationByMessage: ''
     })
     const [usersExists, setUsersExists] = useState([])
     const [users, setUsers] = useState([])
@@ -99,7 +100,7 @@ const RoomChatScreen = ({ route, navigation }) => {
         console.log('state.level', state.level)
         if (state.level == 1) {
             navigation.setOptions({
-                headerRight: () => <ActionSheetIcon navigation={navigation} onOpen={() => actionSheetRef.current?.show()} />,
+                headerRight: () => <ActionSheetIcon navigation={navigation} onOpen={() => handlerUser()} />,
             });
         }
     }, [state.level])
@@ -123,6 +124,19 @@ const RoomChatScreen = ({ route, navigation }) => {
             setOtherUsers(newArray)
         }
     }, [users, usersExists])
+
+    useEffect(() => {
+        if (!!state.actionSheetType) {
+            actionSheetRef.current?.show()
+        } else {
+            actionSheetRef.current?.hide()
+        }
+
+    }, [state.actionSheetType])
+
+    const handlerUser = () => {
+        setState(prev => { return { ...prev, actionSheetType: 1 } })
+    }
 
     const onHasReachedTop = hasReachedTop => {
         if (hasReachedTop)
@@ -256,6 +270,7 @@ const RoomChatScreen = ({ route, navigation }) => {
     }
 
     const onAddUser = (user) => {
+        setState(prev => { return { ...prev, actionSheetType: 0 } })
         // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
         entityRef.doc(`${state.roomID}`).collection('users')
             .doc().set(user)
@@ -270,6 +285,7 @@ const RoomChatScreen = ({ route, navigation }) => {
     }
 
     const onRemoveUser = (user) => {
+        setState(prev => { return { ...prev, actionSheetType: 0 } })
         // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
         entityRef.doc(`${state.roomID}`).collection('users')
             .doc(user.doc).delete()
@@ -284,8 +300,21 @@ const RoomChatScreen = ({ route, navigation }) => {
     }
 
     const handlerLongPressMessage = (action, message) => {
-        console.log('handlerLongPressMessage', message)
-        actionSheetRef.current?.show()
+        console.log('message.geolocation', message.geolocation)
+        setState(prev => {
+            return {
+                ...prev,
+                actionSheetType: 2,
+                geolocationByMessage: message.geolocation
+            }
+        })
+    }
+
+    const onpenMaps = () => {
+        setState(prev => { return { ...prev, actionSheetType: 0 } })
+        const url = `maps:${state.geolocationByMessage}`
+        console.log('url', url)
+        Linking.openURL(url);
     }
 
     const localCurrentPosition = () => {
@@ -335,6 +364,126 @@ const RoomChatScreen = ({ route, navigation }) => {
         onLongPress={handlerLongPressMessage}
         onPressAvatar={() => Alert.alert('yyy')}
     />
+
+    const listUser = <View style={styles.containerActionSheet}>
+        {usersExists.map((item, index) => (
+            <TouchableScale
+                // style={style.button}
+                // onPress={() => selectPhotoTapped(item, index)}
+                activeScale={0.9}
+                key={`${item.email.toString()}-${index.toString()}`}
+            >
+                <View style={{
+                    backgroundColor: '#fe8a71', width: '100%',
+                    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
+                    paddingVertical: scale(10),
+                    marginVertical: scale(5),
+                    borderRadius: scale(10)
+                }}>
+                    <Text style={{ color: '#0e9aa7', padding: scale(5), width: '80%' }}>{item.email}</Text>
+                    <TouchableScale
+                        activeScale={2}
+                        key={index}
+                        style={{
+                            // width: scale(20),
+                            // height: scale(20),
+                            // borderRadius: scale(10),
+                            // backgroundColor: '#fe8a71',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                        onPress={() => {
+                            actionSheetRef.current?.hide();
+                            onRemoveUser(item)
+                        }}
+                    >
+                        <AntDesignIcon
+                            name='minus'
+                            size={scale(16)}
+                            color='#0e9aa7'
+                        />
+                    </TouchableScale>
+                </View>
+            </TouchableScale>
+        ))}
+        {otherUsers.map((item, index) => (
+            <TouchableScale
+                // style={style.button}
+                // onPress={() => selectPhotoTapped(item, index)}
+                activeScale={0.9}
+                key={`${item.email.toString()}-${index.toString()}`}
+            >
+                <View style={{
+                    backgroundColor: '#f6cd61',
+                    width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
+                    paddingVertical: scale(10),
+                    marginVertical: scale(5),
+                    borderRadius: scale(10)
+                }}>
+                    <Text style={{ width: '80%', color: '#4a4e4d', padding: scale(5) }}>{item.email}</Text>
+                    <TouchableScale
+                        activeScale={2}
+                        onPress={() => {
+                            actionSheetRef.current?.hide();
+                            onAddUser(item)
+                        }}
+                        key={index}
+                        style={{
+                            // width: scale(20),
+                            // height: scale(20),
+                            // borderRadius: scale(10),
+                            backgroundColor: '#f6cd61',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <AntDesignIcon
+                            name='plus'
+                            size={scale(16)}
+                            color='#0e9aa7'
+                        />
+                    </TouchableScale>
+                </View>
+            </TouchableScale>
+        ))}
+    </View>
+
+    const locationUser =
+        <View style={styles.containerActionSheet}>
+            <TouchableScale
+                // style={style.button}
+                onPress={() => {
+                    actionSheetRef.current?.hide();
+                    onpenMaps()
+                }}
+                activeScale={0.9}
+            >
+                <View style={{
+                    backgroundColor: '#fe8a71', width: '100%',
+                    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
+                    paddingVertical: scale(10),
+                    marginVertical: scale(5),
+                    borderRadius: scale(10)
+                }}>
+                    <Text style={{ color: '#0e9aa7', padding: scale(5), width: '80%' }}>{state.geolocationByMessage}</Text>
+                    <TouchableScale
+                        activeScale={2}
+                        style={{
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <AntDesignIcon
+                            name='minus'
+                            size={scale(16)}
+                            color='#0e9aa7'
+                        />
+                    </TouchableScale>
+                </View>
+            </TouchableScale>
+
+        </View>
+
     const actionSheet = <ActionSheet
         initialOffsetFromBottom={0.6}
         ref={actionSheetRef}
@@ -360,88 +509,7 @@ const RoomChatScreen = ({ route, navigation }) => {
             }
             style={styles.scrollview}
         >
-            <View style={styles.containerActionSheet}>
-                {usersExists.map((item, index) => (
-                    <TouchableScale
-                        // style={style.button}
-                        // onPress={() => selectPhotoTapped(item, index)}
-                        activeScale={0.9}
-                        key={`${item.email.toString()}-${index.toString()}`}
-                    >
-                        <View style={{
-                            backgroundColor: '#fe8a71', width: '100%',
-                            flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
-                            paddingVertical: scale(10),
-                            marginVertical: scale(5),
-                            borderRadius: scale(10)
-                        }}>
-                            <Text style={{ color: '#0e9aa7', padding: scale(5), width: '80%' }}>{item.email}</Text>
-                            <TouchableScale
-                                activeScale={2}
-                                key={index}
-                                style={{
-                                    // width: scale(20),
-                                    // height: scale(20),
-                                    // borderRadius: scale(10),
-                                    // backgroundColor: '#fe8a71',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }}
-                                onPress={() => {
-                                    actionSheetRef.current?.hide();
-                                    onRemoveUser(item)
-                                }}
-                            >
-                                <AntDesignIcon
-                                    name='minus'
-                                    size={scale(16)}
-                                    color='#0e9aa7'
-                                />
-                            </TouchableScale>
-                        </View>
-                    </TouchableScale>
-                ))}
-                {otherUsers.map((item, index) => (
-                    <TouchableScale
-                        // style={style.button}
-                        // onPress={() => selectPhotoTapped(item, index)}
-                        activeScale={0.9}
-                        key={`${item.email.toString()}-${index.toString()}`}
-                    >
-                        <View style={{
-                            backgroundColor: '#f6cd61',
-                            width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
-                            paddingVertical: scale(10),
-                            marginVertical: scale(5),
-                            borderRadius: scale(10)
-                        }}>
-                            <Text style={{ width: '80%', color: '#4a4e4d', padding: scale(5) }}>{item.email}</Text>
-                            <TouchableScale
-                                activeScale={2}
-                                onPress={() => {
-                                    actionSheetRef.current?.hide();
-                                    onAddUser(item)
-                                }}
-                                key={index}
-                                style={{
-                                    // width: scale(20),
-                                    // height: scale(20),
-                                    // borderRadius: scale(10),
-                                    backgroundColor: '#f6cd61',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <AntDesignIcon
-                                    name='plus'
-                                    size={scale(16)}
-                                    color='#0e9aa7'
-                                />
-                            </TouchableScale>
-                        </View>
-                    </TouchableScale>
-                ))}
-            </View>
+            {state.actionSheetType == 1 ? listUser : locationUser}
             {/*  Add a Small Footer at Bottom */}
             <View style={styles.footer} />
         </ScrollView>
