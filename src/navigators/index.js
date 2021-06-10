@@ -11,8 +11,9 @@ import LottieView from 'lottie-react-native';
 import {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
     HomeScreen, ChatScreen, ChatDetailScreen, RoomScreen, RoomChatScreen,
+    PhoneBookScreen,
     ProfileScreen,
-    CategoryScreen, CategoryDetailScreen, AddCategoryScreen
+    CategoryScreen, CategoryDetailScreen, AddCategoryScreen,
 } from '../screens'
 
 import DrawerIcon from 'components/common/icon/DrawerIcon'
@@ -55,8 +56,42 @@ function HomeStackScreen({ navigation }) {
     );
 }
 
-const RoomChatStack = createStackNavigator();
+const ChatStack = createStackNavigator();
+function ChatStackScreen({ navigation }) {
+    return (
+        <ChatStack.Navigator initialRouteName="Chat">
+            <ChatStack.Screen
+                name="Chat"
+                component={ChatScreen}
+                options={{
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Tin nhắn`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+            <ChatStack.Screen
+                name="ChatDetail"
+                component={ChatDetailScreen}
+                options={{
+                    headerLeft: () => <BackIcon navigation={navigation} />,
+                    // headerTitle: () => <HeaderTitle title={`Phòng chat 111`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+            <ChatStack.Screen
+                name="RoomChatDetail"
+                component={RoomChatScreen}
+                options={{
+                    headerLeft: () => <BackIcon navigation={navigation} />,
+                    // headerTitle: () => <HeaderTitle title={`Phòng chat 111`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+        </ChatStack.Navigator>
+    );
+}
 
+const RoomChatStack = createStackNavigator();
 function RoomChatStackScreen({ navigation }) {
     return (
         <RoomChatStack.Navigator initialRouteName="RoomChat">
@@ -78,7 +113,24 @@ function RoomChatStackScreen({ navigation }) {
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
-            <RoomChatStack.Screen
+        </RoomChatStack.Navigator>
+    );
+}
+
+const PhoneBookStack = createStackNavigator();
+function PhoneBookStackScreen({ navigation }) {
+    return (
+        <PhoneBookStack.Navigator initialRouteName="PhoneBook">
+            <PhoneBookStack.Screen
+                name="PhoneBook"
+                component={PhoneBookScreen}
+                options={{
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Danh bạ`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+            <PhoneBookStack.Screen
                 name="ChatDetail"
                 component={ChatDetailScreen}
                 options={{
@@ -87,7 +139,7 @@ function RoomChatStackScreen({ navigation }) {
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
-        </RoomChatStack.Navigator>
+        </PhoneBookStack.Navigator>
     );
 }
 
@@ -156,7 +208,7 @@ function TabStack() {
             }}
             initialRouteName='Home'
         >
-            <Tab.Screen name="Home" component={HomeStackScreen}
+            {/* <Tab.Screen name="Home" component={HomeStackScreen}
                 options={{
                     tabBarLabel: 'Home',
                     tabBarIcon: ({ color, size }) => (
@@ -178,10 +230,10 @@ function TabStack() {
                         </View>
                     )
                 }}
-            />
-            <Tab.Screen name="RoomChat" component={RoomChatStackScreen}
+            /> */}
+            <Tab.Screen name="Chat" component={ChatStackScreen}
                 options={{
-                    tabBarLabel: 'Phòng chat',
+                    tabBarLabel: 'Tin nhắn',
                     tabBarIcon: ({ color, size }) => (
                         // <MaterialCommunityIcons name="battlenet" color={color} size={size} />
                         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -200,7 +252,57 @@ function TabStack() {
                             />
                         </View>
                     ),
-                    tabBarBadge: 3,
+                    // tabBarBadge: 3,
+                    tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
+                }}
+            />
+            <Tab.Screen name="RoomChat" component={RoomChatStackScreen}
+                options={{
+                    tabBarLabel: 'Nhóm',
+                    tabBarIcon: ({ color, size }) => (
+                        // <MaterialCommunityIcons name="battlenet" color={color} size={size} />
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <LottieView
+                                source={require('@assets/animations/group-chat.json')}
+                                colorFilters={[{
+                                    keypath: "button",
+                                    color: "#F00000"
+                                }, {
+                                    keypath: "Sending Loader",
+                                    color: "#F00000"
+                                }]}
+                                style={{ width: scale(28), height: scale(28), justifyContent: 'center' }}
+                                autoPlay
+                                loop
+                            />
+                        </View>
+                    ),
+                    // tabBarBadge: 3,
+                    tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
+                }}
+            />
+            <Tab.Screen name="PhoneBook" component={PhoneBookStackScreen}
+                options={{
+                    tabBarLabel: 'Danh bạ',
+                    tabBarIcon: ({ color, size }) => (
+                        // <MaterialCommunityIcons name="battlenet" color={color} size={size} />
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <LottieView
+                                source={require('@assets/animations/phone-book.json')}
+                                colorFilters={[{
+                                    keypath: "button",
+                                    color: "#F00000"
+                                }, {
+                                    keypath: "Sending Loader",
+                                    color: "#F00000"
+                                }]}
+                                style={{ width: scale(30), height: scale(30), justifyContent: 'center' }}
+                                autoPlay
+                                loop
+                            />
+                        </View>
+                    ),
+                    // tabBarBadge: 3,
                     tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
                 }}
             />
@@ -225,7 +327,7 @@ function TabStack() {
                             />
                         </View>
                     ),
-                    tabBarBadge: 5,
+                    // tabBarBadge: 5,
                     tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
                 }}
             />
@@ -352,7 +454,7 @@ export default () => {
                 dispatch({ type: 'SIGN_OUT' })
                 AsyncStorage.removeItem('User')
             },
-            signUp: async (email, password, fullName, avatarURL) => {
+            signUp: async (email, password, fullName, avatarURL, phoneNumber) => {
                 // In a production app, we need to send user data to server and get a token
                 // We will also need to handle errors if sign up failed
                 // After getting token, we need to persist the token using `SecureStore`
@@ -367,6 +469,7 @@ export default () => {
                             email,
                             fullName,
                             avatarURL: avatarURL,
+                            phoneNumber: phoneNumber,
                             level: 2
                         };
                         const usersRef = firebase.firestore().collection('users')
@@ -403,8 +506,8 @@ export default () => {
                     ) : (
                         <>
                             <Drawer.Screen name="Home" component={TabStack} />
-                            <Drawer.Screen name="RoomChatDetail" component={RoomChatScreen} />
-                            <Drawer.Screen name="ChatDetail" component={ChatScreen} />
+                            <Drawer.Screen name="RoomChat" component={RoomChatScreen} />
+                            <Drawer.Screen name="Chat" component={ChatScreen} />
                         </>
                     )}
                 </Drawer.Navigator>

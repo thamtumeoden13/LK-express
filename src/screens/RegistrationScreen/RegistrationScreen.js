@@ -10,6 +10,7 @@ const RegistrationScreen = ({ navigation }) => {
     const [state, setState] = useState({
         fullName: '',
         email: '',
+        phoneNumber: '',
         password: '',
         confirmPassword: '',
         avatarURL: listDataElement[Math.floor(Math.random() * (listDataElement.length - 1))].avatar_url
@@ -28,20 +29,21 @@ const RegistrationScreen = ({ navigation }) => {
             alert("Passwords don't match.")
             return
         }
-        signUp(state.email, state.password, state.fullName, state.avatarURL)
+        signUp(state.email, state.password, state.fullName, state.avatarURL, state.phoneNumber)
     }
     return (
         <View style={styles.container}>
             <KeyboardAwareScrollView
                 style={{ flex: 1, width: '100%' }}
-                keyboardShouldPersistTaps="always">
+            // keyboardShouldPersistTaps="always"
+            >
                 <Image
                     style={styles.logo}
                     source={state.avatarURL ? { uri: state.avatarURL } : require('../../../assets/bootsplash_logo.png')}
                 />
                 <TextInput
                     style={styles.input}
-                    placeholder='Full Name'
+                    placeholder='Họ tên'
                     placeholderTextColor="#aaaaaa"
                     onChangeText={(text) => handlerChangeText('fullName', text)}
                     value={state.fullName}
@@ -54,6 +56,17 @@ const RegistrationScreen = ({ navigation }) => {
                     placeholderTextColor="#aaaaaa"
                     onChangeText={(text) => handlerChangeText('email', text)}
                     value={state.email}
+                    keyboardType={'email-address'}
+                    underlineColorAndroid="transparent"
+                    autoCapitalize="none"
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder='Số điện thoại'
+                    placeholderTextColor="#aaaaaa"
+                    onChangeText={(text) => handlerChangeText('phoneNumber', text)}
+                    value={state.email}
+                    keyboardType={'number-pad'}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
                 />
@@ -61,7 +74,7 @@ const RegistrationScreen = ({ navigation }) => {
                     style={styles.input}
                     placeholderTextColor="#aaaaaa"
                     // secureTextEntry
-                    placeholder='Password'
+                    placeholder='Mật khẩu'
                     onChangeText={(text) => handlerChangeText('password', text)}
                     value={state.password}
                     underlineColorAndroid="transparent"
@@ -71,7 +84,7 @@ const RegistrationScreen = ({ navigation }) => {
                     style={styles.input}
                     placeholderTextColor="#aaaaaa"
                     // secureTextEntry
-                    placeholder='Confirm Password'
+                    placeholder='Nhập lại mật khẩu'
                     onChangeText={(text) => handlerChangeText('confirmPassword', text)}
                     value={state.confirmPassword}
                     underlineColorAndroid="transparent"

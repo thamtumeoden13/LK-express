@@ -2,12 +2,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView, Keyboard, Alert } from 'react-native'
-import AntDesignIcons from 'react-native-vector-icons/AntDesign'
-import IonIcons from 'react-native-vector-icons/Ionicons'
 import AsyncStorage from '@react-native-community/async-storage';
 import TouchableScale from 'react-native-touchable-scale';
-import LinearGradient from 'react-native-linear-gradient';
 import LottieView from 'lottie-react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { AuthContext } from '../../utils'
 import { notificationManager } from '../../utils/NotificationManager'
@@ -82,7 +80,6 @@ const HomeScreen = (props) => {
             let document = `${userConnect.id}|${state.userID}`
             let documentRevert = `${state.userID}|${userConnect.id}`
             const isExistsCollection = await checkExistsCollection(document, documentRevert)
-            console.log('isExistsCollection', isExistsCollection)
             if (!isExistsCollection) {
                 onCreateNewConnect(state.user, userConnect)
                 return
@@ -99,9 +96,10 @@ const HomeScreen = (props) => {
 
         const isExistsCollection = await entityChatRef.doc(document).collection('messages').get()
         const isExistsCollectionRevert = await entityChatRef.doc(documentRevert).collection('messages').get()
-        console.log('isExistsCollection', isExistsCollection.docs.length)
-        console.log('isExistsCollectionRevert', isExistsCollectionRevert.docs.length)
-        return isExistsCollection.docs.length > 0 || isExistsCollectionRevert.docs.length > 0
+        if (isExistsCollection.docs.length > 0) return document
+        if (isExistsCollectionRevert.docs.length > 0) return documentRevert
+
+        return ''
     }
 
     const getUsersInfo = async () => {
@@ -227,105 +225,99 @@ const HomeScreen = (props) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.cirle} />
-            <View style={{ margintop: verticalScale(64), paddingVertical: verticalScale(20) }}>
-                <Image
-                    source={!!state.avatarURL ? { uri: state.avatarURL } : require('../../../assets/bootsplash_logo.png')}
-                    style={{ width: moderateScale(100), height: moderateScale(100), alignSelf: 'center' }}
-                />
-                <Text style={{ alignSelf: 'center' }}>{state.email}</Text>
-            </View>
-            {state.level == 1 && <View style={{ marginHorizontal: moderateScale(32) }}>
-                <Text style={styles.header}>{state.level == 1 ? `Tạo phòng` : `Vào phòng`}</Text>
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingVertical: verticalScale(10)
-                }} >
-                    <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: moderateScale(10) }}>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={roomID => onHandlerInput('roomID', roomID)}
-                            placeholder={'Nhập ID phòng'}
-                            autoCapitalize='none'
-                        >
-                            {state.roomID}
-                        </TextInput>
-                    </View>
-                    <TouchableScale
-                        // style={{ backgroundColor: 'red', width: calcWidth(15), height: calcWidth(15),}}
-                        onPress={() => handlerContinue('roomID')}
-                        activeScale={1.5}
-                    >
-                        <LottieView
-                            source={require('@assets/animations/plus.json')}
-                            colorFilters={[{
-                                keypath: "button",
-                                color: "#F00000"
-                            }, {
-                                keypath: "Sending Loader",
-                                color: "#F00000"
-                            }]}
-                            style={{ width: calcWidth(15), height: calcWidth(15), justifyContent: 'center' }}
-                            autoPlay
-                            loop
-                        />
-                    </TouchableScale>
-                    {/* <TouchableOpacity
-                        style={styles.continue}
-                        onPress={() => handlerContinue('roomID')}
-                    >
-                        <AntDesignIcons name={state.level == 1 ? "plus" : "arrowright"} size={scale(24)} color="#fff" />
-                    </TouchableOpacity> */}
+            <KeyboardAwareScrollView
+                style={{ flex: 1, width: '100%' }}
+            // keyboardShouldPersistTaps="always"
+            >
+                <View style={styles.cirle} />
+                <View style={{ margintop: verticalScale(64), paddingVertical: verticalScale(20) }}>
+                    <Image
+                        source={!!state.avatarURL ? { uri: state.avatarURL } : require('../../../assets/bootsplash_logo.png')}
+                        style={{ width: moderateScale(100), height: moderateScale(100), alignSelf: 'center' }}
+                    />
+                    <Text style={{ alignSelf: 'center' }}>{state.email}</Text>
                 </View>
-            </View>
-            }
-            <View style={{ marginHorizontal: moderateScale(32) }}>
-                <Text style={styles.header}>{`Kết nối`}</Text>
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingVertical: verticalScale(10)
-                }} >
-                    <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: moderateScale(10) }}>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={connectUser => onHandlerInput('connectUser', connectUser)}
-                            placeholder={'Nhập tên bạn bè'}
-                            autoCapitalize='none'
-                        >
-                            {state.connectUser}
-                        </TextInput>
+                {state.level == 1 &&
+                    <View style={{ marginHorizontal: moderateScale(32) }}>
+                        <Text style={styles.header}>{state.level == 1 ? `Tạo phòng` : `Vào phòng`}</Text>
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            paddingVertical: verticalScale(10)
+                        }} >
+                            <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: moderateScale(10) }}>
+                                <TextInput
+                                    style={styles.input}
+                                    onChangeText={roomID => onHandlerInput('roomID', roomID)}
+                                    placeholder={'Nhập ID phòng'}
+                                    autoCapitalize='none'
+                                >
+                                    {state.roomID}
+                                </TextInput>
+                            </View>
+                            <TouchableScale
+                                // style={{ backgroundColor: 'red', width: calcWidth(15), height: calcWidth(15),}}
+                                onPress={() => handlerContinue('roomID')}
+                                activeScale={1.5}
+                            >
+                                <LottieView
+                                    source={require('@assets/animations/plus.json')}
+                                    colorFilters={[{
+                                        keypath: "button",
+                                        color: "#F00000"
+                                    }, {
+                                        keypath: "Sending Loader",
+                                        color: "#F00000"
+                                    }]}
+                                    style={{ width: calcWidth(15), height: calcWidth(15), justifyContent: 'center' }}
+                                    autoPlay
+                                    loop
+                                />
+                            </TouchableScale>
+                        </View>
                     </View>
-                    <TouchableScale
-                        // style={style.button}
-                        onPress={() => handlerContinue('connectUser')}
-                        activeScale={1.5}
-                    >
-                        <LottieView
-                            source={require('@assets/animations/add-user.json')}
-                            colorFilters={[{
-                                keypath: "button",
-                                color: "#F00000"
-                            }, {
-                                keypath: "Sending Loader",
-                                color: "#F00000"
-                            }]}
-                            style={{ width: calcWidth(15), height: calcWidth(15), justifyContent: 'center' }}
-                            autoPlay
-                            loop
-                        />
-                    </TouchableScale>
-                    {/* <TouchableOpacity
-                        style={styles.continue}
-                        onPress={() => handlerContinue('connectUser')}
-                    >
-                        <AntDesignIcons name="sharealt" size={scale(24)} color="#fff" />
-                    </TouchableOpacity> */}
+                }
+                <View style={{ marginHorizontal: moderateScale(32) }}>
+                    <Text style={styles.header}>{`Kết nối`}</Text>
+                    <View style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        paddingVertical: verticalScale(10)
+                    }} >
+                        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: moderateScale(10) }}>
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={connectUser => onHandlerInput('connectUser', connectUser)}
+                                placeholder={'Nhập tên bạn bè'}
+                                autoCapitalize='none'
+                            >
+                                {state.connectUser}
+                            </TextInput>
+                        </View>
+                        <TouchableScale
+                            // style={style.button}
+                            onPress={() => handlerContinue('connectUser')}
+                            activeScale={1.5}
+                        >
+                            <LottieView
+                                source={require('@assets/animations/add-user.json')}
+                                colorFilters={[{
+                                    keypath: "button",
+                                    color: "#F00000"
+                                }, {
+                                    keypath: "Sending Loader",
+                                    color: "#F00000"
+                                }]}
+                                style={{ width: calcWidth(15), height: calcWidth(15), justifyContent: 'center' }}
+                                autoPlay
+                                loop
+                            />
+                        </TouchableScale>
+                    </View>
                 </View>
-            </View>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     )
 }

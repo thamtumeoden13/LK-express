@@ -40,7 +40,6 @@ const RoomChatScreen = ({ route, navigation }) => {
         userID: '',
         userName: '',
         avatarURL: '',
-        isActivedLocalPushNotify: false,
         level: '',
         actionSheetType: 0,
         latitude: null,//10.851836,

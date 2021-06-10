@@ -54,7 +54,6 @@ const RoomChatScreen = ({ route, navigation }) => {
         documentID: '',
         userName: '',
         avatarURL: '',
-        isActivedLocalPushNotify: false,
         level: '',
         user: {},
         userConnect: {},
@@ -109,7 +108,7 @@ const RoomChatScreen = ({ route, navigation }) => {
         // let unsubscribe
         if (!!state.userConnect && Object.keys(state.userConnect).length > 0) {
             navigation.setOptions({
-                headerTitle: () => <HeaderTitle title={`${state.userConnect.email}`} />,
+                headerTitle: () => <HeaderTitle title={`${state.userConnect.fullName}`} />,
             });
             const query = entityChatRef
                 .doc(`${state.documentID}`)
@@ -126,7 +125,6 @@ const RoomChatScreen = ({ route, navigation }) => {
         querySnapshot.docChanges().forEach(change => {
             const message = change.doc.data()
             if (change.type === "added") {
-                console.log("New message: ", change.doc.data());
                 messagesFireStore.push({
                     ...message,
                     createdAt: message.createdAt.toDate(),
@@ -145,8 +143,6 @@ const RoomChatScreen = ({ route, navigation }) => {
             }
         })
         messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        console.log('messagesFireStore', messagesFireStore)
-        console.log('state.userConnect', state.userConnect)
         appendMessages(messagesFireStore, state.user, state.userConnect)
     }
 
@@ -156,13 +152,11 @@ const RoomChatScreen = ({ route, navigation }) => {
             const user = doc.data()
             return { ...user, doc: doc.id }
         })
-        console.log(' users[0] ', users[0])
         setState(prev => { return { ...prev, userConnect: users[0] } })
     }
 
     const appendMessages = useCallback((messages, user, userConnect) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-        console.log('appendMessages', messages, user, state.userConnect)
         if (!!messages && messages.length > 0 && user.id != messages[0].authorID) {
             handlerLocalPushNotify(messages[0], state.userConnect)
         }
@@ -174,7 +168,6 @@ const RoomChatScreen = ({ route, navigation }) => {
             playSound: true,
             vibrate: true
         }
-        console.log('notificationManager', messages, userConnect)
         notificationManager.showNotification(
             Math.random(),
             `${userConnect.fullName}`,
@@ -226,7 +219,6 @@ const RoomChatScreen = ({ route, navigation }) => {
     }
 
     const handlerLongPressMessage = (action, message) => {
-        console.log('handlerLongPressMessage', message)
         actionSheetRef.current?.show()
     }
 
@@ -293,7 +285,6 @@ const RoomChatScreen = ({ route, navigation }) => {
         onPressAvatar={() => Alert.alert('yyy')}
     />
 
-    console.log('userConnect-------end', state.userConnect)
     return (
         <SafeAreaView style={{ flex: 1 }} >
             {chat}

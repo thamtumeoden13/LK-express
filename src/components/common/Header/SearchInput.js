@@ -1,31 +1,45 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, version } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Button } from 'react-native'
 import { SearchBar, Input, Icon } from 'react-native-elements';
+import { withNavigation } from '@react-navigation/compat'
 
-export const SearchInput = () => {
+import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
+
+const SearchInput = (props) => {
+
+    const [state, setState] = useState({
+        placeholder: 'Vui lòng nhập',
+    })
+
     const [input, setInput] = useState('')
+
+    const onChangeValue = (value) => {
+        setInput(value)
+        if (props.handerSearchInput) {
+            props.handerSearchInput(value, state.users, state.usersFilter)
+        }
+    }
 
     return (
         <View style={styles.searchBar}>
             <Input
                 value={input}
-                onChangeText={input => setInput(input)}
-                placeholder="Nhập dịch vụ"
-                returnKeyType="go"
+                onChangeText={input => onChangeValue(input)}
+                placeholder={state.placeholder}
+                containerStyle={{ height: verticalScale(32), }}
                 inputContainerStyle={styles.inputContainer}
                 inputStyle={styles.inputStyle}
                 autoFocus={false}
                 autoCapitalize="none"
-                keyboardAppearance="light"
                 autoCorrect={false}
                 blurOnSubmit={false}
-                placeholderTextColor="#fff"
-                leftIcon={<Icon name="search" type="font-awesome" color="#fff" size={18} />}
+                placeholderTextColor="#6a6a6a"
+                leftIcon={<Icon name="search" type="font-awesome" color="#6a6a6a" size={scale(14)} />}
                 rightIcon={
                     input.length > 0 ?
-                        <TouchableOpacity onPress={() => setInput('')}>
-                            <Icon name="remove" type="font-awesome" color="#fff" size={18} right={10} />
+                        <TouchableOpacity onPress={() => setInput('')} style={{ right: scale(10) }}>
+                            <Icon name="remove" type="font-awesome" color="#6a6a6a" size={scale(14)} />
                         </TouchableOpacity>
                         : <View></View>
                 }
@@ -33,26 +47,27 @@ export const SearchInput = () => {
         </View>
     )
 }
+export default withNavigation(SearchInput);
 
 const styles = StyleSheet.create({
     searchBar: {
-        width: '100%',
-        height: 40,
+        flex: 1,
+        flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center',
+        width: calcWidth(80),
     },
     inputContainer: {
-        paddingLeft: 8,
-        borderRadius: 40,
+        paddingLeft: scale(8),
+        borderRadius: scale(8),
         borderWidth: 1,
-        borderColor: '#fff',
-        height: 40,
-        marginVertical: 10,
+        borderColor: '#6a6a6a',
+        height: verticalScale(32),
     },
     inputStyle: {
         flex: 1,
-        marginLeft: 10,
-        color: '#fff',
-        fontSize: 16,
+        marginLeft: moderateScale(10),
+        color: '#000',
+        fontSize: scale(14),
+        height: verticalScale(32),
     }
 })

@@ -57,7 +57,7 @@ const DrawerContentComponents = ({ navigation}) => {
                 <TouchableOpacity onPress={() => navigateToScreen('RoomChat')}>
                     <View style={[styles.screenStyle, (state.activeItemKey == 'RoomChat') ? styles.activeBackgroundColor : null]}>
                         <Icon name="sort" type="material" size={scale(22)} color={(state.activeItemKey == 'RoomChat') ? '#00adff' : '#000'} />
-                        <Text style={[styles.screenTextStyle, (state.activeItemKey == 'RoomChat') ? styles.selectedTextStyle : null]}>{`Phòng chat`}</Text>
+                        <Text style={[styles.screenTextStyle, (state.activeItemKey == 'RoomChat') ? styles.selectedTextStyle : null]}>{`Tin nhắn`}</Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigateToScreen('Category')}>
