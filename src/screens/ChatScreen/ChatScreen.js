@@ -1,20 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
 import { StackActions } from '@react-navigation/native';
-import { Container, Tab, Tabs, TabHeading } from 'native-base';
 import AsyncStorage from '@react-native-community/async-storage';
-import { GiftedChat } from 'react-native-gifted-chat'
 import { ListItem, Avatar, Badge } from 'react-native-elements';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
 import LottieView from 'lottie-react-native';
 import format from 'date-fns/format'
-import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import { vi } from 'date-fns/locale/vi'
 
 import { firebase } from '../../firebase/config'
-import { notificationManager } from '../../utils/NotificationManager'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
+import HeaderSearchInput from 'components/common/Header/SearchInput'
 import styles from './styles';
 
 const RoomScreen = (props) => {
@@ -37,6 +34,7 @@ const RoomScreen = (props) => {
     const [usersByChat, setUsersByChat] = useState([])
     const [users, setUsers] = useState([])
     const [allChats, setAllChats] = useState([])
+    const [allChatsFilter, setAllChatsFilter] = useState([])
 
     useEffect(() => {
         const focusListener = props.navigation.addListener('focus', async () => {
@@ -56,7 +54,6 @@ const RoomScreen = (props) => {
         }
     }, [])
 
-
     useEffect(() => {
         if (!!state.userID) {
             const unsubscribeRoomList = entityRef.onSnapshot(getRealtimeCollectionRoomList, err => Alert.alert(error))
@@ -70,6 +67,17 @@ const RoomScreen = (props) => {
     }, [state.userID])
 
     useEffect(() => {
+        props.navigation.setOptions({
+            headerTitle: () =>
+                <HeaderSearchInput
+                    placeholder={'Tìm tin nhắn, bạn bè'}
+                    handerSearchInput={(value) => onHanderSearchInput(value)}
+                />,
+            headerRight: () => null,
+        });
+    }, [props.navigation, allChats])
+
+    useEffect(() => {
         if (!!users && users.length > 0) {
             const unsubscribeChatList = entityChatRef.onSnapshot(getRealtimeCollectionChatList, err => Alert.alert(error))
             return () => {
@@ -81,8 +89,23 @@ const RoomScreen = (props) => {
     useEffect(() => {
         let allChats = [...rooms, ...usersByChat]
         allChats.sort((a, b) => b.currentCreatedAt.toDate().getTime() - a.currentCreatedAt.toDate().getTime())
+        console.log('allChats', allChats)
         setAllChats(allChats)
+        setAllChatsFilter(allChats)
     }, [rooms, usersByChat])
+
+    const onHanderSearchInput = (searchInput) => {
+        if (searchInput) {
+            const newData = allChats.filter((item) => {
+                const textData = searchInput.toUpperCase()
+                const itemData = `${item.currentMessage.toUpperCase()},${item[`${item.type == 1 ? 'currentUser' : 'roomID'}`].toUpperCase()}`
+                return itemData.indexOf(textData) > -1
+            })
+            setAllChatsFilter(newData)
+        } else {
+            setAllChatsFilter(allChats)
+        }
+    }
 
     const getRealtimeCollectionRoomList = async (querySnapshot) => {
         const reads = querySnapshot.docs.map(async (doc) => {
@@ -270,11 +293,11 @@ const RoomScreen = (props) => {
                 </View>
                 :
                 <>
-                    {!!allChats && allChats.length > 0 &&
+                    {!!allChatsFilter && allChatsFilter.length > 0 &&
                         <FlatList
                             keyExtractor={keyExtractor}
-                            data={allChats}
-                            extraData={allChats}
+                            data={allChatsFilter}
+                            extraData={allChatsFilter}
                             renderItem={renderItem}
                         />
                     }

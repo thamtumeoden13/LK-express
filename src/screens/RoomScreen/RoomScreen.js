@@ -45,13 +45,6 @@ const RoomScreen = (props) => {
                     user: user
                 }
             })
-            const unsubscribeRoomList = entityRef.onSnapshot(getRealtimeCollectionRoomList, err => Alert.alert(error))
-            const queryUserList = entityUserRef.where("id", "!=", user.id)
-            const unsubscribeUserList = queryUserList.onSnapshot(getRealtimeCollectionUserList, err => Alert.alert(error))
-            return () => {
-                unsubscribeRoomList()
-                unsubscribeUserList()
-            }
         });
         return () => {
             focusListener
@@ -62,7 +55,7 @@ const RoomScreen = (props) => {
         props.navigation.setOptions({
             headerTitle: () =>
                 <HeaderSearchInput
-                    placeholder={'Nhập tên nhóm'}
+                    placeholder={'Tìm nhóm'}
                     handerSearchInput={(value) => onHanderSearchInput(value)}
                 />,
             headerRight: () => null,
@@ -125,11 +118,6 @@ const RoomScreen = (props) => {
 
     const onHandlerJoinRoom = (roomID) => {
         const pushAction = StackActions.push('RoomChatDetail', { id: roomID })
-        props.navigation.dispatch(pushAction)
-    }
-
-    const onHandlerConnectRoom = (docID) => {
-        const pushAction = StackActions.push('ChatDetail', { id: docID })
         props.navigation.dispatch(pushAction)
     }
 

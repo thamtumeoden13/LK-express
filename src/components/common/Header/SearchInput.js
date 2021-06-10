@@ -14,6 +14,10 @@ const SearchInput = (props) => {
 
     const [input, setInput] = useState('')
 
+    useEffect(() => {
+        setState(prev => { return { ...prev, placeholder: !!props.placeholder ? props.placeholder : state.placeholder } })
+    }, [props.placeholder])
+
     const onChangeValue = (value) => {
         setInput(value)
         if (props.handerSearchInput) {
@@ -38,7 +42,7 @@ const SearchInput = (props) => {
                 leftIcon={<Icon name="search" type="font-awesome" color="#6a6a6a" size={scale(14)} />}
                 rightIcon={
                     input.length > 0 ?
-                        <TouchableOpacity onPress={() => setInput('')} style={{ right: scale(10) }}>
+                        <TouchableOpacity onPress={() => onChangeValue('')} style={{ right: scale(10) }}>
                             <Icon name="remove" type="font-awesome" color="#6a6a6a" size={scale(14)} />
                         </TouchableOpacity>
                         : <View></View>

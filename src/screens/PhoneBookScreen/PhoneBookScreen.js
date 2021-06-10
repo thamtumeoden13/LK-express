@@ -44,11 +44,6 @@ const PhoneBook = (props) => {
                     user: user
                 }
             })
-            const queryUserList = entityUserRef.where("id", "!=", user.id)
-            const unsubscribeUserList = queryUserList.onSnapshot(getRealtimeCollectionUserList, err => Alert.alert(error))
-            return () => {
-                unsubscribeUserList()
-            }
         });
         return () => {
             focusListener
@@ -56,10 +51,20 @@ const PhoneBook = (props) => {
     }, [])
 
     useEffect(() => {
+        if (!!state.userID) {
+            const queryUserList = entityUserRef.where("id", "!=", state.userID)
+            const unsubscribeUserList = queryUserList.onSnapshot(getRealtimeCollectionUserList, err => Alert.alert(error))
+            return () => {
+                unsubscribeUserList()
+            }
+        }
+    }, [state.userID])
+
+    useEffect(() => {
         props.navigation.setOptions({
             headerTitle: () =>
                 <HeaderSearchInput
-                    placeholder={'Nhập tin nhắn, Tên gợi nhớ'}
+                    placeholder={'Tìm bạn bè, Số điện thoại'}
                     handerSearchInput={(value) => onHanderSearchInput(value)}
                 />,
             headerRight: () => <BagIcon />,
