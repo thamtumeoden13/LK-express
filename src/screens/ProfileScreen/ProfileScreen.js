@@ -12,13 +12,18 @@ import { firebase } from '../../firebase/config'
 import { notificationManager } from '../../utils/NotificationManager'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 
+import FlatListAnimation from 'components/common/listCommon/FlatListAnimation'
+import FlatListAnimationCarousel from 'components/common/listCommon/FlatListAnimationCarousel'
+import AccordionMenu from 'components/common/listCommon/AccordionMenu'
+import HeadPhoneCarousel from 'components/common/listCommon/HeadPhoneCarousel'
+
 import styles from './styles';
 
 const db = firebase.firestore()
 const entityRef = db.collection('chats')
 
 const ProfileScreen = (props) => {
-   
+
     const { signOut } = useContext(AuthContext);
     const [state, setState] = useState({
         connectID: '',
@@ -36,7 +41,7 @@ const ProfileScreen = (props) => {
                 case 'LogOut':
                     handlerSignOut()
                     break;
-            
+
                 default:
                     break;
             }
@@ -97,11 +102,15 @@ const ProfileScreen = (props) => {
     ]
     return (
         <SafeAreaView style={{ flex: 1 }} >
-            <FlatList
+            {/* <FlatList
                 keyExtractor={keyExtractor}
                 data={otherSetting}
                 renderItem={renderItem}
-            />
+            /> */}
+            {/* <FlatListAnimation /> */}
+            {/* <FlatListAnimationCarousel/> */}
+            {/* <AccordionMenu /> */}
+            <HeadPhoneCarousel />
         </SafeAreaView>
     )
 }

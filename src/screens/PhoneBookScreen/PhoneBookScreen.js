@@ -11,6 +11,7 @@ import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import HeaderSearchInput from 'components/common/Header/SearchInput'
 import BagIcon from 'components/common/icon/BagIcon'
+import AccordionMenu from 'components/common/listCommon/AccordionMenu'
 
 import styles from './styles';
 
@@ -199,7 +200,7 @@ const PhoneBook = (props) => {
 
     return (
         <SafeAreaView style={{ flex: 1 }} >
-            {!!state.isDataFetchedUserList ?
+            {/* {!!state.isDataFetchedUserList ?
                 <>
                     {!!usersFilter && usersFilter.length > 0 &&
                         <FlatList
@@ -226,7 +227,8 @@ const PhoneBook = (props) => {
                         loop
                     />
                 </View>
-            }
+            } */ }
+            <AccordionMenu />
         </SafeAreaView>
     )
 }

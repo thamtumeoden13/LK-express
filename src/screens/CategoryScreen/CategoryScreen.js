@@ -22,6 +22,7 @@ import AddIcon from 'components/common/icon/AddIcon'
 import { ModalCenterAlert } from "components/common/modal/ModalCenterAlert";
 import { AddCategory } from 'components/category/modalInputForm'
 import HeaderSearchInput from 'components/common/Header/SearchInput'
+import FlatListAnimationCarousel from 'components/common/listCommon/FlatListAnimationCarousel'
 
 const db = firebase.firestore()
 const entityRef = db.collection('categories')
@@ -186,7 +187,7 @@ const CategoryScreen = (props) => {
     const { isVisible, disabledIcon, typeModalInputForm, modalAlert } = alert
     return (
         <SafeAreaView style={styles.safeArea}>
-            <StatusBar backgroundColor="gray" barStyle="dark-content" hidden />
+            {/* <StatusBar backgroundColor="gray" barStyle="dark-content" hidden />
             <ModalCenterAlert
                 isVisible={isVisible}
                 disabledIcon={disabledIcon}
@@ -221,7 +222,8 @@ const CategoryScreen = (props) => {
                         renderItem={renderChild}
                     />
                 }
-            </View>
+            </View> */}
+            <FlatListAnimationCarousel />
         </SafeAreaView>
     );
 }
