@@ -21,6 +21,7 @@ import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize'
 import AddIcon from 'components/common/icon/AddIcon'
 import { ModalCenterAlert } from "components/common/modal/ModalCenterAlert";
 import { AddCategory } from 'components/category/modalInputForm'
+import HeaderSearchInput from 'components/common/Header/SearchInput'
 
 const db = firebase.firestore()
 const entityRef = db.collection('categories')
@@ -46,6 +47,7 @@ const CategoryScreen = (props) => {
     })
 
     const [categories, setCategories] = useState([])
+    const [categoriesFilter, setCategoriesFilter] = useState([])
 
     useEffect(() => {
         setState(prev => { return { ...prev, isDataFetched: false } })
@@ -69,10 +71,28 @@ const CategoryScreen = (props) => {
     useEffect(() => {
         if (!!state.level && state.level == 1) {
             props.navigation.setOptions({
+                headerTitle: () =>
+                    <HeaderSearchInput
+                        placeholder={'Tìm danh mục, sản phẩm'}
+                        handerSearchInput={(value) => onHanderSearchInput(value)}
+                    />,
                 headerRight: () => <AddIcon onOpen={() => onAddCategory()} />,
             });
         }
     }, [state.level])
+
+    const onHanderSearchInput = (searchInput) => {
+        if (searchInput) {
+            const newData = categories.filter((item) => {
+                const textData = searchInput.toUpperCase()
+                const itemData = `${item.createdByName.toUpperCase()},${item.name.toUpperCase()}`
+                return itemData.indexOf(textData) > -1
+            })
+            setCategoriesFilter(newData)
+        } else {
+            setCategoriesFilter(categories)
+        }
+    }
 
     const getRealtimeCollectionCategoriList = async (querySnapshot) => {
         const reads = querySnapshot.docs.map(async (doc) => {
@@ -85,6 +105,7 @@ const CategoryScreen = (props) => {
         let result = await Promise.all(reads)
         const categories = result.filter(e => { return !!e && Object.keys(e).length > 0 });
         setCategories(categories)
+        setCategoriesFilter(categories)
         console.log('categories', categories)
         setState(prev => { return { ...prev, isDataFetched: true } })
     }
@@ -195,8 +216,8 @@ const CategoryScreen = (props) => {
                     :
                     <FlatList
                         keyExtractor={keyExtractor}
-                        data={categories}
-                        extraData={categories}
+                        data={categoriesFilter}
+                        extraData={categoriesFilter}
                         renderItem={renderChild}
                     />
                 }
