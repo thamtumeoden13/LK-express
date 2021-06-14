@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { SafeAreaView, Modal } from 'react-native';
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -12,19 +12,15 @@ import styles from './styles';
 import { calcWidth } from 'utils/scaleSize';
 
 const LoginScreen = (props) => {
-    const [email, setEmail] = useState('ltv.mrvu@gmail.com')
-    const [password, setPassword] = useState('123456')
-    const [state, setState] = useState({
-        isLoading: false
-    })
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+
+    const { signIn, appContext } = useContext(AuthContext);
 
     const onFooterLinkPress = () => {
         props.navigation.navigate('Registration')
     }
-    const { signIn } = useContext(AuthContext);
-
     const onLoginPress = () => {
-        setState(prev => { return { ...prev, isLoading: true } })
         signIn({ email, password })
     }
 
@@ -33,7 +29,7 @@ const LoginScreen = (props) => {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={!!state.isLoading}
+                visible={!!appContext.isLoading}
             >
                 <SafeAreaView style={{
                     flex: 1,

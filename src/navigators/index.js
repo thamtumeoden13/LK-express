@@ -374,20 +374,24 @@ export default () => {
                 case 'SIGN_IN':
                     return {
                         ...prevState,
-                        isSignout: false,
+                        isLoading: false,
                         userToken: action.token,
                     };
                 case 'SIGN_OUT':
                     return {
                         ...prevState,
-                        isSignout: true,
+                        isLoading: false,
                         userToken: null,
+                    };
+                case 'LOADING':
+                    return {
+                        ...prevState,
+                        isLoading: !!action.isLoading,
                     };
             }
         },
         {
-            isLoading: true,
-            isSignout: false,
+            isLoading: false,
             userToken: null,
         }
     )
@@ -415,83 +419,85 @@ export default () => {
         bootstrapAsync();
     }, [])
 
-    const authContext = React.useMemo(
-        () => ({
-            signIn: async ({ email, password }) => {
-                console.log('email, password', email, password)
-                // In a production app, we need to send some data (usually username, password) to server and get a token
-                // We will also need to handle errors if sign in failed
-                // After getting token, we need to persist the token using `SecureStore`
-                // In the example, we'll use a dummy token
-                firebase
-                    .auth()
-                    .signInWithEmailAndPassword(email, password)
-                    .then((response) => {
-                        const uid = response.user.uid
-                        const usersRef = firebase.firestore().collection('users')
-                        usersRef
-                            .doc(uid)
-                            .get()
-                            .then(firestoreDocument => {
-                                if (!firestoreDocument.exists) {
-                                    alert("User does not exist anymore.")
-                                    return;
-                                }
-                                const user = firestoreDocument.data()
-                                console.log('JSON.stringify(user)', JSON.stringify(user))
-                                AsyncStorage.setItem('User', JSON.stringify(user))
-                                dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
-                            })
-                            .catch(error => {
-                                alert(error)
-                            });
-                    })
-                    .catch(error => {
-                        alert(error)
-                    })
-            },
-            signOut: () => {
-                dispatch({ type: 'SIGN_OUT' })
-                AsyncStorage.removeItem('User')
-            },
-            signUp: async (email, password, fullName, avatarURL, phoneNumber) => {
-                // In a production app, we need to send user data to server and get a token
-                // We will also need to handle errors if sign up failed
-                // After getting token, we need to persist the token using `SecureStore`
-                // In the example, we'll use a dummy token
-                firebase
-                    .auth()
-                    .createUserWithEmailAndPassword(email, password)
-                    .then((response) => {
-                        const uid = response.user.uid
-                        const data = {
-                            id: uid,
-                            email,
-                            fullName,
-                            avatarURL: avatarURL,
-                            phoneNumber: phoneNumber,
-                            level: 2
-                        };
-                        const usersRef = firebase.firestore().collection('users')
-                        usersRef
-                            .doc(uid)
-                            .set(data)
-                            .then(async () => {
-                                // const user = firestoreDocument.data()
-                                await AsyncStorage.setItem('User', JSON.stringify(data))
-                                dispatch({ type: 'SIGN_IN', token: JSON.stringify(data) });
-                            })
-                            .catch((error) => {
-                                alert(error)
-                            });
-                    })
-                    .catch((error) => {
-                        alert(error)
-                    });
-            },
-        }),
-        []
-    )
+    const authContext = React.useMemo(() => ({
+        signIn: async ({ email, password }) => {
+            console.log('email, password', email, password)
+            dispatch({ type: 'LOADING', isLoading: true })
+            // In a production app, we need to send some data (usually username, password) to server and get a token
+            // We will also need to handle errors if sign in failed
+            // After getting token, we need to persist the token using `SecureStore`
+            // In the example, we'll use a dummy token
+            firebase
+                .auth()
+                .signInWithEmailAndPassword(email, password)
+                .then((response) => {
+                    const uid = response.user.uid
+                    const usersRef = firebase.firestore().collection('users')
+                    usersRef
+                        .doc(uid)
+                        .get()
+                        .then(firestoreDocument => {
+                            if (!firestoreDocument.exists) {
+                                alert("User does not exist anymore.")
+                                return;
+                            }
+                            const user = firestoreDocument.data()
+                            console.log('JSON.stringify(user)', JSON.stringify(user))
+                            AsyncStorage.setItem('User', JSON.stringify(user))
+                            dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
+                        })
+                        .catch(error => {
+                            alert(error)
+                        });
+                })
+                .catch(error => {
+                    dispatch({ type: 'LOADING', isLoading: false })
+                    alert(error)
+                })
+        },
+        signOut: () => {
+            dispatch({ type: 'SIGN_OUT' })
+            AsyncStorage.removeItem('User')
+        },
+        signUp: async (email, password, fullName, avatarURL, phoneNumber) => {
+            dispatch({ type: 'LOADING', isLoading: true })
+            // In a production app, we need to send user data to server and get a token
+            // We will also need to handle errors if sign up failed
+            // After getting token, we need to persist the token using `SecureStore`
+            // In the example, we'll use a dummy token
+            firebase
+                .auth()
+                .createUserWithEmailAndPassword(email, password)
+                .then((response) => {
+                    const uid = response.user.uid
+                    const data = {
+                        id: uid,
+                        email,
+                        fullName,
+                        avatarURL: avatarURL,
+                        phoneNumber: phoneNumber,
+                        level: 2
+                    };
+                    const usersRef = firebase.firestore().collection('users')
+                    usersRef
+                        .doc(uid)
+                        .set(data)
+                        .then(async () => {
+                            // const user = firestoreDocument.data()
+                            await AsyncStorage.setItem('User', JSON.stringify(data))
+                            dispatch({ type: 'SIGN_IN', token: JSON.stringify(data) });
+                        })
+                        .catch((error) => {
+                            alert(error)
+                        });
+                })
+                .catch((error) => {
+                    dispatch({ type: 'LOADING', isLoading: false })
+                    alert(error)
+                });
+        },
+        appContext: state
+    }), [state])
 
     return (
         <AuthContext.Provider value={authContext}>
