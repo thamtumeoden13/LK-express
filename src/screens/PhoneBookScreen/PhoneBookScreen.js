@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useReducer } from 'react'
 import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -6,14 +6,27 @@ import { ListItem, Avatar, Badge } from 'react-native-elements';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
 import LottieView from 'lottie-react-native';
+import faker from 'faker'
 
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import HeaderSearchInput from 'components/common/Header/SearchInput'
 import BagIcon from 'components/common/icon/BagIcon'
-import AccordionMenu from 'components/common/listCommon/AccordionMenu'
+import FlatListAnimation from 'components/common/listCommon/FlatListAnimation'
 
 import styles from './styles';
+
+faker.seed(10)
+
+const DATA = [...Array(30).keys()].map((_, i) => {
+    return {
+        key: faker.datatype.uuid(),
+        image: `https://randomuser.me/api/portraits/${faker.helpers.randomize(['women', 'men'])}/${faker.datatype.number(60)}.jpg`,
+        name: faker.name.findName(),
+        jobTitle: faker.name.jobTitle(),
+        email: faker.internet.email()
+    };
+})
 
 const PhoneBook = (props) => {
     const db = firebase.firestore()
@@ -76,7 +89,7 @@ const PhoneBook = (props) => {
         if (searchInput) {
             const newData = users.filter((item) => {
                 const textData = searchInput.toUpperCase()
-                const itemData = `${item.fullName.toUpperCase()},${item.email.toUpperCase()}`
+                const itemData = `${item.fullName.toUpperCase()},${item.email.toUpperCase()},${item.phoneNumber.toUpperCase()}`
                 return itemData.indexOf(textData) > -1
             })
             setUsersFilter(newData)
@@ -96,7 +109,17 @@ const PhoneBook = (props) => {
     const getRealtimeCollectionUserList = async (querySnapshot) => {
         let users = querySnapshot.docs.map((doc) => {
             const user = doc.data()
-            return { ...user, doc: doc.id }
+            const phoneNumber = !!user.phoneNumber
+                ? `${user.phoneNumber.substr(0, 3)} ${user.phoneNumber.substr(3, 3)} ${user.phoneNumber.substr(6)}`
+                : ''
+            return {
+                ...user,
+                doc: doc.id,
+                name: user.fullName,
+                jobTitle: phoneNumber,
+                email: user.email,
+                image: user.avatarURL
+            }
         })
         setUsers(users)
         setUsersFilter(users)
@@ -200,15 +223,16 @@ const PhoneBook = (props) => {
 
     return (
         <SafeAreaView style={{ flex: 1 }} >
-            {/* {!!state.isDataFetchedUserList ?
+            {!!state.isDataFetchedUserList ?
                 <>
                     {!!usersFilter && usersFilter.length > 0 &&
-                        <FlatList
-                            keyExtractor={keyExtractor}
-                            data={usersFilter}
-                            extraData={usersFilter}
-                            renderItem={renderItemUser}
-                        />
+                        // <FlatList
+                        //     keyExtractor={keyExtractor}
+                        //     data={usersFilter}
+                        //     extraData={usersFilter}
+                        //     renderItem={renderItemUser}
+                        // />
+                        <FlatListAnimation result={usersFilter} />
                     }
                 </>
                 :
@@ -227,8 +251,7 @@ const PhoneBook = (props) => {
                         loop
                     />
                 </View>
-            } */ }
-            <AccordionMenu />
+            }
         </SafeAreaView>
     )
 }

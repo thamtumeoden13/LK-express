@@ -276,7 +276,7 @@ const RoomScreen = (props) => {
     return (
         <SafeAreaView style={{ flex: 1 }} >
             {!state.isDataFetchedChatList || !state.isDataFetchedRoomList ?
-                <View style={{ flex: 1, alignItems: 'center' }}>
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', }}>
                     <LottieView
                         source={require('@assets/animations/890-loading-animation.json')}
                         colorFilters={[{
@@ -286,7 +286,7 @@ const RoomScreen = (props) => {
                             keypath: "Sending Loader",
                             color: "#F00000"
                         }]}
-                        style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+                        style={{ width: calcWidth(30), height: calcWidth(30) }}
                         autoPlay
                         loop
                     />

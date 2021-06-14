@@ -12,7 +12,6 @@ import { vi } from 'date-fns/locale/vi'
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import HeaderSearchInput from 'components/common/Header/SearchInput'
-import FlatListAnimation from 'components/common/listCommon/FlatListAnimation'
 
 import styles from './styles';
 
@@ -166,8 +165,8 @@ const RoomScreen = (props) => {
 
     return (
         <SafeAreaView style={{ flex: 1 }} >
-            {/* {!state.isDataFetchedRoomList ?
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            {!state.isDataFetchedRoomList ?
+                <View style={{ flex: 1, justifyContent: 'center', justifyContent: 'center', alignItems: 'center' }}>
                     <LottieView
                         source={require('@assets/animations/890-loading-animation.json')}
                         colorFilters={[{
@@ -177,7 +176,7 @@ const RoomScreen = (props) => {
                             keypath: "Sending Loader",
                             color: "#F00000"
                         }]}
-                        style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+                        style={{ width: calcWidth(30), height: calcWidth(30) }}
                         autoPlay
                         loop
                     />
@@ -193,8 +192,7 @@ const RoomScreen = (props) => {
                         />
                     }
                 </>
-            } */}
-            <FlatListAnimation />
+            }
         </SafeAreaView>
     )
 }

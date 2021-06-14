@@ -102,15 +102,17 @@ const ProfileScreen = (props) => {
     ]
     return (
         <SafeAreaView style={{ flex: 1 }} >
-            {/* <FlatList
-                keyExtractor={keyExtractor}
-                data={otherSetting}
-                renderItem={renderItem}
-            /> */}
+            <View style={{ flex: 0.5 }}>
+                <FlatList
+                    keyExtractor={keyExtractor}
+                    data={otherSetting}
+                    renderItem={renderItem}
+                />
+            </View>
             {/* <FlatListAnimation /> */}
-            {/* <FlatListAnimationCarousel/> */}
+            <FlatListAnimationCarousel />
             {/* <AccordionMenu /> */}
-            <HeadPhoneCarousel />
+            {/* <HeadPhoneCarousel /> */}
         </SafeAreaView>
     )
 }

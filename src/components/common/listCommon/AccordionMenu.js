@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { View, Text, Image, Dimensions, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, Alert, Dimensions, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
 import { Transition, Transitioning } from 'react-native-reanimated'
 
 const DATA = [
@@ -71,13 +71,19 @@ const transition = () => (
     </Transition.Together>
 )
 
-const AccordionMenu = () => {
+const AccordionMenu = (props) => {
     const ref = useRef()
     const [currentIndex, setCurrentIndex] = useState(null)
 
     const handlerTouchOpacity = (index) => {
         ref.current.animateNextTransition()
         setCurrentIndex(currentIndex === index ? null : index)
+    }
+
+    const handalerTouchItem = (subCategory) => {
+        if (props.onPressItem) {
+            props.onPressItem()
+        }
     }
 
     return (
@@ -99,7 +105,9 @@ const AccordionMenu = () => {
                             {index === currentIndex &&
                                 <View style={styles.subCategories}>
                                     {subCategories.map(subCategory => (
-                                        <Text style={[styles.body, { color: color }]}>{subCategory}</Text>
+                                        <TouchableOpacity key={`item-${category}`} onPress={() => handalerTouchItem(subCategory)}>
+                                            <Text style={[styles.body, { color: color }]}>{subCategory}</Text>
+                                        </TouchableOpacity>
                                     ))}
                                 </View>
                             }

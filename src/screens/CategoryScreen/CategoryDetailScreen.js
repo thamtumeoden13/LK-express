@@ -17,6 +17,7 @@ import {
 import { ENTRIES1, ENTRIES2 } from 'constants/entries';
 
 import HeaderTitle from 'components/common/Header/HeaderTitle'
+import HeadPhoneCarousel from 'components/common/listCommon/HeadPhoneCarousel'
 
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
@@ -97,7 +98,7 @@ const CategoryDetailScreen = (props) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar backgroundColor="gray" barStyle="dark-content" hidden />
-            <View style={styles.container}>
+            {/* <View style={styles.container}>
                 <ScrollView
                     contentContainerStyle={{ flexGrow: 1 }}
                     scrollEventThrottle={16}
@@ -109,7 +110,8 @@ const CategoryDetailScreen = (props) => {
                         onPressItem={onPressItem}
                     />
                 </ScrollView>
-            </View>
+            </View> */}
+            <HeadPhoneCarousel />
         </SafeAreaView>
     );
 }

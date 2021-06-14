@@ -22,7 +22,7 @@ import AddIcon from 'components/common/icon/AddIcon'
 import { ModalCenterAlert } from "components/common/modal/ModalCenterAlert";
 import { AddCategory } from 'components/category/modalInputForm'
 import HeaderSearchInput from 'components/common/Header/SearchInput'
-import FlatListAnimationCarousel from 'components/common/listCommon/FlatListAnimationCarousel'
+import AccordionMenu from 'components/common/listCommon/AccordionMenu'
 
 const db = firebase.firestore()
 const entityRef = db.collection('categories')
@@ -223,7 +223,7 @@ const CategoryScreen = (props) => {
                     />
                 }
             </View> */}
-            <FlatListAnimationCarousel />
+            <AccordionMenu onPressItem={onHandlerJoinCategory} />
         </SafeAreaView>
     );
 }

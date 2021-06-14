@@ -58,14 +58,14 @@ const RoomChatScreen = ({ route, navigation }) => {
             playSound: true,
             vibrate: true
         }
-        notificationManager.showNotificationSchedule(
-            Math.random(),
-            `Alert`,
-            `Time to launch`,
-            `${new Date()}`,
-            {}, // data
-            options //options
-        )
+        // notificationManager.showNotificationSchedule(
+        //     Math.random(),
+        //     `Alert`,
+        //     `Time to launch`,
+        //     `${new Date()}`,
+        //     {}, // data
+        //     options //options
+        // )
         setTimeout(async () => {
             const roomID = route.params.id
             const userToken = await AsyncStorage.getItem('User');
