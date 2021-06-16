@@ -16,6 +16,7 @@ import {
 } from 'components/carousel/layout';
 import { ENTRIES1, ENTRIES2 } from 'constants/entries';
 
+import ShoppingCartIcon from 'components/common/icon/ShoppingCartIcon'
 import HeaderTitle from 'components/common/Header/HeaderTitle'
 import HeadPhoneCarousel from 'components/common/listCommon/HeadPhoneCarousel'
 
@@ -50,7 +51,7 @@ const CategoryDetailScreen = (props) => {
         if (!!state.categoryID) {
             props.navigation.setOptions({
                 headerTitle: () => <HeaderTitle title={`${state.categoryName}`} />,
-                headerRight: () => null,
+                headerRight: () => <ShoppingCartIcon onOpen={() => onAddShoppingCart()} />,
             });
 
             const query = entityRef
@@ -91,6 +92,10 @@ const CategoryDetailScreen = (props) => {
         setCategories(categoriesFireStore)
     }, [categories])
 
+    const onAddShoppingCart = () => {
+        // const pushAction = StackActions.push('AddCategory')
+        // props.navigation.dispatch(pushAction)
+    }
     const onPressItem = (item, index) => {
         Alert.alert('CarouselMainLayout', `You've clicked ${item.title}`);
     }

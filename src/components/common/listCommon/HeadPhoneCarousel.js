@@ -1,5 +1,7 @@
+import { AddCategory } from 'components/category/modalInputForm';
 import React, { useRef } from 'react'
-import { View, Text, FlatList, Image, Dimensions, StyleSheet, StatusBar, Animated } from 'react-native'
+import { View, Text, FlatList, Image, Dimensions, StyleSheet, StatusBar, Animated, TouchableOpacity } from 'react-native'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 const DATA = [
     {
@@ -9,6 +11,7 @@ const DATA = [
         description: 'Four on-trend colorways to seamlessly suit your style.',
         key: 'first',
         color: '#9dcdfa',
+        price: 200
     },
     {
         type: 'Pampas',
@@ -17,6 +20,7 @@ const DATA = [
         description: 'A bold statement tuned to perfection.',
         key: 'second',
         color: '#db9efa',
+        price: 250
     },
     {
         type: 'Humlan P',
@@ -26,6 +30,7 @@ const DATA = [
             'An Urbanears classic! Listen-all-day fit. Striking the perfect balance of effortless technology',
         key: 'third',
         color: '#999',
+        price: 190
     },
     {
         type: 'Humlan B',
@@ -35,6 +40,7 @@ const DATA = [
             'The “Plattan” in Plattan headphones is Swedish for “the slab.”',
         key: 'fourth',
         color: '#a1e3a1',
+        price: 200
     },
 ];
 
@@ -73,7 +79,7 @@ const Circle = ({ scrollX }) => {
     )
 }
 
-const Item = ({ imageUri, heading, description, index, scrollX }) => {
+const Item = ({ imageUri, heading, description, price, index, scrollX, addToCart}) => {
 
     const inputRange = [(index - 1) * width, index * width, (index + 1) * width]
     const inputRangeOpacity = [(index - 0.3) * width, index * width, (index + 0.3) * width]
@@ -114,6 +120,14 @@ const Item = ({ imageUri, heading, description, index, scrollX }) => {
                     transform: [{ translateX: translateDescription }],
                     opacity
                 }]}> {description}</Animated.Text>
+                <Animated.Text style={[styles.price,
+                {
+                    transform: [{ translateX: translateDescription }],
+                    opacity
+                }]}> {`${price} $`}</Animated.Text>
+                <TouchableOpacity onPress={addToCart}>
+                    <MaterialIcons name='add-shopping-cart' size={24} color='#000' />
+                </TouchableOpacity>
             </View>
         </View>
     )
@@ -151,14 +165,16 @@ const Pagination = ({ scrollX }) => {
 
 const HeadPhoneCarousel = () => {
     const scrollX = useRef(new Animated.Value(0)).current
-
+    const addToCart = (item)=>{
+        console.log(item)
+    }
     return (
         <View style={styles.container}>
             <StatusBar hidden={false} />
             <Circle scrollX={scrollX} />
             <Animated.FlatList
                 data={DATA}
-                renderItem={({ item, index }) => <Item {...item} index={index} scrollX={scrollX} />}
+                renderItem={({ item, index }) => <Item {...item} index={index} scrollX={scrollX} addToCart={() => addToCart(item)} />}
                 keyExtractor={({ key }, index) => key.toString()}
                 pagingEnabled
                 horizontal
@@ -199,7 +215,7 @@ const styles = StyleSheet.create({
     textStyles: {
         alignItems: 'flex-start',
         alignSelf: 'flex-end',
-        flex: 1
+        flex: 1,
     },
     heading: {
         color: '#444',
@@ -217,6 +233,18 @@ const styles = StyleSheet.create({
         marginRight: 10,
         fontSize: 16,
         lineHeight: 16 * 1.5
+    },
+    price: {
+        color: '#00f',
+        fontWeight: 'bold',
+        fontSize: 20,
+        textAlign: 'left',
+        width: width * 0.5,
+        marginVertical: 20
+    },
+    contentStyles: {
+        alignItems: 'flex-start',
+        alignContent: 'flex-end'
     },
     logo: {
         opacity: 0.9,

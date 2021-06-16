@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState, useReducer, useRef } from 'react'
-import { Alert, LogBox, AppState, Platform } from 'react-native'
+import { Alert, LogBox, AppState, Platform, Keyboard } from 'react-native'
 import { decode, encode } from 'base-64'
 import codePush from "react-native-code-push";
 import { PERMISSIONS, request, openSettings, checkNotifications } from 'react-native-permissions';
@@ -13,6 +13,7 @@ import { ModalCenterAlert } from "./components/common/modal/ModalCenterAlert";
 import OpenSetting from './components/app/modalInputForm/OpenSetting';
 
 import { notificationManager } from './utils/NotificationManager'
+import { firebase } from './firebase/config'
 
 if (!global.btoa) { global.btoa = encode }
 if (!global.atob) { global.atob = decode }
@@ -105,8 +106,12 @@ const toastConfig = {
         </View>
     ),
 };
+const entityUserRef = firebase.firestore().collection('users')
 
 const App = (props) => {
+
+    const appState = useRef(AppState.currentState);
+
     const [alert, setAlert] = useState({
         isVisible: false,
         disabledIcon: false,
@@ -125,11 +130,13 @@ const App = (props) => {
 
     useEffect(() => {
         notificationManager.configure(onRegister, onNotification, onOpenNotification)
-        const appLocationState = AppState.addEventListener('change', requestLocationPermission)
-        const appPermission = AppState.addEventListener('change', checkMultiPermission)
+        // const appLocationState = AppState.addEventListener('change', requestLocationPermission)
+        // const appPermission = AppState.addEventListener('change', checkMultiPermission)
+        const appStateChange = AppState.addEventListener('change', _handleAppStateChange)
         return () => {
-            appLocationState
-            appPermission
+            // appLocationState
+            // appPermission
+            appStateChange
             // handlerOpenURL
             // unsubscribe
         };
@@ -141,6 +148,29 @@ const App = (props) => {
             preOpenSettingPermission()
         }
     }, [state.locationPermissionDenied, state.notificationPermissionDenied])
+
+    const _handleAppStateChange = (nextAppState) => {
+        console.log("AppState", appState.current, nextAppState);
+
+        if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+            console.log("App has come to the foreground!");
+
+            requestLocationPermission()
+            checkMultiPermission()
+
+            entityUserRef.doc(`9MjBQFx1A3M2YkO4FNQ6lrmnl4E3`)
+                .update({
+                    currentUpdateLocation: ''
+                })
+                .then(_doc => {
+                    Keyboard.dismiss()
+                })
+                .catch((error) => {
+                    Alert.alert(error)
+                })
+        }
+        appState.current = nextAppState;
+    };
 
     const requestLocationPermission = async () => {
         if (Platform.OS === 'ios') {

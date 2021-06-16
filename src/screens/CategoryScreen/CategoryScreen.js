@@ -18,7 +18,7 @@ import LottieView from 'lottie-react-native';
 
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
-import AddIcon from 'components/common/icon/AddIcon'
+import ShoppingCartIcon from 'components/common/icon/ShoppingCartIcon'
 import { ModalCenterAlert } from "components/common/modal/ModalCenterAlert";
 import { AddCategory } from 'components/category/modalInputForm'
 import HeaderSearchInput from 'components/common/Header/SearchInput'
@@ -77,7 +77,7 @@ const CategoryScreen = (props) => {
                         placeholder={'Tìm danh mục, sản phẩm'}
                         handerSearchInput={(value) => onHanderSearchInput(value)}
                     />,
-                headerRight: () => <AddIcon onOpen={() => onAddCategory()} />,
+                headerRight: () => <ShoppingCartIcon onOpen={() => onAddShoppingCart()} />,
             });
         }
     }, [state.level])
@@ -117,26 +117,9 @@ const CategoryScreen = (props) => {
         props.navigation.dispatch(pushAction)
     }
 
-    const onAddCategory = () => {
-        const pushAction = StackActions.push('AddCategory')
+    const onAddShoppingCart = () => {
+        const pushAction = StackActions.push('ShoppingCart')
         props.navigation.dispatch(pushAction)
-    }
-
-    const renderModalInputForm = (typeModalInputForm) => {
-        let ModalInputForm
-        switch (typeModalInputForm) {
-            case 1:
-                ModalInputForm = (
-                    <AddCategory
-
-                    />
-                )
-                break;
-            default:
-                ModalInputForm = null
-                break;
-        }
-        return ModalInputForm
     }
 
     const onCloseModalAlert = () => {

@@ -144,13 +144,13 @@ const ChatScreen = (props) => {
             playSound: true,
             vibrate: true
         }
-        notificationManager.showNotification(
-            Math.random(),
-            `${connectID}`,
-            `${message.text}`,
-            {}, // data
-            options //options
-        )
+        // notificationManager.showNotification(
+        //     Math.random(),
+        //     `${connectID}`,
+        //     `${message.text}`,
+        //     {}, // data
+        //     options //options
+        // )
     }
 
     const onSend = (messages = []) => {

@@ -11,9 +11,8 @@ import LottieView from 'lottie-react-native';
 import {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
     HomeScreen, ChatScreen, ChatDetailScreen, RoomScreen, RoomChatScreen,
-    PhoneBookScreen,
-    ProfileScreen,
-    CategoryScreen, CategoryDetailScreen, AddCategoryScreen,
+    PhoneBookScreen, ProfileScreen, UpdateProfileScreen,
+    CategoryScreen, CategoryDetailScreen, AddCategoryScreen, ShoppingCartScreen,
 } from '../screens'
 
 import DrawerIcon from 'components/common/icon/DrawerIcon'
@@ -175,6 +174,13 @@ function CategoryStackScreen({ navigation }) {
                     // headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
+            <CategoryStack.Screen
+                name="ShoppingCart"
+                component={ShoppingCartScreen}
+                options={{
+                    headerTitle: () => <HeaderTitle title={`Giỏ Hàng`} />,
+                }}
+            />
         </CategoryStack.Navigator>
     );
 }
@@ -189,11 +195,18 @@ function ProfileStackScreen({ navigation }) {
                 component={ProfileScreen}
                 options={{
                     // headerLeft: () => <DrawerIcon navigation={navigation} />,
-                    headerRight: () => <BagIcon navigation={navigation} />,
+                    // headerRight: () => <BagIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Cá nhân`} />,
                 }}
             />
-            <ProfileStack.Screen name="ProfileDetail" component={ProfileScreen} />
+            <ProfileStack.Screen
+                name="UpdateProfile" component={UpdateProfileScreen}
+                options={{
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    // headerRight: () => <BagIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Cập nhật thông tin`} />,
+                }}
+            />
         </ProfileStack.Navigator>
     );
 }
@@ -442,7 +455,6 @@ export default () => {
                                 return;
                             }
                             const user = firestoreDocument.data()
-                            console.log('JSON.stringify(user)', JSON.stringify(user))
                             AsyncStorage.setItem('User', JSON.stringify(user))
                             dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
                         })
@@ -459,12 +471,13 @@ export default () => {
             dispatch({ type: 'SIGN_OUT' })
             AsyncStorage.removeItem('User')
         },
-        signUp: async (email, password, fullName, avatarURL, phoneNumber) => {
+        signUp: async (result) => {
             dispatch({ type: 'LOADING', isLoading: true })
             // In a production app, we need to send user data to server and get a token
             // We will also need to handle errors if sign up failed
             // After getting token, we need to persist the token using `SecureStore`
             // In the example, we'll use a dummy token
+            const { email, password, fullName, avatarURL, avatarBase64, phoneNumber, address } = result
             firebase
                 .auth()
                 .createUserWithEmailAndPassword(email, password)
@@ -474,8 +487,10 @@ export default () => {
                         id: uid,
                         email,
                         fullName,
-                        avatarURL: avatarURL,
-                        phoneNumber: phoneNumber,
+                        avatarURL,
+                        avatarBase64,
+                        phoneNumber,
+                        address,
                         level: 2
                     };
                     const usersRef = firebase.firestore().collection('users')

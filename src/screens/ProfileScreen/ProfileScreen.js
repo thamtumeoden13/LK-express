@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react'
 import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
-import { GiftedChat } from 'react-native-gifted-chat'
-import AsyncStorage from '@react-native-community/async-storage';
 import TouchableScale from 'react-native-touchable-scale';
 import LinearGradient from 'react-native-linear-gradient';
 import { ListItem, Avatar, Icon } from 'react-native-elements';
-import LottieView from 'lottie-react-native';
+import { StackActions } from '@react-navigation/native';
 
 import { AuthContext } from '../../utils'
 import { firebase } from '../../firebase/config'
@@ -41,6 +39,10 @@ const ProfileScreen = (props) => {
                 case 'LogOut':
                     handlerSignOut()
                     break;
+                case 'UpdateProfile':
+                    const pushAction = StackActions.push('UpdateProfile')
+                    props.navigation.dispatch(pushAction)
+                    break;
 
                 default:
                     break;
@@ -63,7 +65,7 @@ const ProfileScreen = (props) => {
 
                 onPress={onHandlerPress}
             >
-                <Icon name={item.icon} color='#112d4e' />
+                <Icon name={item.icon} type={item.type} color='#112d4e' />
                 <Avatar rounded source={{ uri: item.avatar_url }} />
                 <ListItem.Content>
                     <ListItem.Title style={{ color: '#112d4e', fontWeight: 'bold' }}>
@@ -95,9 +97,15 @@ const ProfileScreen = (props) => {
         },
         {
             title: 'Hướng dẫn sử dụng',
-            icon: 'help',
+            icon: 'help-circle',
             type: "feather",
             route: 'Help'
+        },
+        {
+            title: 'Hồ sơ',
+            icon: 'user-check',
+            type: "feather",
+            route: 'UpdateProfile'
         },
     ]
     return (
@@ -109,10 +117,7 @@ const ProfileScreen = (props) => {
                     renderItem={renderItem}
                 />
             </View>
-            {/* <FlatListAnimation /> */}
-            <FlatListAnimationCarousel />
-            {/* <AccordionMenu /> */}
-            {/* <HeadPhoneCarousel /> */}
+            {/* <FlatListAnimationCarousel /> */}
         </SafeAreaView>
     )
 }

@@ -12,6 +12,7 @@ export default StyleSheet.create({
         flex: 1,
         height: 120,
         width: 120,
+        borderRadius: 60,
         alignSelf: "center",
         margin: 30
     },

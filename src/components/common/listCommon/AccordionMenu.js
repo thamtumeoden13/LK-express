@@ -82,7 +82,7 @@ const AccordionMenu = (props) => {
 
     const handalerTouchItem = (subCategory) => {
         if (props.onPressItem) {
-            props.onPressItem()
+            props.onPressItem(subCategory, subCategory)
         }
     }
 

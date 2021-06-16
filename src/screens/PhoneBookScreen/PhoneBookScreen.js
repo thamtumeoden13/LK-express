@@ -1,5 +1,9 @@
-import React, { useEffect, useState, useCallback, useReducer } from 'react'
-import { FlatList, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native'
+import React, { useEffect, useState, useCallback, useRef, forwardRef, createRef } from 'react'
+import {
+    FlatList, Keyboard, SafeAreaView, StyleSheet,
+    Image, TouchableOpacity, View, Dimensions, Text,
+    Animated, findNodeHandle
+} from 'react-native'
 import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { ListItem, Avatar, Badge } from 'react-native-elements';
@@ -28,10 +32,17 @@ const DATA = [...Array(30).keys()].map((_, i) => {
     };
 })
 
+const images = {
+    user: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
+    customer: 'https://images.pexels.com/photos/3973557/pexels-photo-3973557.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
+}
+
+const db = firebase.firestore()
+const entityChatRef = db.collection('chats')
+const entityUserRef = db.collection('users')
+
 const PhoneBook = (props) => {
-    const db = firebase.firestore()
-    const entityChatRef = db.collection('chats')
-    const entityUserRef = db.collection('users')
+    const ref = useRef()
 
     const [state, setState] = useState({
         userID: '',
@@ -44,6 +55,8 @@ const PhoneBook = (props) => {
     })
     const [users, setUsers] = useState([])
     const [usersFilter, setUsersFilter] = useState([])
+    const [usersCustomer, setUsersCustomer] = useState([])
+    const [usersFilterCustomer, setUsersFilterCustomer] = useState([])
 
     useEffect(() => {
         const focusListener = props.navigation.addListener('focus', async () => {
@@ -92,9 +105,16 @@ const PhoneBook = (props) => {
                 const itemData = `${item.fullName.toUpperCase()},${item.email.toUpperCase()},${item.phoneNumber.toUpperCase()}`
                 return itemData.indexOf(textData) > -1
             })
+            const newDataCustomer = usersCustomer.filter((item) => {
+                const textData = searchInput.toUpperCase()
+                const itemData = `${item.fullName.toUpperCase()},${item.email.toUpperCase()},${item.phoneNumber.toUpperCase()}`
+                return itemData.indexOf(textData) > -1
+            })
             setUsersFilter(newData)
+            setUsersFilterCustomer(newDataCustomer)
         } else {
             setUsersFilter(users)
+            setUsersFilterCustomer(usersCustomer)
         }
     }
 
@@ -121,8 +141,13 @@ const PhoneBook = (props) => {
                 image: user.avatarURL
             }
         })
-        setUsers(users)
-        setUsersFilter(users)
+        const filterUsers = users.filter(e => e.userType == 1)
+        const filterCustomers = users.filter(e => e.userType == 2)
+
+        setUsers(filterUsers)
+        setUsersFilter(filterUsers)
+        setUsersCustomer(filterCustomers)
+        setUsersFilterCustomer(filterCustomers)
         setState(prev => { return { ...prev, isDataFetchedUserList: true } })
     }
 
@@ -221,9 +246,143 @@ const PhoneBook = (props) => {
         </ListItem>
     )
 
+    const tabs = Object.keys(images).map((key) => ({
+        key: key,
+        title: key == 'user' ? 'Danh Bạ' : 'Đối tác / CTV',
+        image: images[key],
+        ref: createRef()
+    }))
+    const { width, height } = Dimensions.get('screen')
+    const scrollX = useRef(new Animated.Value(0)).current
+
+    const Indicator = ({ measures, scrollX }) => {
+        console.log(measures)
+        const inputRange = tabs.map((_, index) => index * width)
+        const indicatorWidth = scrollX.interpolate({
+            inputRange,
+            outputRange: measures.map(measure => measure.width)
+        })
+        const translateX = scrollX.interpolate({
+            inputRange,
+            outputRange: measures.map(measure => measure.x)
+        })
+        return (
+            <Animated.View
+                style={{
+                    position: 'absolute',
+                    height: 2,
+                    width: indicatorWidth,
+                    left: 0,
+                    backgroundColor: '#000',
+                    bottom: 0,
+                    transform: [{ translateX }]
+                }}
+            />
+        )
+    }
+
+    const Tab = forwardRef(({ item, fontSize, onItemPress }, ref) => {
+        return (
+            <TouchableOpacity onPress={onItemPress}>
+                <View ref={ref}>
+                    <Text style={{ color: '#000', fontSize, textTransform: 'uppercase' }}>{item.title}</Text>
+                </View>
+            </TouchableOpacity>
+        )
+    })
+
+    const Tabs = ({ data, scrollX, onItemPress }) => {
+        const containerRef = useRef()
+        const [measures, setMeasures] = useState([])
+        useEffect(() => {
+            let m = []
+            data.forEach(item => {
+                item.ref.current.measureLayout(containerRef.current,
+                    (x, y, width, height) => {
+                        m.push({
+                            x, y, width, height
+                        })
+
+                        if (m.length === data.length) {
+                            setMeasures(m)
+                        }
+                    }
+                )
+            })
+        }, [])
+
+        return (
+            <View style={{ position: 'absolute', width, height: 40 }}>
+                <View ref={containerRef} style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', }}>
+                    {data.map((item, index) => {
+                        return (
+                            <Tab key={item.key} item={item} fontSize={30 / data.length} ref={item.ref} onItemPress={() => onItemPress(index)} />
+                        )
+                    })}
+                </View>
+                {!!measures && measures.length > 0 && <Indicator measures={measures} scrollX={scrollX} />}
+            </View>
+        )
+    }
+
+    const onItemPress = useCallback(itemIndex => {
+        ref?.current?.scrollToOffset({
+            offset: itemIndex * width
+        })
+    })
+
     return (
-        <SafeAreaView style={{ flex: 1 }} >
-            {!!state.isDataFetchedUserList ?
+        <View style={{ flex: 1, backgroundColor: 'rgb(250,222,249)' }} >
+            <FlatList
+                ref={ref}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                bounces={false}
+                keyExtractor={({ key }) => key.toString()}
+                onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                    { useNativeDriver: false }
+                )}
+                contentContainerStyle={{ marginTop: 48 }}
+                data={tabs}
+                renderItem={({ item, index }) => {
+                    return (
+                        <View style={{ width, height }}>
+                            {!!state.isDataFetchedUserList ?
+                                <>
+                                    {item.key == 'user' && !!usersFilter && usersFilter.length > 0 &&
+                                        <FlatListAnimation result={usersFilter} />
+                                    }
+                                    {item.key == 'customer' && !!usersFilterCustomer && usersFilterCustomer.length > 0 &&
+                                        <FlatListAnimation result={usersFilterCustomer} />
+                                    }
+                                </>
+                                :
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                    <LottieView
+                                        source={require('@assets/animations/890-loading-animation.json')}
+                                        colorFilters={[{
+                                            keypath: "button",
+                                            color: "#F00000"
+                                        }, {
+                                            keypath: "Sending Loader",
+                                            color: "#F00000"
+                                        }]}
+                                        style={{ width: calcWidth(30), height: calcWidth(30), justifyContent: 'center' }}
+                                        autoPlay
+                                        loop
+                                    />
+                                </View>
+                            }
+                        </View>
+                    )
+                }}
+            />
+            <Tabs data={tabs} scrollX={scrollX} onItemPress={onItemPress} />
+
+            {/* } */}
+            {/* {!!state.isDataFetchedUserList ?
                 <>
                     {!!usersFilter && usersFilter.length > 0 &&
                         // <FlatList
@@ -251,8 +410,8 @@ const PhoneBook = (props) => {
                         loop
                     />
                 </View>
-            }
-        </SafeAreaView>
+            } */}
+        </View>
     )
 }
 

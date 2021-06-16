@@ -216,6 +216,16 @@ const RoomChatScreen = ({ route, navigation }) => {
             .catch((error) => {
                 alert(error)
             })
+        entityUserRef.doc(state.userID)
+            .update({
+                currentUpdateLocation: state.geolocation
+            })
+            .then(_doc => {
+                Keyboard.dismiss()
+            })
+            .catch((error) => {
+                alert(error)
+            })
     }
 
     const handlerLongPressMessage = (action, message) => {

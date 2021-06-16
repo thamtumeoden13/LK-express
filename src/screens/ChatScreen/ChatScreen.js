@@ -12,6 +12,8 @@ import { vi } from 'date-fns/locale/vi'
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import HeaderSearchInput from 'components/common/Header/SearchInput'
+import { notificationManager } from 'utils/NotificationManager'
+
 import styles from './styles';
 
 const RoomScreen = (props) => {
@@ -89,7 +91,6 @@ const RoomScreen = (props) => {
     useEffect(() => {
         let allChats = [...rooms, ...usersByChat]
         allChats.sort((a, b) => b.currentCreatedAt.toDate().getTime() - a.currentCreatedAt.toDate().getTime())
-        console.log('allChats', allChats)
         setAllChats(allChats)
         setAllChatsFilter(allChats)
     }, [rooms, usersByChat])
@@ -167,6 +168,19 @@ const RoomScreen = (props) => {
         })
         setUsers(users)
         setState(prev => { return { ...prev, isDataFetchedUserList: true } })
+        // const options = {
+        //     soundName: "default",
+        //     playSound: true,
+        //     vibrate: true
+        // }
+        // notificationManager.showNotificationSchedule(
+        //     Math.random(),
+        //     `Alert`,
+        //     `Init Notification`,
+        //     `${new Date()}`,
+        //     {}, // data
+        //     options //options
+        // )
     }
 
     const onHandlerJoinRoom = (roomID) => {

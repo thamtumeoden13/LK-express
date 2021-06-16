@@ -14,16 +14,17 @@ import ChatDetailScreen from './ChatScreen/ChatDetailScreen'
 
 import PhoneBookScreen from './PhoneBookScreen/PhoneBookScreen'
 
-import ProfileScreen from './ProfileScreen/ProfileScreen'
-
 import CategoryScreen from './CategoryScreen/CategoryScreen'
 import CategoryDetailScreen from './CategoryScreen/CategoryDetailScreen'
 import AddCategoryScreen from './CategoryScreen/AddCategoryScreen'
+import ShoppingCartScreen from './CategoryScreen/ShoppingCartScreen'
+
+import ProfileScreen from './ProfileScreen/ProfileScreen'
+import UpdateProfileScreen from './ProfileScreen/UpdateProfileScreen'
 
 export {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
     HomeScreen, RoomScreen, RoomChatScreen, ChatScreen, ChatDetailScreen,
-    PhoneBookScreen,
-    ProfileScreen,
-    CategoryScreen, CategoryDetailScreen, AddCategoryScreen
+    PhoneBookScreen, ProfileScreen, UpdateProfileScreen,
+    CategoryScreen, CategoryDetailScreen, AddCategoryScreen, ShoppingCartScreen,
 }

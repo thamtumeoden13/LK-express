@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react'
 import {
-    View, Text, Image, StyleSheet, Animated,
+    View, Text, Image, StyleSheet, Animated, TouchableOpacity, Alert, Linking
 } from 'react-native'
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
 
-const BG_IMG = 'https://images.pexels.com/photos/1231265/pexels-photo-1231265.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260'
+const BG_IMG = 'https://images.pexels.com/photos/2033997/pexels-photo-2033997.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
 const SPACING = 20
 const AVATAR_SIZE = 70
 const ITEM_SIZE = AVATAR_SIZE + SPACING * 3
@@ -16,6 +17,46 @@ const FlatListAnimation = ({ result }) => {
     useEffect(() => {
         setData(!!result ? result : [])
     }, [result])
+
+    const handlerCallPhone = (phone) => {
+        let url = '';
+        if (Platform.OS === 'android') {
+            url = `tel://${phone}`;
+        } else {
+            url = `telprompt:${phone}`;
+        }
+        Linking.canOpenURL(url)
+            .then((supported) => {
+                // if (!supported) {
+                //     console.error('Can\'t handle url: ' + url);
+                // } else {
+                //     return Linking.openURL(url)
+                //         .then((data) => console.log("then", data))
+                //         .catch((err) => { throw err; });
+                // }
+                return Linking.openURL(url)
+                    .then((data) => console.log("then", data))
+                    .catch((err) => { throw err; });
+            })
+            .catch((err) => {
+                // this.onHandlerToast(true, 'error_custom', 'Lỗi gọi điện thoại', 'Không thể gọi điện thoại! vui lòng thao tác bằng tay')
+                console.log('An error occurred url', err)
+            });
+    }
+
+    const handlerShowLocation = (location) => {
+        const url = `maps://?ll=${location.replace(/ /g, '')}`
+        Linking.canOpenURL(url)
+            .then((supported) => {
+                return Linking.openURL(url)
+                    .then((data) => console.log("then", data))
+                    .catch((err) => { throw err; });
+            })
+            .catch((err) => {
+                // this.onHandlerToast(true, 'error_custom', 'Lỗi gọi điện thoại', 'Không thể gọi điện thoại! vui lòng thao tác bằng tay')
+                console.log('An error occurred url', err)
+            });
+    }
 
     const renderItem = ({ item, index }) => {
 
@@ -64,10 +105,21 @@ const FlatListAnimation = ({ result }) => {
                         marginRight: SPACING / 2
                     }}
                 />
-                <View>
-                    <Text style={{ fontSize: 22, fontWeight: '600', lineHeight: 30 }}>{item.name}</Text>
-                    <Text style={{ fontSize: 18, opacity: 0.7, fontStyle: 'italic', lineHeight: 20 }}>{item.jobTitle}</Text>
-                    <Text style={{ fontSize: 14, opacity: 0.8, color: '#00f' }}>{item.email}</Text>
+                <View style={{ flex: 1 }}>
+                    {!!item.name && <Text style={{ fontSize: 22, fontWeight: '600', lineHeight: 30 }}>{item.name}</Text>}
+                    {!!item.jobTitle && <Text style={{ fontSize: 18, opacity: 0.7, fontStyle: 'italic', lineHeight: 20 }}>{item.jobTitle}</Text>}
+                    {!!item.email && <Text style={{ fontSize: 14, opacity: 0.8, color: '#00f' }}>{item.email}</Text>}
+                    {!!item.address && <Text style={{ fontSize: 12, opacity: 0.8, color: '#000' }}>{item.address}</Text>}
+                    <View style={{ paddingVertical: 5, flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <TouchableOpacity style={{ alignItems: 'flex-start', width: '50%' }} onPress={() => handlerCallPhone(item.phoneNumber)}>
+                            <SimpleLineIcons name='phone' size={20} color={'#000'} />
+                        </TouchableOpacity>
+                        {item.userType == 1 &&
+                            <TouchableOpacity style={{ alignItems: 'flex-start', width: '50%' }} onPress={() => handlerShowLocation(item.currentUpdateLocation)}>
+                                <SimpleLineIcons name='location-pin' size={20} color={'#000'} />
+                            </TouchableOpacity>
+                        }
+                    </View>
                 </View>
             </Animated.View>
         )
