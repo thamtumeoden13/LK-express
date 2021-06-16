@@ -24,6 +24,11 @@
 	<string>1</string>
 	<key>CodePushDeploymentKey</key>
 	<string>dEl2fhAufvhR7566pFdpLbHu1KisOMnTp0QrV</string>
+	<key>LSApplicationQueriesSchemes	</key>
+	<array>
+		<string>tel</string>
+		<string>telprompt</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MKDirectionsApplicationSupportedModes</key>
