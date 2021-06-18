@@ -351,6 +351,7 @@ const App = (props) => {
             }
         };
         bootstrapAsync();
+        // checkForUpdate();
         return () => {
             appStateChange
         };
@@ -522,6 +523,68 @@ const App = (props) => {
                 onHide: () => { }
             });
         }
+    }
+
+    const checkForUpdate = async () => {
+        // setState(prev => { return { ...prev, isFetched: false } })
+        let metadata = null
+        let isError = false
+        await CodePush.checkForUpdate()
+            .then((update) => {
+                metadata = update
+            }).catch(err => {
+                metadata = err
+                isError = true
+            });
+        console.log(isError, metadata)
+        if (!isError && !!metadata && !!metadata.isMandatory) {
+            // const appNewVersion = `${metadata.appVersion} build ${metadata.label}`
+            // const appNewVersionDescription = `${metadata.description}`
+            sync();
+        }
+    }
+
+    const codePushStatusDidChange = (syncStatus) => {
+        switch (syncStatus) {
+            case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+                // setState(prev => { return { ...prev, syncMessage: "Đang kiểm tra bản cập nhật." } });
+                break;
+            case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+                // setState(prev => { return { ...prev, syncMessage: "Đang tải xuống gói cập nhật" } });
+                break;
+            case CodePush.SyncStatus.AWAITING_USER_ACTION:
+                // setState(prev => { return { ...prev, syncMessage: "Awaiting user action." } });
+                break;
+            case CodePush.SyncStatus.INSTALLING_UPDATE:
+                // setState(prev => { return { ...prev, syncMessage: "Đang cài đặt bản cập nhật." } });
+                break;
+            case CodePush.SyncStatus.UP_TO_DATE:
+                // setState(prev => { return { ...prev, syncMessage: "Ứng dụng được cập nhật", progress: false } });
+                break;
+            case CodePush.SyncStatus.UPDATE_IGNORED:
+                // setState(prev => { return { ...prev, syncMessage: "Người dùng đã hủy cập nhật.", progress: false } });
+                break;
+            case CodePush.SyncStatus.UPDATE_INSTALLED:
+                preCodePushSync(true)
+                break;
+            case CodePush.SyncStatus.UNKNOWN_ERROR:
+                preCodePushSync(false)
+                break;
+        }
+    }
+
+    const codePushDownloadDidProgress = (progress) => {
+        // setState(prev => { return { ...prev, progress } });
+    }
+
+    /** Update is downloaded silently, and applied on restart (recommended) */
+    const sync = () => {
+        // setState(prev => { return { ...prev, disabled: true } })
+        CodePush.sync(
+            {},
+            codePushStatusDidChange,
+            codePushDownloadDidProgress
+        );
     }
 
     const { isVisible, disabledIcon, typeModalInputForm, modalAlert } = alert
