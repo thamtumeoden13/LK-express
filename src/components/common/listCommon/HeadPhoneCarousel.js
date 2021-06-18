@@ -11,7 +11,9 @@ const DATA = [
         description: 'Four on-trend colorways to seamlessly suit your style.',
         key: 'first',
         color: '#9dcdfa',
-        price: 200
+        price: 200000,
+        quantity:1,
+        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
     },
     {
         type: 'Pampas',
@@ -20,7 +22,9 @@ const DATA = [
         description: 'A bold statement tuned to perfection.',
         key: 'second',
         color: '#db9efa',
-        price: 250
+        price: 250000,
+        quantity: 1,
+        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
     },
     {
         type: 'Humlan P',
@@ -30,7 +34,9 @@ const DATA = [
             'An Urbanears classic! Listen-all-day fit. Striking the perfect balance of effortless technology',
         key: 'third',
         color: '#999',
-        price: 190
+        price: 190000,
+        quantity: 1,
+        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
     },
     {
         type: 'Humlan B',
@@ -40,7 +46,9 @@ const DATA = [
             'The “Plattan” in Plattan headphones is Swedish for “the slab.”',
         key: 'fourth',
         color: '#a1e3a1',
-        price: 200
+        price: 200000,
+        quantity: 1,
+        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
     },
 ];
 
@@ -132,6 +140,7 @@ const Item = ({ imageUri, heading, description, price, index, scrollX, addToCart
         </View>
     )
 }
+
 const Pagination = ({ scrollX }) => {
     const inputRange = [-width, 0, width]
     const translateX = scrollX.interpolate({
@@ -163,11 +172,9 @@ const Pagination = ({ scrollX }) => {
     )
 }
 
-const HeadPhoneCarousel = () => {
+const HeadPhoneCarousel = ({ addToCart}) => {
     const scrollX = useRef(new Animated.Value(0)).current
-    const addToCart = (item)=>{
-        console.log(item)
-    }
+   
     return (
         <View style={styles.container}>
             <StatusBar hidden={false} />
@@ -175,7 +182,7 @@ const HeadPhoneCarousel = () => {
             <Animated.FlatList
                 data={DATA}
                 renderItem={({ item, index }) => <Item {...item} index={index} scrollX={scrollX} addToCart={() => addToCart(item)} />}
-                keyExtractor={({ key }, index) => key.toString()}
+                keyExtractor={({ key }, index) => index.toString()}
                 pagingEnabled
                 horizontal
                 onScroll={Animated.event(

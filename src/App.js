@@ -1,19 +1,21 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState, useReducer, useRef } from 'react'
+import React, { useEffect, useState, useReducer, useRef, useMemo } from 'react'
 import { Alert, LogBox, AppState, Platform, Keyboard } from 'react-native'
 import { decode, encode } from 'base-64'
 import codePush from "react-native-code-push";
 import { PERMISSIONS, request, openSettings, checkNotifications } from 'react-native-permissions';
 import RNExitApp from 'react-native-exit-app';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-community/async-storage';
 
-import AppContainer from './navigators'
+import AppContainer from './navigators/index'
 
 import { ModalCenterAlert } from "./components/common/modal/ModalCenterAlert";
 import OpenSetting from './components/app/modalInputForm/OpenSetting';
 
 import { notificationManager } from './utils/NotificationManager'
 import { firebase } from './firebase/config'
+import { AuthContext } from './utils'
 
 if (!global.btoa) { global.btoa = encode }
 if (!global.atob) { global.atob = decode }
@@ -128,11 +130,192 @@ const App = (props) => {
         notificationPermissionDenied: false,
     })
 
+    const DATA = [
+        {
+            price: 200000,
+            quantity: 1,
+            title: 'Headphone',
+            thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
+        },
+        {
+            price: 300000,
+            quantity: 1,
+            title: 'SmartPhone 1',
+            thumbnail: 'https://images.pexels.com/photos/3973557/pexels-photo-3973557.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
+        },
+        {
+            price: 250000,
+            quantity: 3,
+            title: 'SmartPhone 2',
+            thumbnail: 'https://images.pexels.com/photos/3493731/pexels-photo-3493731.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
+        },
+        {
+            price: 400000,
+            quantity: 1,
+            title: 'SmartPhone 3',
+            thumbnail: 'https://images.pexels.com/photos/3714902/pexels-photo-3714902.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
+        },
+    ]
+
+    const [stateContext, dispatch] = useReducer(
+        (prevState, action) => {
+            switch (action.type) {
+                case 'RESTORE_TOKEN':
+                    return {
+                        ...prevState,
+                        userToken: action.token,
+                        isLoading: false,
+                    };
+                case 'SIGN_IN':
+                    return {
+                        ...prevState,
+                        isLoading: false,
+                        userToken: action.token,
+                    };
+                case 'SIGN_OUT':
+                    return {
+                        ...prevState,
+                        isLoading: false,
+                        userToken: null,
+                    };
+                case 'LOADING':
+                    return {
+                        ...prevState,
+                        isLoading: !!action.isLoading,
+                    };
+                case 'ADD_SHOPPING_CART':
+                    return {
+                        ...prevState,
+                        shoppingCartList: [...prevState.shoppingCartList, action.shoppingCartItem],
+                    };
+                case 'UPDATE_SHOPPING_CART':
+                    return {
+                        ...prevState,
+                        shoppingCartList: action.shoppingCartList,
+                    };
+                case 'REMOVE_SHOPPING_CART':
+                    const filter = prevState.shoppingCartList.filter((e, i) => i != action.index)
+
+                    return {
+                        ...prevState,
+                        shoppingCartList: filter,
+                    }
+            }
+        },
+        {
+            isLoading: false,
+            userToken: null,
+            shoppingCartList: DATA
+        }
+    )
+    const authContext = useMemo(() => ({
+        signIn: async ({ email, password }) => {
+            console.log('email, password', email, password)
+            dispatch({ type: 'LOADING', isLoading: true })
+            firebase
+                .auth()
+                .signInWithEmailAndPassword(email, password)
+                .then((response) => {
+                    const uid = response.user.uid
+                    const usersRef = firebase.firestore().collection('users')
+                    usersRef
+                        .doc(uid)
+                        .get()
+                        .then(firestoreDocument => {
+                            if (!firestoreDocument.exists) {
+                                Alert.alert("User does not exist anymore.")
+                                return;
+                            }
+                            const user = firestoreDocument.data()
+                            AsyncStorage.setItem('User', JSON.stringify(user))
+                            dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
+                        })
+                        .catch(error => {
+                            Alert.alert(error)
+                        });
+                })
+                .catch(error => {
+                    dispatch({ type: 'LOADING', isLoading: false })
+                    Alert.alert(error)
+                })
+        },
+        signOut: () => {
+            dispatch({ type: 'SIGN_OUT' })
+            AsyncStorage.removeItem('User')
+        },
+        signUp: async (result) => {
+            dispatch({ type: 'LOADING', isLoading: true })
+
+            const { email, password, fullName, avatarURL, avatarBase64, phoneNumber, address } = result
+            firebase
+                .auth()
+                .createUserWithEmailAndPassword(email, password)
+                .then((response) => {
+                    const uid = response.user.uid
+                    const data = {
+                        id: uid,
+                        email,
+                        fullName,
+                        avatarURL,
+                        avatarBase64,
+                        phoneNumber,
+                        address,
+                        level: 2
+                    };
+                    const usersRef = firebase.firestore().collection('users')
+                    usersRef
+                        .doc(uid)
+                        .set(data)
+                        .then(async () => {
+                            // const user = firestoreDocument.data()
+                            await AsyncStorage.setItem('User', JSON.stringify(data))
+                            dispatch({ type: 'SIGN_IN', token: JSON.stringify(data) });
+                        })
+                        .catch((error) => {
+                            Alert.alert(error)
+                        });
+                })
+                .catch((error) => {
+                    dispatch({ type: 'LOADING', isLoading: false })
+                    Alert.alert(error)
+                });
+        },
+        addShoppingCart: async (item) => {
+            dispatch({ type: 'ADD_SHOPPING_CART', shoppingCartItem: item })
+
+        },
+        updateShoppingCart: async (result) => {
+            dispatch({ type: 'UPDATE_SHOPPING_CART', shoppingCartList: result })
+
+        },
+        removeShoppingCart: async (index) => {
+            dispatch({ type: 'REMOVE_SHOPPING_CART', index: index })
+
+        },
+        appContext: stateContext
+    }), [stateContext])
+
     useEffect(() => {
         notificationManager.configure(onRegister, onNotification, onOpenNotification)
-        // const appLocationState = AppState.addEventListener('change', requestLocationPermission)
-        // const appPermission = AppState.addEventListener('change', checkMultiPermission)
         const appStateChange = AppState.addEventListener('change', _handleAppStateChange)
+        const bootstrapAsync = async () => {
+            let userToken;
+
+            try {
+                userToken = await AsyncStorage.getItem('User');
+                if (!!userToken) {
+                    dispatch({ type: 'RESTORE_TOKEN', token: JSON.stringify(userToken) });
+                }
+            } catch (e) {
+                // Restoring token failed
+            }
+
+            // After restoring token, we may need to validate it in production apps
+
+            // This will switch to the App screen or Auth screen and this loading
+            // screen will be unmounted and thrown away.
+        };
+        bootstrapAsync();
         return () => {
             // appLocationState
             // appPermission
@@ -140,7 +323,6 @@ const App = (props) => {
             // handlerOpenURL
             // unsubscribe
         };
-
     }, [])
 
     useEffect(() => {
@@ -164,9 +346,11 @@ const App = (props) => {
                 })
                 .then(_doc => {
                     Keyboard.dismiss()
+                    console.log('aaaaaaa')
                 })
                 .catch((error) => {
                     Alert.alert(error)
+                    console.log('bbbbbb')
                 })
         }
         appState.current = nextAppState;
@@ -275,15 +459,6 @@ const App = (props) => {
         })
     }
 
-    const restartApp = () => {
-        // setTimeout(() => {
-        //     Platform.select({
-        //         ios: RNRestart.Restart(),
-        //         android: RNExitApp.exitApp()
-        //     })
-        // }, 500);
-    }
-
     const onRegister = (token) => {
         console.log('[Notification] registered', token)
     }
@@ -299,7 +474,7 @@ const App = (props) => {
 
     const { isVisible, disabledIcon, typeModalInputForm, modalAlert } = alert
     return (
-        <>
+        <AuthContext.Provider value={authContext}>
             <Toast config={toastConfig} ref={(ref) => Toast.setRef(ref)} />
             <ModalCenterAlert
                 isVisible={isVisible}
@@ -311,7 +486,7 @@ const App = (props) => {
                 onCloseModalAlert={onCloseModalAlert}
             />
             <AppContainer />
-        </>
+        </AuthContext.Provider>
     );
 }
 

@@ -2,64 +2,7 @@ import React from 'react'
 import { View, Text, Image, FlatList, Dimensions, TouchableOpacity, Animated } from 'react-native'
 import AntDesignIcon from 'react-native-vector-icons/AntDesign'
 
-const DATA = [
-    {
-        key: 1,
-        price: 200000,
-        quantity: 1,
-        title: 'Headphone',
-        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
-    },
-    {
-        key: 2,
-        price: 300000,
-        quantity: 1,
-        title: 'SmartPhone 1',
-        thumbnail: 'https://images.pexels.com/photos/3973557/pexels-photo-3973557.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
-    },
-    {
-        key: 3,
-        price: 250000,
-        quantity: 3,
-        title: 'SmartPhone 2',
-        thumbnail: 'https://images.pexels.com/photos/3493731/pexels-photo-3493731.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
-    },
-    {
-        key: 4,
-        price: 400000,
-        quantity: 1,
-        title: 'SmartPhone 3',
-        thumbnail: 'https://images.pexels.com/photos/3714902/pexels-photo-3714902.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
-    },
-    {
-        key: 5,
-        price: 400000,
-        quantity: 1,
-        title: 'SmartPhone 3',
-        thumbnail: 'https://images.pexels.com/photos/3714902/pexels-photo-3714902.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
-    },
-    {
-        key: 6,
-        price: 400000,
-        quantity: 1,
-        title: 'SmartPhone 3',
-        thumbnail: 'https://images.pexels.com/photos/3714902/pexels-photo-3714902.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
-    },
-    {
-        key: 7,
-        price: 400000,
-        quantity: 1,
-        title: 'SmartPhone 3',
-        thumbnail: 'https://images.pexels.com/photos/3714902/pexels-photo-3714902.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
-    },
-    {
-        key: 8,
-        price: 400000,
-        quantity: 1,
-        title: 'SmartPhone 3',
-        thumbnail: 'https://images.pexels.com/photos/3714902/pexels-photo-3714902.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
-    },
-]
+import { AuthContext } from '../../utils'
 
 const { width, height } = Dimensions.get('screen')
 const SPACING = 20
@@ -70,12 +13,17 @@ const ShoppingCartScreen = () => {
 
     const scrollY = React.useRef(new Animated.Value(0)).current
 
+    const { appContext, removeShoppingCart } = React.useContext(AuthContext);
+
+    const onRemove = (index) => {
+        removeShoppingCart(index)
+    }
+
     return (
         <View style={{ flex: 1, alignItems: 'center' }}>
-
             <Animated.FlatList
-                data={DATA}
-                keyExtractor={({ key }) => key.toString()}
+                data={appContext.shoppingCartList}
+                keyExtractor={({ key }, index) => index.toString()}
                 contentContainerStyle={{ width, paddingHorizontal: 10 }}
                 bounces={false}
                 showsVerticalScrollIndicator={false}
@@ -159,7 +107,10 @@ const ShoppingCartScreen = () => {
                                     </View>
                                 </View>
                             </View>
-                            <TouchableOpacity style={{ height: '100%', width: 40, alignItems: 'flex-end' }}>
+                            <TouchableOpacity
+                                style={{ height: '100%', width: 40, alignItems: 'flex-end' }}
+                                onPress={() => onRemove(index)}
+                            >
                                 <AntDesignIcon name='delete' size={20} color={'#6a6a6a'} />
                             </TouchableOpacity>
                         </Animated.View>

@@ -274,7 +274,7 @@ const PhoneBook = (props) => {
                     width: indicatorWidth,
                     left: 0,
                     backgroundColor: '#000',
-                    bottom: 0,
+                    bottom: 5,
                     transform: [{ translateX }]
                 }}
             />
@@ -284,7 +284,7 @@ const PhoneBook = (props) => {
     const Tab = forwardRef(({ item, fontSize, onItemPress }, ref) => {
         return (
             <TouchableOpacity onPress={onItemPress}>
-                <View ref={ref}>
+                <View ref={ref} style={{ justifyContent: 'center', height: 48 }}>
                     <Text style={{ color: '#000', fontSize, textTransform: 'uppercase' }}>{item.title}</Text>
                 </View>
             </TouchableOpacity>
@@ -312,7 +312,7 @@ const PhoneBook = (props) => {
         }, [])
 
         return (
-            <View style={{ position: 'absolute', width, height: 40 }}>
+            <View style={{ position: 'absolute', width, height: 48 }}>
                 <View ref={containerRef} style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', }}>
                     {data.map((item, index) => {
                         return (

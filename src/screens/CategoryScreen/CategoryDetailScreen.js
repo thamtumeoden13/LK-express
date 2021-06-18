@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import {
     StyleSheet,
     View,
@@ -9,6 +9,7 @@ import {
     Alert
 } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { StackActions } from '@react-navigation/native';
 
 import {
     CarouselMainLayout,
@@ -21,6 +22,7 @@ import HeaderTitle from 'components/common/Header/HeaderTitle'
 import HeadPhoneCarousel from 'components/common/listCommon/HeadPhoneCarousel'
 
 import { firebase } from '../../firebase/config'
+import { AuthContext } from '../../utils'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 
 const db = firebase.firestore()
@@ -34,6 +36,8 @@ const CategoryDetailScreen = (props) => {
         categoryName: ''
     })
     const [categories, setCategories] = useState([])
+
+    const { addShoppingCart } = useContext(AuthContext)
 
     useEffect(() => {
         const categoryID = props.route.params.id
@@ -51,7 +55,7 @@ const CategoryDetailScreen = (props) => {
         if (!!state.categoryID) {
             props.navigation.setOptions({
                 headerTitle: () => <HeaderTitle title={`${state.categoryName}`} />,
-                headerRight: () => <ShoppingCartIcon onOpen={() => onAddShoppingCart()} />,
+                headerRight: () => <ShoppingCartIcon onOpen={() => onOpenShoppingCart()} />,
             });
 
             const query = entityRef
@@ -92,13 +96,20 @@ const CategoryDetailScreen = (props) => {
         setCategories(categoriesFireStore)
     }, [categories])
 
-    const onAddShoppingCart = () => {
-        // const pushAction = StackActions.push('AddCategory')
-        // props.navigation.dispatch(pushAction)
+    const onAddShoppingCart = (item) => {
+        console.log('onAddShoppingCart', item)
+        addShoppingCart(item)
     }
+
+    const onOpenShoppingCart = () => {
+        const pushAction = StackActions.push('ShoppingCart')
+        props.navigation.dispatch(pushAction)
+    }
+
     const onPressItem = (item, index) => {
         Alert.alert('CarouselMainLayout', `You've clicked ${item.title}`);
     }
+
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -116,7 +127,9 @@ const CategoryDetailScreen = (props) => {
                     />
                 </ScrollView>
             </View> */}
-            <HeadPhoneCarousel />
+            <HeadPhoneCarousel
+                addToCart={onAddShoppingCart}
+            />
         </SafeAreaView>
     );
 }

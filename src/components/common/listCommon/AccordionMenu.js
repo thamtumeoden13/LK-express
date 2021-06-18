@@ -105,8 +105,8 @@ const AccordionMenu = (props) => {
                             {index === currentIndex &&
                                 <View style={styles.subCategories}>
                                     {subCategories.map(subCategory => (
-                                        <TouchableOpacity key={`item-${category}`} onPress={() => handalerTouchItem(subCategory)}>
-                                            <Text style={[styles.body, { color: color }]}>{subCategory}</Text>
+                                        <TouchableOpacity key={`item-${subCategory}`} onPress={() => handalerTouchItem(subCategory)}>
+                                            <Text style={[styles.body, { color: color }]}>{`* ${subCategory}`}</Text>
                                         </TouchableOpacity>
                                     ))}
                                 </View>
@@ -136,14 +136,18 @@ const styles = StyleSheet.create({
         fontSize: 38,
         fontWeight: '900',
         textTransform: 'uppercase',
-
+        textAlign: 'left',
+        width: '100%',
+        paddingLeft: 20
     },
     subCategories: {
-        marginTop: 10
+        marginTop: 10,
+        width:'100%'
     },
     body: {
         fontSize: 20,
         lineHeight: 20 * 1.5,
-        textAlign: 'center'
+        textAlign: 'left',
+        paddingLeft:30
     }
 })

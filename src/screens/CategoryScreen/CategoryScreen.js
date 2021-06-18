@@ -77,7 +77,7 @@ const CategoryScreen = (props) => {
                         placeholder={'Tìm danh mục, sản phẩm'}
                         handerSearchInput={(value) => onHanderSearchInput(value)}
                     />,
-                headerRight: () => <ShoppingCartIcon onOpen={() => onAddShoppingCart()} />,
+                headerRight: () => <ShoppingCartIcon onOpen={() => onOpenShoppingCart()} />,
             });
         }
     }, [state.level])
@@ -117,7 +117,7 @@ const CategoryScreen = (props) => {
         props.navigation.dispatch(pushAction)
     }
 
-    const onAddShoppingCart = () => {
+    const onOpenShoppingCart = () => {
         const pushAction = StackActions.push('ShoppingCart')
         props.navigation.dispatch(pushAction)
     }

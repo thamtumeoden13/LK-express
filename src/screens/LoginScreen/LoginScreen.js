@@ -12,8 +12,8 @@ import styles from './styles';
 import { calcWidth } from 'utils/scaleSize';
 
 const LoginScreen = (props) => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const [email, setEmail] = useState('ltv.mrvu@gmail.com')
+    const [password, setPassword] = useState('123456')
 
     const { signIn, appContext } = useContext(AuthContext);
 

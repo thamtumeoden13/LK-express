@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useRef, useState } from 'react'
+import React, { useContext, useReducer, useEffect, useRef, useState } from 'react'
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView, Keyboard, Alert } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -375,164 +375,24 @@ const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
 export default () => {
-    const [state, dispatch] = useReducer(
-        (prevState, action) => {
-            switch (action.type) {
-                case 'RESTORE_TOKEN':
-                    return {
-                        ...prevState,
-                        userToken: action.token,
-                        isLoading: false,
-                    };
-                case 'SIGN_IN':
-                    return {
-                        ...prevState,
-                        isLoading: false,
-                        userToken: action.token,
-                    };
-                case 'SIGN_OUT':
-                    return {
-                        ...prevState,
-                        isLoading: false,
-                        userToken: null,
-                    };
-                case 'LOADING':
-                    return {
-                        ...prevState,
-                        isLoading: !!action.isLoading,
-                    };
-            }
-        },
-        {
-            isLoading: false,
-            userToken: null,
-        }
-    )
-
-    useEffect(() => {
-        // Fetch the token from storage then navigate to our appropriate place
-        const bootstrapAsync = async () => {
-            let userToken;
-
-            try {
-                userToken = await AsyncStorage.getItem('User');
-                if (!!userToken) {
-                    dispatch({ type: 'RESTORE_TOKEN', token: JSON.stringify(userToken) });
-                }
-            } catch (e) {
-                // Restoring token failed
-            }
-
-            // After restoring token, we may need to validate it in production apps
-
-            // This will switch to the App screen or Auth screen and this loading
-            // screen will be unmounted and thrown away.
-        };
-
-        bootstrapAsync();
-    }, [])
-
-    const authContext = React.useMemo(() => ({
-        signIn: async ({ email, password }) => {
-            console.log('email, password', email, password)
-            dispatch({ type: 'LOADING', isLoading: true })
-            // In a production app, we need to send some data (usually username, password) to server and get a token
-            // We will also need to handle errors if sign in failed
-            // After getting token, we need to persist the token using `SecureStore`
-            // In the example, we'll use a dummy token
-            firebase
-                .auth()
-                .signInWithEmailAndPassword(email, password)
-                .then((response) => {
-                    const uid = response.user.uid
-                    const usersRef = firebase.firestore().collection('users')
-                    usersRef
-                        .doc(uid)
-                        .get()
-                        .then(firestoreDocument => {
-                            if (!firestoreDocument.exists) {
-                                alert("User does not exist anymore.")
-                                return;
-                            }
-                            const user = firestoreDocument.data()
-                            AsyncStorage.setItem('User', JSON.stringify(user))
-                            dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
-                        })
-                        .catch(error => {
-                            alert(error)
-                        });
-                })
-                .catch(error => {
-                    dispatch({ type: 'LOADING', isLoading: false })
-                    alert(error)
-                })
-        },
-        signOut: () => {
-            dispatch({ type: 'SIGN_OUT' })
-            AsyncStorage.removeItem('User')
-        },
-        signUp: async (result) => {
-            dispatch({ type: 'LOADING', isLoading: true })
-            // In a production app, we need to send user data to server and get a token
-            // We will also need to handle errors if sign up failed
-            // After getting token, we need to persist the token using `SecureStore`
-            // In the example, we'll use a dummy token
-            const { email, password, fullName, avatarURL, avatarBase64, phoneNumber, address } = result
-            firebase
-                .auth()
-                .createUserWithEmailAndPassword(email, password)
-                .then((response) => {
-                    const uid = response.user.uid
-                    const data = {
-                        id: uid,
-                        email,
-                        fullName,
-                        avatarURL,
-                        avatarBase64,
-                        phoneNumber,
-                        address,
-                        level: 2
-                    };
-                    const usersRef = firebase.firestore().collection('users')
-                    usersRef
-                        .doc(uid)
-                        .set(data)
-                        .then(async () => {
-                            // const user = firestoreDocument.data()
-                            await AsyncStorage.setItem('User', JSON.stringify(data))
-                            dispatch({ type: 'SIGN_IN', token: JSON.stringify(data) });
-                        })
-                        .catch((error) => {
-                            alert(error)
-                        });
-                })
-                .catch((error) => {
-                    dispatch({ type: 'LOADING', isLoading: false })
-                    alert(error)
-                });
-        },
-        appContext: state
-    }), [state])
-
+    const { appContext } = useContext(AuthContext);
     return (
-        <AuthContext.Provider value={authContext}>
-            <NavigationContainer>
-                <Drawer.Navigator
-                    screenOptions={{ headerShown: false }}
-                    drawerContent={props => <DrawerContentComponents {...props} />}
-                >
-                    {state.userToken == null ? (
-                        // <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
-                        <Drawer.Screen name="Login" component={AuthStack} />
-                    ) : (
-                        <>
-                            <Drawer.Screen name="Home" component={TabStack} />
-                            <Drawer.Screen name="RoomChat" component={RoomChatScreen} />
-                            <Drawer.Screen name="Chat" component={ChatScreen} />
-                        </>
-                    )}
-                </Drawer.Navigator>
-            </NavigationContainer >
-        </AuthContext.Provider>
+        <NavigationContainer>
+            <Drawer.Navigator
+                screenOptions={{ headerShown: false }}
+                drawerContent={props => <DrawerContentComponents {...props} />}
+            >
+                {!appContext || appContext.userToken == null ? (
+                    // <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} />
+                    <Drawer.Screen name="Login" component={AuthStack} />
+                ) : (
+                    <>
+                        <Drawer.Screen name="Home" component={TabStack} />
+                        <Drawer.Screen name="RoomChat" component={RoomChatScreen} />
+                        <Drawer.Screen name="Chat" component={ChatScreen} />
+                    </>
+                )}
+            </Drawer.Navigator>
+        </NavigationContainer >
     )
 }

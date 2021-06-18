@@ -12,7 +12,6 @@ export const colors = {
     background2: '#21D4FD'
 };
 const DrawerContentComponents = ({ navigation}) => {
-    console.log('xxx', navigation)
     const [state, setState] = useState({ activeItemKey: 'Home' })
 
     const gradient = () => {
@@ -27,7 +26,6 @@ const DrawerContentComponents = ({ navigation}) => {
     }
 
     const navigateToScreen = (route) => {
-        console.log('route', route)
         InteractionManager.runAfterInteractions(() => {
             navigation.navigate(route)
             navigation.closeDrawer()
