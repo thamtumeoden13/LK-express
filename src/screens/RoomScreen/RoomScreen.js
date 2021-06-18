@@ -66,11 +66,11 @@ const RoomScreen = (props) => {
     useEffect(() => {
         if (!!state.userID) {
             const unsubscribeRoomList = entityRef.onSnapshot(getRealtimeCollectionRoomList, err => Alert.alert(error))
-            const queryUserList = entityUserRef.where("id", "!=", state.userID)
-            const unsubscribeUserList = queryUserList.onSnapshot(getRealtimeCollectionUserList, err => Alert.alert(error))
+            // const queryUserList = entityUserRef.where("id", "!=", state.userID)
+            // const unsubscribeUserList = queryUserList.onSnapshot(getRealtimeCollectionUserList, err => Alert.alert(error))
             return () => {
                 unsubscribeRoomList()
-                unsubscribeUserList()
+                // unsubscribeUserList()
             }
         }
     }, [state.userID])
@@ -108,14 +108,14 @@ const RoomScreen = (props) => {
         setState(prev => { return { ...prev, isDataFetchedRoomList: true } })
     }
 
-    const getRealtimeCollectionUserList = async (querySnapshot) => {
-        let users = querySnapshot.docs.map((doc) => {
-            const user = doc.data()
-            return { ...user, doc: doc.id }
-        })
-        setUsers(users)
-        setState(prev => { return { ...prev, isDataFetchedUserList: true } })
-    }
+    // const getRealtimeCollectionUserList = async (querySnapshot) => {
+    //     let users = querySnapshot.docs.map((doc) => {
+    //         const user = doc.data()
+    //         return { ...user, doc: doc.id }
+    //     })
+    //     setUsers(users)
+    //     setState(prev => { return { ...prev, isDataFetchedUserList: true } })
+    // }
 
     const onHandlerJoinRoom = (roomID) => {
         const pushAction = StackActions.push('RoomChatDetail', { id: roomID })

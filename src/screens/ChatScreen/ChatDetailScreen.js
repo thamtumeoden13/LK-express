@@ -41,6 +41,7 @@ const RoomChatScreen = ({ route, navigation }) => {
         scrollViewRef.current?.setNativeProps({
             scrollEnabled: false,
         });
+        setState(prev => { return { ...prev, actionSheetType: 0 } })
     };
 
     const onOpen = () => {
