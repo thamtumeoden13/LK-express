@@ -247,14 +247,16 @@ const App = (props) => {
                             const user = firestoreDocument.data()
                             AsyncStorage.setItem('User', JSON.stringify(user))
                             dispatch({ type: 'SIGN_IN', token: JSON.stringify(user) });
+                            dispatch({ type: 'LOADING', isLoading: false })
                         })
                         .catch(error => {
-                            Alert.alert(error)
+                            dispatch({ type: 'LOADING', isLoading: false })
+                            Alert.alert(JSON.stringify(error))
                         });
                 })
                 .catch(error => {
                     dispatch({ type: 'LOADING', isLoading: false })
-                    Alert.alert(error)
+                    Alert.alert(JSON.stringify(error))
                 })
         },
         signOut: () => {
@@ -290,12 +292,12 @@ const App = (props) => {
                             dispatch({ type: 'SIGN_IN', token: JSON.stringify(data) });
                         })
                         .catch((error) => {
-                            Alert.alert(error)
+                            Alert.alert(JSON.stringify(error))
                         });
                 })
                 .catch((error) => {
                     dispatch({ type: 'LOADING', isLoading: false })
-                    Alert.alert(error)
+                    Alert.alert(JSON.stringify(error))
                 });
         },
         addShoppingCart: async (item) => {
