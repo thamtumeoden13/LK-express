@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState, useReducer, useRef, useMemo } from 'react'
-import { Alert, LogBox, AppState, Platform, Keyboard } from 'react-native'
+import { Alert, LogBox, AppState, Platform, Keyboard, View, Text } from 'react-native'
+import { Icon } from 'react-native-elements'
 import { decode, encode } from 'base-64'
 import codePush from "react-native-code-push";
 import { PERMISSIONS, request, openSettings, checkNotifications } from 'react-native-permissions';
@@ -16,6 +17,7 @@ import OpenSetting from './components/app/modalInputForm/OpenSetting';
 import { notificationManager } from './utils/NotificationManager'
 import { firebase } from './firebase/config'
 import { AuthContext } from './utils'
+import { moderateScale, verticalScale, scale, calcHeight, calcWidth } from 'utils/scaleSize';
 
 if (!global.btoa) { global.btoa = encode }
 if (!global.atob) { global.atob = decode }
@@ -200,14 +202,30 @@ const App = (props) => {
                         ...prevState,
                         shoppingCartList: filter,
                     }
+                case 'SHOW_TOAST':
+                    const { title, body, duration } = action.result
+                    return {
+                        ...prevState,
+                        isVisibleToast: true,
+                        toastResult: { title, body, duration }
+                    }
+                case 'HIDE_TOAST':
+                    return {
+                        ...prevState,
+                        isVisibleToast: false,
+                        toastResult: {}
+                    }
             }
         },
         {
             isLoading: false,
             userToken: null,
+            isVisibleToast: false,
+            toastResult: {},
             shoppingCartList: DATA
         }
     )
+
     const authContext = useMemo(() => ({
         signIn: async ({ email, password }) => {
             console.log('email, password', email, password)
@@ -282,15 +300,36 @@ const App = (props) => {
         },
         addShoppingCart: async (item) => {
             dispatch({ type: 'ADD_SHOPPING_CART', shoppingCartItem: item })
-
+            const message = {
+                title: 'Thêm vào giỏ hàng',
+                body: 'Thành công',
+                duration: 1000
+            }
+            dispatch({ type: 'SHOW_TOAST', result: message })
         },
         updateShoppingCart: async (result) => {
             dispatch({ type: 'UPDATE_SHOPPING_CART', shoppingCartList: result })
-
+            const message = {
+                title: 'Cập nhật giỏ hàng',
+                body: 'Thành công',
+                duration: 2000
+            }
+            dispatch({ type: 'SHOW_TOAST', result: message })
         },
         removeShoppingCart: async (index) => {
             dispatch({ type: 'REMOVE_SHOPPING_CART', index: index })
-
+            const message = {
+                title: 'Cập nhật giỏ hàng',
+                body: 'Thành công',
+                duration: 2000
+            }
+            dispatch({ type: 'SHOW_TOAST', result: message })
+        },
+        showToast: async (message) => {
+            dispatch({ type: 'SHOW_TOAST', result: !!message ? message : {} })
+        },
+        hideToast: async () => {
+            dispatch({ type: 'HIDE_TOAST' })
         },
         appContext: stateContext
     }), [stateContext])
@@ -300,7 +339,6 @@ const App = (props) => {
         const appStateChange = AppState.addEventListener('change', _handleAppStateChange)
         const bootstrapAsync = async () => {
             let userToken;
-
             try {
                 userToken = await AsyncStorage.getItem('User');
                 if (!!userToken) {
@@ -309,19 +347,10 @@ const App = (props) => {
             } catch (e) {
                 // Restoring token failed
             }
-
-            // After restoring token, we may need to validate it in production apps
-
-            // This will switch to the App screen or Auth screen and this loading
-            // screen will be unmounted and thrown away.
         };
         bootstrapAsync();
         return () => {
-            // appLocationState
-            // appPermission
             appStateChange
-            // handlerOpenURL
-            // unsubscribe
         };
     }, [])
 
@@ -330,6 +359,15 @@ const App = (props) => {
             preOpenSettingPermission()
         }
     }, [state.locationPermissionDenied, state.notificationPermissionDenied])
+
+    useEffect(() => {
+        if (!!stateContext.isVisibleToast) {
+            const { title, body, duration } = stateContext.toastResult
+            onHandlerToast(true, 'success_custom', title, body, duration)
+        } else {
+            onHandlerToast(false)
+        }
+    }, [stateContext.isVisibleToast, stateContext.toastResult])
 
     const _handleAppStateChange = (nextAppState) => {
         console.log("AppState", appState.current, nextAppState);
@@ -340,18 +378,6 @@ const App = (props) => {
             requestLocationPermission()
             checkMultiPermission()
 
-            entityUserRef.doc(`9MjBQFx1A3M2YkO4FNQ6lrmnl4E3`)
-                .update({
-                    currentUpdateLocation: ''
-                })
-                .then(_doc => {
-                    Keyboard.dismiss()
-                    console.log('aaaaaaa')
-                })
-                .catch((error) => {
-                    Alert.alert(error)
-                    console.log('bbbbbb')
-                })
         }
         appState.current = nextAppState;
     };
@@ -415,6 +441,7 @@ const App = (props) => {
             }
         })
     }
+
     const openSettingPermission = (status) => {
         setTimeout(() => {
             if (!!status) {
@@ -472,9 +499,33 @@ const App = (props) => {
         Alert.alert('Open notification')
     }
 
+    const onHandlerToast = (status, type, title, body, duration) => {
+        const initialType = ["success", "error", "info", "success_custom", "info_custom", "error_custom"];
+        const isExists = initialType.includes(type)
+        if (!!status) {
+            Toast.show({
+                type: `${!!type && isExists ? type : 'success'}`,
+                position: 'bottom',
+                text1: `${!!title ? title : 'Hello'}`,
+                text2: `${!!body ? body : 'This is some something 👋'}`,
+                visibilityTime: !!duration && duration > 0 ? duration : 3000,
+                autoHide: !!duration && duration == -1 ? false : true,
+                topOffset: Platform.OS === 'ios' ? 50 : 30,
+                onShow: () => { },
+                onHide: () => { }
+            });
+        }
+        else {
+            Toast.hide({
+                onHide: () => { }
+            });
+        }
+    }
+
     const { isVisible, disabledIcon, typeModalInputForm, modalAlert } = alert
     return (
         <AuthContext.Provider value={authContext}>
+            <AppContainer />
             <Toast config={toastConfig} ref={(ref) => Toast.setRef(ref)} />
             <ModalCenterAlert
                 isVisible={isVisible}
@@ -485,7 +536,6 @@ const App = (props) => {
                 childComponent={renderModalInputForm(typeModalInputForm)}
                 onCloseModalAlert={onCloseModalAlert}
             />
-            <AppContainer />
         </AuthContext.Provider>
     );
 }
