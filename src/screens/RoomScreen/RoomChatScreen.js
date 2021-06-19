@@ -14,13 +14,14 @@ import Geolocation from 'react-native-geolocation-service';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 
-import { firebase } from '../../firebase/config'
-import { notificationManager } from 'utils/NotificationManager'
 import HeaderTitle from 'components/common/Header/HeaderTitle'
 import ActionSheetIcon from 'components/common/icon/ActionSheetIcon'
 
-import styles from './styles';
+import { firebase } from '../../firebase/config'
+import { notificationManager } from 'utils/NotificationManager'
 import { scale } from 'utils/scaleSize';
+
+import styles from './styles';
 
 function Difference(arr = [], oarr = []) {
     return arr.reduce((t, v) => oarr.find(e => { return e.email == v.email }) ? t : [...t, v], []);

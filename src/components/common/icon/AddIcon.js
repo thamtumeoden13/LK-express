@@ -9,9 +9,7 @@ import { moderateScale, scale } from 'utils/scaleSize';
 
 const AddIcon = (props) => {
     const openBag = () => {
-        console.log('openBag')
         props.onOpen()
-        // navigation.openDrawer()
     }
 
     return (

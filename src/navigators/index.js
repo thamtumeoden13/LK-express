@@ -10,7 +10,8 @@ import LottieView from 'lottie-react-native';
 
 import {
     LoginScreen, RegistrationScreen, AuthLoadingScreen,
-    HomeScreen, ChatScreen, ChatDetailScreen, RoomScreen, RoomChatScreen,
+    HomeScreen, ChatScreen, ChatDetailScreen, 
+    RoomScreen, RoomChatScreen,AddRoomScreen,
     PhoneBookScreen, ProfileScreen, UpdateProfileScreen,
     CategoryScreen, CategoryDetailScreen, AddCategoryScreen, ShoppingCartScreen,
 } from '../screens'
@@ -111,6 +112,15 @@ function RoomChatStackScreen({ navigation }) {
                     // headerTitle: () => <HeaderTitle title={`Phòng chat 111`} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
+            />
+            <RoomChatStack.Screen
+                name="AddRoom"
+                component={AddRoomScreen}
+                // options={{
+                //     headerLeft: () => <BackIcon navigation={navigation} />,
+                //     // headerTitle: () => <HeaderTitle title={`Phòng chat 111`} />,
+                //     headerRight: () => <BagIcon navigation={navigation} />,
+                // }}
             />
         </RoomChatStack.Navigator>
     );

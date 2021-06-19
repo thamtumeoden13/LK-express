@@ -12,6 +12,7 @@ import { vi } from 'date-fns/locale/vi'
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import HeaderSearchInput from 'components/common/Header/SearchInput'
+import AddIcon from 'components/common/icon/AddIcon'
 
 import styles from './styles';
 
@@ -25,6 +26,7 @@ const RoomScreen = (props) => {
         connectID: '',
         userName: '',
         user: {},
+        level: '',
         page: 0,
         isDataFetchedRoomList: false,
         isDataFetchedChatList: false,
@@ -43,9 +45,17 @@ const RoomScreen = (props) => {
                     ...prev,
                     userID: user.id,
                     userName: user.fullName,
-                    user: user
+                    user: user,
+                    level: user.level,
                 }
             })
+            // const unsubscribeRoomList = entityRef.onSnapshot(getRealtimeCollectionRoomList, err => Alert.alert(error))
+            // const queryUserList = entityUserRef.where("id", "!=", state.userID)
+            // const unsubscribeUserList = queryUserList.onSnapshot(getRealtimeCollectionUserList, err => Alert.alert(error))
+            // return () => {
+            //     unsubscribeRoomList()
+            //     // unsubscribeUserList()
+            // }
         });
         return () => {
             focusListener
@@ -59,9 +69,17 @@ const RoomScreen = (props) => {
                     placeholder={'Tìm nhóm'}
                     handerSearchInput={(value) => onHanderSearchInput(value)}
                 />,
-            headerRight: () => null,
         });
     }, [props.navigation, rooms])
+
+    useEffect(() => {
+        console.log('state.level', state.level)
+        if (state.level == 1) {
+            props.navigation.setOptions({
+                headerRight: () => <AddIcon navigation={props.navigation} onOpen={() => addNewRoom()} />,
+            });
+        }
+    }, [state.level])
 
     useEffect(() => {
         if (!!state.userID) {
@@ -74,6 +92,11 @@ const RoomScreen = (props) => {
             }
         }
     }, [state.userID])
+
+    const addNewRoom = () => {
+        const pushAction = StackActions.push('AddRoom')
+        props.navigation.dispatch(pushAction)
+    }
 
     const onHanderSearchInput = (searchInput) => {
         if (searchInput) {
