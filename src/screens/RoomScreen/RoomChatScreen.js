@@ -24,7 +24,7 @@ import { scale } from 'utils/scaleSize';
 import styles from './styles';
 
 function Difference(arr = [], oarr = []) {
-    return arr.reduce((t, v) => oarr.find(e => { return e.email == v.email }) ? t : [...t, v], []);
+    return arr.reduce((t, v) => oarr.find(e => { return e.id == v.id }) ? t : [...t, v], []);
 }
 
 const RoomChatScreen = ({ route, navigation }) => {
@@ -97,7 +97,6 @@ const RoomChatScreen = ({ route, navigation }) => {
     }, [navigation, state.roomID])
 
     useEffect(() => {
-        console.log('state.level', state.level)
         if (state.level == 1) {
             navigation.setOptions({
                 headerRight: () => <ActionSheetIcon navigation={navigation} onOpen={() => handlerUser()} />,
@@ -163,7 +162,7 @@ const RoomChatScreen = ({ route, navigation }) => {
         querySnapshot.docChanges().forEach(change => {
             const message = change.doc.data()
             if (change.type === "added") {
-                console.log("New message: ", change.doc.data());
+                // console.log("New message: ", change.doc.data());
                 messagesFireStore.push({
                     ...message,
                     createdAt: message.createdAt.toDate(),
@@ -174,41 +173,40 @@ const RoomChatScreen = ({ route, navigation }) => {
                     }
                 })
             }
-            if (change.type === "modified") {
-                console.log("Modified message: ", change.doc.data());
-            }
-            if (change.type === "removed") {
-                console.log("Removed message: ", change.doc.data());
-            }
+            // if (change.type === "modified") {
+            //     console.log("Modified message: ", change.doc.data());
+            // }
+            // if (change.type === "removed") {
+            //     console.log("Removed message: ", change.doc.data());
+            // }
         })
         messagesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        console.log('messagesFireStore', messagesFireStore)
         appendMessages(messagesFireStore, state.userID, state.roomID)
     }
 
     const getCollectionUsersExistsList = async () => {
-        const querySnapshot = await entityRef.doc(state.roomID).collection('users').get()
-        const reads = querySnapshot.docs.map((doc) => {
-            const user = doc.data()
-            return { ...user, doc: doc.id }
+        const querySnapshot = await entityRef.doc(state.roomID).collection('users').where("id", "!=", state.userID).get()
+        const reads = querySnapshot.docs.map(async (doc) => {
+            const _doc = doc.data()
+            const user = await _doc.userRef.get()
+            const userRef = user.data()
+            return { id: _doc.id, doc: doc.id, email: userRef.email, phoneNumber: userRef.phoneNumber, fullName: userRef.fullName }
         })
-        console.log('reads', reads)
-        setUsersExists(reads)
+        const usersExists = await Promise.all(reads)
+        setUsersExists(usersExists)
     }
 
     const getCollectionUsersList = async (userID) => {
-        const querySnapshot = await entityUserRef.get()
+        const querySnapshot = await entityUserRef.where("id", "!=", state.userID).get()
         let users = querySnapshot.docs.map((doc) => {
             const user = doc.data()
             return { ...user, doc: doc.id }
         })
-        console.log('users', users)
         setUsers(users)
     }
 
     const appendMessages = useCallback((messages, userID, roomID) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-        console.log('appendMessages', messages)
         if (!!messages && messages.length > 0 && userID != messages[0].authorID) {
             handlerLocalPushNotify(messages[0], roomID)
         }
@@ -283,9 +281,12 @@ const RoomChatScreen = ({ route, navigation }) => {
 
     const onAddUser = (user) => {
         setState(prev => { return { ...prev, actionSheetType: 0 } })
-        // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        let data = {
+            id: user.id,
+            userRef: db.doc(`users/${user.id}`)
+        };
         entityRef.doc(`${state.roomID}`).collection('users')
-            .doc().set(user)
+            .doc().set(data)
             .then(_doc => {
                 getCollectionUsersExistsList()
                 Keyboard.dismiss()
@@ -298,7 +299,6 @@ const RoomChatScreen = ({ route, navigation }) => {
 
     const onRemoveUser = (user) => {
         setState(prev => { return { ...prev, actionSheetType: 0 } })
-        // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
         entityRef.doc(`${state.roomID}`).collection('users')
             .doc(user.doc).delete()
             .then(_doc => {
@@ -308,7 +308,6 @@ const RoomChatScreen = ({ route, navigation }) => {
             .catch((error) => {
                 alert(error)
             })
-
     }
 
     const handlerLongPressMessage = (action, message) => {
@@ -374,7 +373,7 @@ const RoomChatScreen = ({ route, navigation }) => {
         }}
         onSend={onSend}
         onLongPress={handlerLongPressMessage}
-        // onPressAvatar={handlerLongPressMessage}
+    // onPressAvatar={handlerLongPressMessage}
     />
 
     const listUser =

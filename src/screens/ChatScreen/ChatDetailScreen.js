@@ -292,7 +292,7 @@ const RoomChatScreen = ({ route, navigation }) => {
             avatarURL: state.avatarURL
         }}
         onSend={onSend}
-        onLongPress={handlerLongPressMessage}
+        // onLongPress={handlerLongPressMessage}
         onPressAvatar={() => Alert.alert('yyy')}
     />
 

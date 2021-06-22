@@ -1,67 +1,6 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { View, Text, Alert, Dimensions, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
 import { Transition, Transitioning } from 'react-native-reanimated'
-
-const DATA = [
-    {
-        bg: '#A8DDE9',
-        color: '#3F5B98',
-        category: 'Healthcare',
-        subCategories: ['Skincare', 'Personal care', 'Health', 'Eye care'],
-    },
-    {
-        bg: '#086E4B',
-        color: '#FCBE4A',
-        category: 'Food & Drink',
-        subCategories: [
-            'Fruits & Vegetables',
-            'Frozen Food',
-            'Bakery',
-            'Snacks & Desserts',
-            'Beverages',
-            'Alcoholic beverages',
-            'Noodles & Pasta',
-            'Rice & Cooking oil',
-        ],
-    },
-    {
-        bg: '#FECBCA',
-        color: '#FD5963',
-        category: 'Beauty',
-        subCategories: ['Skincare', 'Makeup', 'Nail care', 'Perfume'],
-    },
-    {
-        bg: '#193B8C',
-        color: '#FECBCD',
-        category: 'Baby & Kids',
-        subCategories: [
-            'Toys',
-            'Trolleys',
-            'LEGO®',
-            'Electronics',
-            'Puzzles',
-            'Costumes',
-            'Food',
-            'Hygiene & Care',
-            "Child's room",
-            'Feeding accessories',
-        ],
-    },
-    {
-        bg: '#FDBD50',
-        color: '#F5F5EB',
-        category: 'Homeware',
-        subCategories: [
-            'Air purifiers',
-            'Stoves, hoods & ovens',
-            'Refrigerators',
-            'Coffee & Tea',
-            'Air conditioning',
-            'Grilling',
-            'Vacuum cleaners',
-        ],
-    },
-]
 
 const transition = () => (
     <Transition.Together>
@@ -74,15 +13,34 @@ const transition = () => (
 const AccordionMenu = (props) => {
     const ref = useRef()
     const [currentIndex, setCurrentIndex] = useState(null)
+    const [result, setResult] = useState([])
+
+    useEffect(() => {
+        let result = props.result
+        if (!!result) {
+            result.map(e => {
+                e.activedIndex = false
+                e.activedKey = ''
+            })
+        }
+        setResult(result)
+    }, [props.result])
 
     const handlerTouchOpacity = (index) => {
         ref.current.animateNextTransition()
         setCurrentIndex(currentIndex === index ? null : index)
     }
 
-    const handalerTouchItem = (subCategory) => {
+    const handalerTouchItem = (name, index, subCategory, childIndex) => {
+        result.map(e => {
+            e.activedIndex = childIndex
+            e.activedKey = name
+            return e
+        })
+        setResult(result)
+        setCurrentIndex(null)
         if (props.onPressItem) {
-            props.onPressItem(subCategory, subCategory)
+            props.onPressItem(name, subCategory)
         }
     }
 
@@ -92,21 +50,27 @@ const AccordionMenu = (props) => {
             transition={transition}
             style={styles.container}
         >
-            {DATA.map(({ bg, color, category, subCategories }, index) => {
+            {result.map(({ bg, color, name, subCategories, activedKey, activedIndex }, index) => {
                 return (
                     <TouchableOpacity
-                        key={category}
+                        key={name}
                         activeOpacity={0.9}
                         style={styles.cardContainer}
                         onPress={() => handlerTouchOpacity(index)}
                     >
                         <View style={[styles.card, { backgroundColor: bg }]}>
-                            <Text style={[styles.heading, { color: color }]}>{category}</Text>
+                            <Text style={[styles.heading, { color: color }]}>{name}</Text>
                             {index === currentIndex &&
                                 <View style={styles.subCategories}>
-                                    {subCategories.map(subCategory => (
-                                        <TouchableOpacity key={`item-${subCategory}`} onPress={() => handalerTouchItem(subCategory)}>
-                                            <Text style={[styles.body, { color: color }]}>{`* ${subCategory}`}</Text>
+                                    {subCategories.map((subCategory, childIndex) => (
+                                        <TouchableOpacity key={`item-${subCategory}`} onPress={() => handalerTouchItem(name, index, subCategory, childIndex)}>
+                                            <Text style={[styles.body, {
+                                                color: color,
+                                                fontWeight: name == activedKey && childIndex == activedIndex ? 'bold' : '300',
+                                                textDecorationLine: name == activedKey && childIndex == activedIndex ? 'underline' : 'none',
+                                                textDecorationColor: color,
+                                                textDecorationStyle: 'solid'
+                                            }]}>{`${subCategory}`}</Text>
                                         </TouchableOpacity>
                                     ))}
                                 </View>
@@ -142,12 +106,12 @@ const styles = StyleSheet.create({
     },
     subCategories: {
         marginTop: 10,
-        width:'100%'
+        width: '100%'
     },
     body: {
         fontSize: 20,
         lineHeight: 20 * 1.5,
         textAlign: 'left',
-        paddingLeft:30
+        paddingLeft: 30
     }
 })

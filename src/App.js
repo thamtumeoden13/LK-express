@@ -410,7 +410,6 @@ const App = (props) => {
         if (Platform.OS === 'ios') {
             const response1 = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
             const response2 = await checkNotifications();
-            console.log(response1, response2)
             if (response1 !== 'granted' || response2.status !== 'granted') {
                 setState(prev => {
                     return {
@@ -490,16 +489,16 @@ const App = (props) => {
     }
 
     const onRegister = (token) => {
-        console.log('[Notification] registered', token)
+        // console.log('[Notification] registered', token)
     }
 
     const onNotification = (notify) => {
-        console.log('[Notification] onNotification', notify)
+        // console.log('[Notification] onNotification', notify)
     }
 
     const onOpenNotification = (notify) => {
-        console.log('[onOpenNotification] registered', notify)
-        Alert.alert('Open notification')
+        // console.log('[onOpenNotification] registered', notify)
+        // Alert.alert('Open notification')
     }
 
     const onHandlerToast = (status, type, title, body, duration) => {

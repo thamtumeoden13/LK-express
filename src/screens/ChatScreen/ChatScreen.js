@@ -111,7 +111,10 @@ const RoomScreen = (props) => {
     const getRealtimeCollectionRoomList = async (querySnapshot) => {
         const reads = querySnapshot.docs.map(async (doc) => {
             const room = doc.data()
-            const querySnapshot2 = await entityRef.doc(doc.id).collection('users').where("id", "==", state.userID).get()
+            console.log('room', room)
+            const querySnapshot2 = await entityRef.doc(doc.id).collection('users')
+                .where("id", "==", state.userID)
+                .get()
             if (querySnapshot2.docs.length > 0) {
                 return {
                     ...room,
@@ -121,9 +124,33 @@ const RoomScreen = (props) => {
                     type: 2
                 }
             }
+            // console.log('querySnapshot2.docs', querySnapshot2.docs)
+            // const aaa = querySnapshot2.docs.map( async(doc)=>{
+            //     const bbb= doc.data()
+            //     console.log('bbb', bbb)
+            //     if (bbb.userRef) {
+            //         const yyyy = await bbb.userRef.get()
+            //         console.log('yyyy', yyyy.data())
+            //         return { ...yyyy.data()}
+            //     }
+            // })
+            // let aaa1 = await Promise.all(aaa)
+            // console.log('aaa', aaa)
+            // console.log('aaa1', aaa1)
+            // const aaa2 = aaa1.filter(e => { return e.id ==state.userID });
+            // if (aaa2.length > 0) {
+            //     return {
+            //         ...room,
+            //         name: room.currentUser,
+            //         subtitle: room.currentMessage,
+            //         avatarURL: room.currentAvatar,
+            //         type: 2
+            //     }
+            // }
         })
         let result = await Promise.all(reads)
         const rooms = result.filter(e => { return !!e && Object.keys(e).length > 0 });
+        console.log('rooms', rooms)
         setRooms(rooms)
         setState(prev => { return { ...prev, isDataFetchedRoomList: true } })
     }

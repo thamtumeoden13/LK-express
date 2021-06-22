@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Image, Text, TextInput, TouchableOpacity, View, Keyboard } from 'react-native'
+import { Image, Text, TextInput, TouchableOpacity, View, Keyboard, Modal, SafeAreaView, Alert } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import AsyncStorage from '@react-native-community/async-storage';
+import LottieView from 'lottie-react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import FeatherIcon from 'react-native-vector-icons/Feather'
 
@@ -18,10 +19,14 @@ const entityUserRef = db.collection('users')
 
 const UpdateProfileScreen = (props) => {
 
+    const [state, setState] = useState({
+        isLoading: false
+    })
     const [user, setUser] = useState({})
 
     useEffect(() => {
         const focusListener = props.navigation.addListener('focus', async () => {
+            setState(prev => { return { ...prev, isLoading: true } })
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             getUsersInfo(user.id)
@@ -46,6 +51,7 @@ const UpdateProfileScreen = (props) => {
         })
         console.log('users', users)
         setUser({ ...users }[0])
+        setState(prev => { return { ...prev, isLoading: false } })
     }
 
     const handlerChangeText = (name, text) => {
@@ -53,6 +59,7 @@ const UpdateProfileScreen = (props) => {
     }
 
     const onUpdateProfile = () => {
+        setState(prev => { return { ...prev, isLoading: true } })
 
         const result = {
             avatarBase64: user.avatarBase64,
@@ -65,10 +72,13 @@ const UpdateProfileScreen = (props) => {
         entityUserRef.doc(user.userID).update(result)
             .then(_doc => {
                 Keyboard.dismiss()
+                setState(prev => { return { ...prev, isLoading: false } })
+                // Alert.alert('success')
                 props.navigation.goBack()
             })
             .catch((error) => {
-                alert(error)
+                setState(prev => { return { ...prev, isLoading: false } })
+                Alert.alert(error)
             })
     }
 
@@ -97,6 +107,32 @@ const UpdateProfileScreen = (props) => {
 
     return (
         <View style={styles.container}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={!!state.isLoading}
+            >
+                <SafeAreaView style={{
+                    flex: 1,
+                    justifyContent: 'center', alignItems: 'center', position: 'absolute',
+                    backgroundColor: '#0003',
+                    top: 0, bottom: 0, left: 0, right: 0
+                }}>
+                    <LottieView
+                        source={require('@assets/animations/loading.json')}
+                        colorFilters={[{
+                            keypath: "button",
+                            color: "#F00000"
+                        }, {
+                            keypath: "Sending Loader",
+                            color: "#F00000"
+                        }]}
+                        style={{ width: calcWidth(50), height: calcWidth(50), justifyContent: 'center', alignItems: 'center' }}
+                        autoPlay
+                        loop
+                    />
+                </SafeAreaView>
+            </Modal>
             <KeyboardAwareScrollView
                 style={{ flex: 1, width: '100%' }}
             // keyboardShouldPersistTaps="always"

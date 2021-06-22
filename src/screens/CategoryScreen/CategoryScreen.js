@@ -86,9 +86,10 @@ const CategoryScreen = (props) => {
         if (searchInput) {
             const newData = categories.filter((item) => {
                 const textData = searchInput.toUpperCase()
-                const itemData = `${item.createdByName.toUpperCase()},${item.name.toUpperCase()}`
+                const itemData = `${item.name.toUpperCase()},${item.subCategories.toString().toUpperCase()}`
                 return itemData.indexOf(textData) > -1
             })
+            console.log('newData', newData)
             setCategoriesFilter(newData)
         } else {
             setCategoriesFilter(categories)
@@ -104,7 +105,11 @@ const CategoryScreen = (props) => {
             }
         })
         let result = await Promise.all(reads)
-        const categories = result.filter(e => { return !!e && Object.keys(e).length > 0 });
+        let categories = result.filter(e => { return !!e && Object.keys(e).length > 0 });
+        categories.map(e=>{
+            e.subCategories = e.subCategories.split(',')
+            return e    
+        })
         setCategories(categories)
         setCategoriesFilter(categories)
         console.log('categories', categories)
@@ -206,7 +211,7 @@ const CategoryScreen = (props) => {
                     />
                 }
             </View> */}
-            <AccordionMenu onPressItem={onHandlerJoinCategory} />
+            <AccordionMenu result={categoriesFilter} onPressItem={onHandlerJoinCategory} />
         </SafeAreaView>
     );
 }
