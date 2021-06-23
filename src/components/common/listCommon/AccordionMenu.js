@@ -31,7 +31,7 @@ const AccordionMenu = (props) => {
         setCurrentIndex(currentIndex === index ? null : index)
     }
 
-    const handalerTouchItem = (name, index, subCategory, childIndex) => {
+    const handalerTouchItem = (id, name, index, childIndex) => {
         result.map(e => {
             e.activedIndex = childIndex
             e.activedKey = name
@@ -40,7 +40,7 @@ const AccordionMenu = (props) => {
         setResult(result)
         setCurrentIndex(null)
         if (props.onPressItem) {
-            props.onPressItem(name, subCategory)
+            props.onPressItem(id, name)
         }
     }
 
@@ -63,14 +63,14 @@ const AccordionMenu = (props) => {
                             {index === currentIndex &&
                                 <View style={styles.subCategories}>
                                     {subCategories.map((subCategory, childIndex) => (
-                                        <TouchableOpacity key={`item-${subCategory}`} onPress={() => handalerTouchItem(name, index, subCategory, childIndex)}>
+                                        <TouchableOpacity key={`item-${subCategory.id}`} onPress={() => handalerTouchItem(subCategory.id, name, index, childIndex)}>
                                             <Text style={[styles.body, {
                                                 color: color,
                                                 fontWeight: name == activedKey && childIndex == activedIndex ? 'bold' : '300',
                                                 textDecorationLine: name == activedKey && childIndex == activedIndex ? 'underline' : 'none',
                                                 textDecorationColor: color,
                                                 textDecorationStyle: 'solid'
-                                            }]}>{`${subCategory}`}</Text>
+                                            }]}>{`${subCategory.name}`}</Text>
                                         </TouchableOpacity>
                                     ))}
                                 </View>

@@ -27,6 +27,7 @@ import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize'
 
 const db = firebase.firestore()
 const entityRef = db.collection('categories')
+const entityProductsRef = db.collection('products')
 
 const CategoryDetailScreen = (props) => {
 
@@ -58,47 +59,24 @@ const CategoryDetailScreen = (props) => {
                 headerRight: () => <ShoppingCartIcon onOpen={() => onOpenShoppingCart()} />,
             });
 
-            const query = entityRef
-                .doc(`${state.categoryID}`)
-                .collection('images')
-            const unsubscribe = query.onSnapshot(getRealtimeCollection, err => Alert.alert(error));
-            return () => {
-                unsubscribe();
-            }
+            getRealtimeCollection()
         }
     }, [props.navigation, state.categoryID])
 
-    const getRealtimeCollection = async (querySnapshot) => {
-        let categoriesFireStore = []
-        querySnapshot.docChanges().forEach(change => {
-            const product = change.doc.data()
-            if (change.type === "added") {
-                console.log("New product: ", change.doc.data());
-                categoriesFireStore.push({
-                    ...product,
-                    createdAt: product.createdAt.toDate(),
-                    illustration: product.uri
-                })
-            }
-            if (change.type === "modified") {
-                console.log("Modified product: ", change.doc.data());
-            }
-            if (change.type === "removed") {
-                console.log("Removed product: ", change.doc.data());
-            }
-        })
-        categoriesFireStore.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        console.log('categoriesFireStore', categoriesFireStore)
-        appendCategories(categoriesFireStore)
+    const getRealtimeCollection = async () => {
+        const querySnapshot = await entityProductsRef.doc(state.categoryID).get()
+        setCategories([querySnapshot.data()])
     }
 
-    const appendCategories = useCallback((categoriesFireStore) => {
-        setCategories(categoriesFireStore)
-    }, [categories])
 
     const onAddShoppingCart = (item) => {
         console.log('onAddShoppingCart', item)
-        addShoppingCart(item)
+        if (item.quantity > 0) {
+            addShoppingCart(item)
+        }
+        else{
+            Alert.alert('Thêm giỏ hàng', `Vui lòng nhập số lượng`);
+        }
     }
 
     const onOpenShoppingCart = () => {
@@ -109,7 +87,6 @@ const CategoryDetailScreen = (props) => {
     const onPressItem = (item, index) => {
         Alert.alert('CarouselMainLayout', `You've clicked ${item.title}`);
     }
-
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -128,6 +105,7 @@ const CategoryDetailScreen = (props) => {
                 </ScrollView>
             </View> */}
             <HeadPhoneCarousel
+                data={categories}
                 addToCart={onAddShoppingCart}
             />
         </SafeAreaView>

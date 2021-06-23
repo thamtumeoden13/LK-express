@@ -26,6 +26,7 @@ import AccordionMenu from 'components/common/listCommon/AccordionMenu'
 
 const db = firebase.firestore()
 const entityRef = db.collection('categories')
+const entityProductRef = db.collection('products')
 
 const CategoryScreen = (props) => {
 
@@ -106,9 +107,22 @@ const CategoryScreen = (props) => {
         })
         let result = await Promise.all(reads)
         let categories = result.filter(e => { return !!e && Object.keys(e).length > 0 });
-        categories.map(e=>{
-            e.subCategories = e.subCategories.split(',')
-            return e    
+        categories.map(async (e) => {
+            // e.subCategories = e.subCategories.split(',')
+            e.subCategories = []
+            if (e.productsRef) {
+                const reads = e.productsRef.map(async (f) => {
+                    const querySnapshot2 = await entityProductRef.doc(f).get();
+                    const data = querySnapshot2.data()
+                    return {
+                        id: f,
+                        name: data.heading
+                    }
+                })
+                const products = await Promise.all(reads)
+                e.subCategories = products
+            }
+            return e
         })
         setCategories(categories)
         setCategoriesFilter(categories)

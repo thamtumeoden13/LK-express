@@ -1,7 +1,8 @@
-import { AddCategory } from 'components/category/modalInputForm';
-import React, { useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, FlatList, Image, Dimensions, StyleSheet, StatusBar, Animated, TouchableOpacity } from 'react-native'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import TouchableScale from 'react-native-touchable-scale';
 
 const DATA = [
     {
@@ -12,7 +13,7 @@ const DATA = [
         key: 'first',
         color: '#9dcdfa',
         price: 200000,
-        quantity:1,
+        quantity: 1,
         thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
     },
     {
@@ -59,129 +60,166 @@ const DOT_SIZE = 40
 
 const CIRCLE_SIZE = width * 0.6
 
-const Circle = ({ scrollX }) => {
-    return (
-        <View style={[StyleSheet.absoluteFill, styles.circleContainer]}>
-            {DATA.map(({ key, color }, index) => {
-                const inputRange = [(index - 0.55) * width, index * width, (index + 0.55) * width]
-                const scale = scrollX.interpolate({
-                    inputRange,
-                    outputRange: [0, 1, 0],
-                    extrapolate: 'clamp'
-                })
-                const opacity = scrollX.interpolate({
-                    inputRange,
-                    outputRange: [0, 0.2, 0]
-                })
-
-                return (
-                    <Animated.View key={key} style={[styles.circle,
-                    {
-                        backgroundColor: color,
-                        opacity: opacity,
-                        transform: [{ scale }]
-                    }]} />
-                )
-            })}
-        </View>
-    )
-}
-
-const Item = ({ imageUri, heading, description, price, index, scrollX, addToCart}) => {
-
-    const inputRange = [(index - 1) * width, index * width, (index + 1) * width]
-    const inputRangeOpacity = [(index - 0.3) * width, index * width, (index + 0.3) * width]
-
-    const scale = scrollX.interpolate({
-        inputRange,
-        outputRange: [0, 1, 0]
-    })
-
-    const translateHeading = scrollX.interpolate({
-        inputRange,
-        outputRange: [width * 0.1, 0, -width * 0.1]
-    })
-
-    const translateDescription = scrollX.interpolate({
-        inputRange,
-        outputRange: [width * 0.6, 0, -width * 0.6]
-    })
-
-    const opacity = scrollX.interpolate({
-        inputRange: inputRangeOpacity,
-        outputRange: [0, 1, 0]
-    })
-
-    return (
-        <View style={styles.itemStyle}>
-            <Animated.Image
-                source={imageUri}
-                style={[styles.imageStyle, { transform: [{ scale }] }]}
-            />
-            <View style={styles.textStyles}>
-                <Animated.Text style={[styles.heading, {
-                    transform: [{ translateX: translateHeading }],
-                    opacity
-                }]}>{heading}</Animated.Text>
-                <Animated.Text style={[styles.description,
-                {
-                    transform: [{ translateX: translateDescription }],
-                    opacity
-                }]}> {description}</Animated.Text>
-                <Animated.Text style={[styles.price,
-                {
-                    transform: [{ translateX: translateDescription }],
-                    opacity
-                }]}> {`${price} $`}</Animated.Text>
-                <TouchableOpacity onPress={addToCart}>
-                    <MaterialIcons name='add-shopping-cart' size={24} color='#000' />
-                </TouchableOpacity>
-            </View>
-        </View>
-    )
-}
-
-const Pagination = ({ scrollX }) => {
-    const inputRange = [-width, 0, width]
-    const translateX = scrollX.interpolate({
-        inputRange,
-        outputRange: [-DOT_SIZE, 0, DOT_SIZE]
-    })
-
-    return (
-        <View style={styles.pagination}>
-            <Animated.View
-                style={[
-                    styles.paginationIndicator,
-                    {
-                        position: 'absolute',
-                        transform: [{ translateX }]
-                    }
-                ]}
-            />
-            {DATA.map((item, index) => {
-                return (
-                    <View key={item.key} style={styles.paginationDotContainer}>
-                        <View
-                            style={[styles.paginationDot, { backgroundColor: item.color }]}
-                        />
-                    </View>
-                )
-            })}
-        </View>
-    )
-}
-
-const HeadPhoneCarousel = ({ addToCart}) => {
+const HeadPhoneCarousel = ({ data, addToCart }) => {
     const scrollX = useRef(new Animated.Value(0)).current
-   
+  
+    const [result, setResult] = useState([])
+
+    useEffect(() => {
+        if (!!data) {
+            data.map(e => {
+                e.quantity = 0
+                return e
+            })
+            setResult(data)
+        } else {
+            setResult([])
+        }
+    }, [data])
+
+    const handerQuantity = (type, item, index) => {
+        let quantity = 0
+        if (type == 'minus') {
+            quantity = item.quantity - 1 >= 0 ? item.quantity - 1 : 1
+        }
+        if (type == 'plus') {
+            quantity = item.quantity + 1 < 10 ? item.quantity + 1 : 9
+        }
+        const element = Object.assign({}, item, { quantity })
+        const listElement = Object.assign([], result, { [index]: element })
+        console.log('listElement', listElement)
+        setResult(listElement)
+    }
+
+    const Circle = ({ scrollX }) => {
+        return (
+            <View style={[StyleSheet.absoluteFill, styles.circleContainer]}>
+                {result.map(({ key, color }, index) => {
+                    const inputRange = [(index - 0.55) * width, index * width, (index + 0.55) * width]
+                    const scale = scrollX.interpolate({
+                        inputRange,
+                        outputRange: [0, 1, 0],
+                        extrapolate: 'clamp'
+                    })
+                    const opacity = scrollX.interpolate({
+                        inputRange,
+                        outputRange: [0, 0.2, 0]
+                    })
+
+                    return (
+                        <Animated.View key={key} style={[styles.circle,
+                        {
+                            backgroundColor: color,
+                            opacity: opacity,
+                            transform: [{ scale }]
+                        }]} />
+                    )
+                })}
+            </View>
+        )
+    }
+
+    const Item = ({ item, index, scrollX, handerQuantity, addToCart }) => {
+
+        const inputRange = [(index - 1) * width, index * width, (index + 1) * width]
+        const inputRangeOpacity = [(index - 0.3) * width, index * width, (index + 0.3) * width]
+
+        const scale = scrollX.interpolate({
+            inputRange,
+            outputRange: [0, 1, 0]
+        })
+
+        const translateHeading = scrollX.interpolate({
+            inputRange,
+            outputRange: [width * 0.1, 0, -width * 0.1]
+        })
+
+        const translateDescription = scrollX.interpolate({
+            inputRange,
+            outputRange: [width * 0.6, 0, -width * 0.6]
+        })
+
+        const opacity = scrollX.interpolate({
+            inputRange: inputRangeOpacity,
+            outputRange: [0, 1, 0]
+        })
+
+        return (
+            <View style={styles.itemStyle}>
+                <Animated.Image
+                    source={{ uri: item.imageUri }}
+                    style={[styles.imageStyle, { transform: [{ scale }] }]}
+                />
+                <View style={styles.textStyles}>
+                    <Animated.Text style={[styles.heading, {
+                        transform: [{ translateX: translateHeading }],
+                        opacity
+                    }]}>{item.heading}</Animated.Text>
+                    <Animated.Text style={[styles.description,
+                    {
+                        transform: [{ translateX: translateDescription }],
+                        opacity
+                    }]}> {item.description}</Animated.Text>
+                    <Animated.Text style={[styles.price,
+                    {
+                        transform: [{ translateX: translateDescription }],
+                        opacity
+                    }]}> {`${item.price} $`}</Animated.Text>
+                    <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-around', }}>
+                        <TouchableScale onPress={() => handerQuantity('minus', item, index)}>
+                            <AntDesign name='minuscircleo' size={20} color='#f00' />
+                        </TouchableScale>
+                        <Text style={{ width: 48, textAlign: 'center' }}>{item.quantity}</Text>
+                        <TouchableScale onPress={() => handerQuantity('plus', item, index)}>
+                            <AntDesign name='pluscircleo' size={20} color='#00f' />
+                        </TouchableScale>
+                        <TouchableScale onPress={addToCart} style={{ width: 48, marginLeft: 20 }}>
+                            <MaterialIcons name='add-shopping-cart' size={24} color='#000' />
+                        </TouchableScale>
+                    </View>
+                </View>
+            </View>
+        )
+    }
+
+    const Pagination = ({ scrollX }) => {
+        const inputRange = [-width, 0, width]
+        const translateX = scrollX.interpolate({
+            inputRange,
+            outputRange: [-DOT_SIZE, 0, DOT_SIZE]
+        })
+
+        return (
+            <View style={styles.pagination}>
+                <Animated.View
+                    style={[
+                        styles.paginationIndicator,
+                        {
+                            position: 'absolute',
+                            transform: [{ translateX }]
+                        }
+                    ]}
+                />
+                {result.map((item, index) => {
+                    return (
+                        <View key={item.key} style={styles.paginationDotContainer}>
+                            <View
+                                style={[styles.paginationDot, { backgroundColor: item.color }]}
+                            />
+                        </View>
+                    )
+                })}
+            </View>
+        )
+    }
     return (
         <View style={styles.container}>
             <StatusBar hidden={false} />
             <Circle scrollX={scrollX} />
             <Animated.FlatList
-                data={DATA}
-                renderItem={({ item, index }) => <Item {...item} index={index} scrollX={scrollX} addToCart={() => addToCart(item)} />}
+                data={result}
+                extraData={result}
+                renderItem={({ item, index }) => <Item item={item} index={index} scrollX={scrollX} handerQuantity={handerQuantity} addToCart={() => addToCart(item)} />}
                 keyExtractor={({ key }, index) => index.toString()}
                 pagingEnabled
                 horizontal

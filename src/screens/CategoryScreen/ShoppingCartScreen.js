@@ -76,7 +76,7 @@ const ShoppingCartScreen = () => {
                             opacity
                         }}>
                             <Image
-                                source={!!item.imageUri ? item.imageUri : { uri: item.thumbnail }}
+                                source={{ uri: item.imageUri ? item.imageUri : item.thumbnail }}
                                 style={{
                                     width: IMAGE_SIZE, height: IMAGE_SIZE,
                                     borderRadius: IMAGE_SIZE / 2,
