@@ -14,6 +14,7 @@ import {
     RoomScreen, RoomChatScreen,AddRoomScreen,
     PhoneBookScreen, ProfileScreen, UpdateProfileScreen,
     CategoryScreen, CategoryDetailScreen, AddCategoryScreen, ShoppingCartScreen,
+    DiaryScreen, DiaryDetailScreen, AddDiaryScreen
 } from '../screens'
 
 import DrawerIcon from 'components/common/icon/DrawerIcon'
@@ -153,7 +154,6 @@ function PhoneBookStackScreen({ navigation }) {
 }
 
 const CategoryStack = createStackNavigator();
-
 function CategoryStackScreen({ navigation }) {
     return (
         <CategoryStack.Navigator initialRouteName="Category">
@@ -195,8 +195,39 @@ function CategoryStackScreen({ navigation }) {
     );
 }
 
-const ProfileStack = createStackNavigator();
+const DiaryStack = createStackNavigator();
+function DiaryStackScreen({ navigation }) {
+    return (
+        <DiaryStack.Navigator initialRouteName="Diary">
+            <DiaryStack.Screen
+                name="Diary"
+                component={DiaryScreen}
+                options={{
+                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Nhật ký`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+            <DiaryStack.Screen
+                name="DiaryDetail"
+                component={DiaryDetailScreen}
+                options={{
+                    headerTitle: () => <HeaderTitle title={`Bình luận`} />,
+                    headerRight: () => <BagIcon navigation={navigation} />,
+                }}
+            />
+            <DiaryStack.Screen
+                name="AddDiary"
+                component={AddDiaryScreen}
+                options={{
+                    headerTitle: () => <HeaderTitle title={`Thêm nhật ký`} />,
+                }}
+            />
+        </DiaryStack.Navigator>
+    );
+}
 
+const ProfileStack = createStackNavigator();
 function ProfileStackScreen({ navigation }) {
     return (
         <ProfileStack.Navigator initialRouteName="Profile">
@@ -351,6 +382,29 @@ function TabStack() {
                         </View>
                     ),
                     // tabBarBadge: 5,
+                    tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
+                }}
+            />
+            <Tab.Screen name="Diary" component={DiaryStackScreen}
+                options={{
+                    tabBarLabel: 'Nhật ký',
+                    tabBarIcon: ({ color, size }) => (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <LottieView
+                                source={require('@assets/animations/effective-timeline.json')}
+                                colorFilters={[{
+                                    keypath: "button",
+                                    color: "#F00000"
+                                }, {
+                                    keypath: "Sending Loader",
+                                    color: "#F00000"
+                                }]}
+                                style={{ width: scale(26), height: scale(26), justifyContent: 'center' }}
+                                autoPlay
+                                loop
+                            />
+                        </View>
+                    ),
                     tabBarBadgeStyle: { backgroundColor: 'tomato', color: '#fff' }
                 }}
             />

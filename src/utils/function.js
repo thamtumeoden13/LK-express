@@ -1,4 +1,7 @@
-import { Tile } from "react-native-elements";
+
+import formatDistanceToNow from 'date-fns/formatDistanceToNow'
+import isDate from 'date-fns/isDate'
+import viLocale from "date-fns/locale/vi";
 
 export const formatData = (data, numColumns) => {
     const numberOfFullRows = Math.floor(data.length / numColumns);
@@ -428,4 +431,46 @@ export const getDisplayDetailModalAlert = (statusID, title, content, type = 'err
             break;
     }
     return { title, content, action, type }
+}
+
+const COUNT_FORMATS = [
+    { // 0 - 999
+        letter: '',
+        limit: 1e3
+    },
+    { // 1,000 - 999,999
+        letter: 'K',
+        limit: 1e6
+    },
+    { // 1,000,000 - 999,999,999
+        letter: 'M',
+        limit: 1e9
+    },
+    { // 1,000,000,000 - 999,999,999,999
+        letter: 'B',
+        limit: 1e12
+    },
+    { // 1,000,000,000,000 - 999,999,999,999,999
+        letter: 'T',
+        limit: 1e15
+    }
+];
+
+export function formatCount(value) {
+    const format = COUNT_FORMATS.find(format => (value < format.limit));
+
+    value = (1000 * value / format.limit);
+    value = Math.round(value * 10) / 10; // keep one decimal number, only if needed
+
+    return (value + format.letter);
+}
+
+export const formatDistanceToNowVi = (date = new Date().toISOString()) => {
+    let result = isDate(new Date(date))
+    if (result) {
+        return formatDistanceToNow(new Date(date),
+            { addSuffix: true, locale: viLocale }
+        )
+    }
+    return ''
 }

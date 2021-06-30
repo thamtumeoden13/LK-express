@@ -20,6 +20,10 @@ import CategoryDetailScreen from './CategoryScreen/CategoryDetailScreen'
 import AddCategoryScreen from './CategoryScreen/AddCategoryScreen'
 import ShoppingCartScreen from './CategoryScreen/ShoppingCartScreen'
 
+import DiaryScreen from './DiaryScreen/DiaryScreen'
+import DiaryDetailScreen from './DiaryScreen/DiaryDetailScreen'
+import AddDiaryScreen from './DiaryScreen/DiaryDetailScreen'
+
 import ProfileScreen from './ProfileScreen/ProfileScreen'
 import UpdateProfileScreen from './ProfileScreen/UpdateProfileScreen'
 
@@ -29,4 +33,5 @@ export {
     ChatScreen, ChatDetailScreen,
     PhoneBookScreen, ProfileScreen, UpdateProfileScreen,
     CategoryScreen, CategoryDetailScreen, AddCategoryScreen, ShoppingCartScreen,
+    DiaryScreen, DiaryDetailScreen, AddDiaryScreen
 }
