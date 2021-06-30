@@ -27,11 +27,9 @@ const DATA = [
 const Content = (props) => {
 
     const [state, setState] = useState({
-        isReady: false,
-        status: false,
-        quality: 0,
-        error: '',
-        documentType: 0,
+        like: false,
+        dislike: false,
+        isShowMore: false,
         title: 'This is a TITLE',
         content: `This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
         This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
@@ -42,12 +40,7 @@ const Content = (props) => {
         This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
         This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT `,
         contentSubStr: '',
-        isShowMore: false,
     })
-
-    useEffect(() => {
-        setState(prev => { return { ...prev, documentType: !!props.documentType ? props.documentType : 0 } })
-    }, [props.documentType])
 
     useEffect(() => {
         let contentSubStr = state.content
@@ -57,11 +50,20 @@ const Content = (props) => {
             isShowMore = true
         }
         setState(prev => { return { ...prev, contentSubStr, isShowMore } })
-
     }, [state.content])
 
     const onHandlerContent = () => {
         setState(prev => { return { ...prev, contentSubStr: prev.content, isShowMore: false } })
+    }
+
+    const onHandlerLike = (type1, type2) => {
+        setState(prev => {
+            return {
+                ...prev,
+                [type1]: !prev[type1],
+                [type2]: false,
+            }
+        })
     }
 
     return (
