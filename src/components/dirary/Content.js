@@ -6,7 +6,7 @@ import TouchableScale from 'react-native-touchable-scale';
 
 import FlatListAnimationCarousel from 'components/common/listCommon/FlatListAnimationCarousel'
 
-import { calcHeight, scale, verticalScale,calcWidth,moderateScale} from 'utils/scaleSize';
+import { calcHeight, scale, verticalScale, calcWidth, moderateScale } from 'utils/scaleSize';
 import { formatCount, formatDistanceToNowVi } from 'utils/function'
 
 const width = Dimensions.get('screen').width;
@@ -24,21 +24,14 @@ const DATA = [
     'https://images.pexels.com/photos/605223/pexels-photo-605223.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
 ]
 
-const Content = (props) => {
+const Content = ({ title, content, totalLike, totalViews, onPressItem }) => {
 
     const [state, setState] = useState({
         like: false,
         dislike: false,
         isShowMore: false,
-        title: 'This is a TITLE',
-        content: `This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
-        This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
-        This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
-        This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
-        This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
-        This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
-        This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT 
-        This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT This is a CONTENT `,
+        title: title,
+        content: content,
         contentSubStr: '',
     })
 
@@ -56,19 +49,12 @@ const Content = (props) => {
         setState(prev => { return { ...prev, contentSubStr: prev.content, isShowMore: false } })
     }
 
-    const onHandlerLike = (type1, type2) => {
-        setState(prev => {
-            return {
-                ...prev,
-                [type1]: !prev[type1],
-                [type2]: false,
-            }
-        })
-    }
-
     return (
         <View>
-            <View style={{ paddingHorizontal: scale(10) }}>
+            <TouchableOpacity
+                style={{ padding: scale(10) }}
+                onPress={onPressItem}
+            >
                 {!!state.title && <Text style={{ fontSize: scale(16), fontWeight: 'bold', }}>{state.title}</Text>}
                 {!!state.contentSubStr &&
                     <>
@@ -80,42 +66,9 @@ const Content = (props) => {
                         }
                     </>
                 }
-
-            </View>
+            </TouchableOpacity>
             <View style={{ height: calcHeight(30) }}>
                 <FlatListAnimationCarousel />
-            </View>
-            <View style={{ position: 'absolute', bottom: 0, backgroundColor: '#fff' }}>
-                <View style={{
-                    height: verticalScale(48),
-                    flexDirection: 'row',
-                    width: calcWidth(100),
-                    padding: scale(5),
-                    alignItems: 'flex-end'
-                }}>
-                    <View style={{ height: '100%', width: moderateScale(48) }}>
-                        <TouchableScale onPress={() => onHandlerLike('like', 'dislike')}>
-                            <AntDesignIcon
-                                name='like2' size={20}
-                                color={!!state.like ? '#185ADB' : '#171717'}
-                            />
-                        </TouchableScale>
-                        <Text style={{ fontSize: 12, color: !!state.like ? '#185ADB' : '#171717' }}>{formatCount(1000)}</Text>
-                    </View>
-                    <View style={{ height: '100%', width: moderateScale(48) }}>
-                        <TouchableScale onPress={() => onHandlerLike('dislike', 'like')}>
-                            <AntDesignIcon
-                                name='dislike2' size={20}
-                                color={!!state.dislike ? '#185ADB' : '#171717'}
-                            />
-                        </TouchableScale>
-                        <Text style={{ fontSize: 12, color: !!state.dislike ? '#185ADB' : '#171717' }}>{formatCount(100)}</Text>
-                    </View>
-                    <View style={{ height: '100%', width: '50%', }}>
-                        <IonsIcon name='chatbox-ellipses-outline' size={20} style={{ marginRight: scale(5) }} />
-                        <Text style={{ color: '#6a6a6a', fontSize: scale(14) }}>{`${formatCount(123456)} bình luận`}</Text>
-                    </View>
-                </View>
             </View>
         </View>
     )

@@ -205,7 +205,7 @@ function DiaryStackScreen({ navigation }) {
                 options={{
                     // headerLeft: () => <DrawerIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Nhật ký`} />,
-                    headerRight: () => <BagIcon navigation={navigation} />,
+                    // headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
             <DiaryStack.Screen
@@ -213,7 +213,7 @@ function DiaryStackScreen({ navigation }) {
                 component={DiaryDetailScreen}
                 options={{
                     headerTitle: () => <HeaderTitle title={`Bình luận`} />,
-                    headerRight: () => <BagIcon navigation={navigation} />,
+                    // headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
             <DiaryStack.Screen

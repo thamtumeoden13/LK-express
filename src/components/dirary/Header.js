@@ -9,7 +9,7 @@ import getMinutes from 'date-fns/getMinutes';
 import { moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import { formatCount, formatDistanceToNowVi } from 'utils/function'
 
-const Header = ({ fullName, imgURL, dateCreated }) => {
+const Header = ({ fullName, imgURL, imgBase64, dateCreated }) => {
 
     return (
         <View style={{
@@ -19,7 +19,7 @@ const Header = ({ fullName, imgURL, dateCreated }) => {
             paddingHorizontal: scale(10)
         }}>
             <Image
-                source={{ uri: imgURL }}
+                source={{ uri: !!imgBase64 ? `data:image/png;base64,${imgBase64}` : imgURL }}
                 style={{ width: moderateScale(48), height: moderateScale(48), borderRadius: moderateScale(24) }}
                 resizeMode={'cover'}
             />
