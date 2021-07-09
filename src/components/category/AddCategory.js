@@ -46,8 +46,13 @@ const AddCategory = (props) => {
     }, [props.products])
 
     useEffect(() => {
-        const find = products.find(e => { return !!e.isActived })
-        setState(prev => { return { ...prev, isExistsProduct: !!find && Object.keys(find).length > 0 ? true : false } })
+        const filter = products.filter(e => { return !!e.isActived })
+        setState(prev => { return { ...prev, isExistsProduct: !!filter && filter.length > 0 ? true : false } })
+        const listImage = filter.slice().map(e=>{
+            e.uri = e.imageUri
+            return e
+        })
+        setListImage(listImage)
     }, [products])
 
     const onChangeInput = (name, value) => {
@@ -80,7 +85,7 @@ const AddCategory = (props) => {
             return
         }
 
-        const listProduct = products.filter(e => { return !!e.isActived }).map(f => { return f.docRef })
+        const listProduct = products.filter(e => { return !!e.isActived })
 
         const result = {
             categoryID: state.categoryID,
@@ -95,36 +100,6 @@ const AddCategory = (props) => {
 
 
     const onChooseUploadFile = () => {
-        // launchImageLibrary(
-        //     {
-        //         mediaType: 'photo',
-        //         includeBase64: true,
-        //         maxHeight: 200,
-        //         maxWidth: 200,
-        //     },
-        //     (response) => {
-        //         if (response.didCancel) {
-        //             // console.log('User cancelled photo picker');
-        //         } else if (response.error) {
-        //             // console.log('ImagePicker Error: ', response.error);
-        //         } else if (response.customButton) {
-        //             // console.log('User tapped custom button: ', response.customButton);
-        //         } else {
-        //             let listElement = listImage.slice()
-        //             console.log('response', response)
-        //             const element = {
-        //                 base64: response.base64,
-        //                 createdAt: new Date(),
-        //                 subtitle: 'Lorem ipsum dolor sit amet 22 2 2',
-        //                 title: 'Earlier this morning, NYC 3 3 3 3',
-        //                 uri: ''
-        //             }
-        //             listElement.push(element)
-        //             setListImage(listElement)
-        //             // uploadImage(response)
-        //         }
-        //     },
-        // )
         ImagePicker.openPicker({
             multiple: true,
             includeBase64: true,
@@ -137,11 +112,10 @@ const AddCategory = (props) => {
                 return e
             })
             const newImages = [...result, ...listImage]
-            console.log('ImagePicker.openPicker', newImages);
             setListImage(newImages)
         });
     }
-    console.log('products1223123', products)
+
     return (
         <View style={styles.container}>
             <Text style={{
@@ -196,7 +170,7 @@ const AddCategory = (props) => {
                                     <View style={{ flexDirection: 'row', alignItems: 'center', padding: scale(5) }}>
                                         <Image
                                             source={item.imageUri ? { uri: item.imageUri } : { uri: `data:image/png;base64,${item.imageBase64}` }}
-                                            style={{ width: scale(40), height: scale(40), borderRadius: scale(20), }}
+                                            style={{ width: scale(48), height: scale(48), borderRadius: scale(24), }}
                                             resizeMode={'contain'}
                                         />
                                         <View style={{ flexDirection: 'column', padding: scale(5) }}>
@@ -214,14 +188,14 @@ const AddCategory = (props) => {
                             )
                         }}
                     />
-                    {/* {!!listImage && listImage.length > 0 &&
+                    {!!listImage && listImage.length > 0 &&
                         <CarouselMainLayout
                             data={listImage}
                             loopData={true}
                         // title={`Main Layout`}
                         // subtitle={`Default layout | Loop | Autoplay | Parallax | Scale | Opacity | Pagination with tappable dots`}
                         />
-                    } */}
+                    }
                 </KeyboardAwareScrollView>
             </View>
             <View style={{ width: '100%', flexDirection: 'column', justifyContent: 'center', backgroundColor: 'transparent' }}>

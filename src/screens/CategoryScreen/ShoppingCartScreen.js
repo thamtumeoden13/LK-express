@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, Image, FlatList, Dimensions, TouchableOpacity, Animated } from 'react-native'
 import AntDesignIcon from 'react-native-vector-icons/AntDesign'
+import { formatMoney } from 'utils/function'
 
 import { AuthContext } from '../../utils'
 
@@ -95,7 +96,7 @@ const ShoppingCartScreen = () => {
                                 <View style={{ flexDirection: 'row' }}>
                                     <View style={{ width: width / 5, alignItems: 'center' }}>
                                         <Text style={{ fontSize: 14, fontWeight: '300' }}>{'Đơn giá'}</Text>
-                                        <Text style={{ fontSize: 12, fontWeight: 'bold' }}>{item.price}</Text>
+                                        <Text style={{ fontSize: 12, fontWeight: 'bold' }}>{formatMoney(item.price, 0)}</Text>
                                     </View>
                                     <View style={{ width: width / 5, alignItems: 'center' }}>
                                         <Text style={{ fontSize: 14, fontWeight: '300' }}>{'Số lượng'}</Text>
@@ -103,7 +104,7 @@ const ShoppingCartScreen = () => {
                                     </View>
                                     <View style={{ width: width / 5, alignItems: 'center' }}>
                                         <Text style={{ fontSize: 14, fontWeight: '300', }}>{'Thành tiền'}</Text>
-                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#f00' }}>{item.quantity * item.price}</Text>
+                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#f00' }}>{formatMoney(item.quantity * item.price, 0)}</Text>
                                     </View>
                                 </View>
                             </View>

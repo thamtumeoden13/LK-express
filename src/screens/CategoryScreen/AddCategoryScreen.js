@@ -53,25 +53,24 @@ const AddCategoryScreen = (props) => {
     const getRealtimeCollection = async () => {
         const querySnapshot = await entityProductsRef.get()
         const products = querySnapshot.docs.map(doc => {
-            console.log(doc.data())
             const product = doc.data()
             return {
                 ...product,
                 docRef: doc.id
             }
         })
-        console.log(products)
         setProducts(products)
     }
 
 
     const addCategory = (result) => {
         let { categoryName, listImage, listProduct } = result
-            console.log('result', result)
         listImage.map(e => {
             e.createdBy = state.userID
             return e
         })
+
+        const productsRef = listProduct.map(f => { return f.docRef })
         entityRef.add({
             bg: getRandomColor(),
             color: getRandomColor(),
@@ -79,23 +78,19 @@ const AddCategoryScreen = (props) => {
             createdBy: state.userID,
             createdByName: state.userName,
             name: categoryName,
-            productsRef: listProduct,
-            subCategories: 'Toys,Trolleys,LEGO®,'
+            productsRef: productsRef,
         }).then((docRef) => {
-            console.log('docRef', docRef)
-            // images.map(element => {
-            //     entityRef.doc(`${docRef.id}`).collection('images').add({
-            //         imageBase64: !!element.data ? element.data : '',
-            //         imageUrl: !!element.url ? element.url : '',
-            //         createdAt: new Date(),
-            //         createdBy: state.userID,
-            //         createdByName: state.userName,
-            //     }).then(_doc => {
-            //         Keyboard.dismiss()
-            //     }).catch((error) => {
-            //         console.log("Error adding document image: ", error);
-            //     })
-            // })
+            listProduct.map(product => {
+                const newcategoriesRef = [docRef.id, ...product.categoriesRef]
+                entityProductsRef.doc(product.docRef).update({
+                    categoriesRef: newcategoriesRef
+                }).then(_doc => {
+                    Keyboard.dismiss()
+                }).catch((error) => {
+                    alert(error)
+                })
+            })
+
         }).catch((error) => {
             alert(error)
         })

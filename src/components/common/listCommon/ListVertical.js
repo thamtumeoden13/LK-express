@@ -73,7 +73,7 @@ const ListVertical = (props) => {
                                 <View style={[styles.containerItem]}>
                                     <View style={{ flex: 2 }}>
                                         <Image
-                                            source={{ uri: e.illustration }}
+                                            source={{ uri: e.uri }}
                                             style={{ flex: 1, width: null, height: null, resizeMode: 'cover' }}
                                         >
                                         </Image>

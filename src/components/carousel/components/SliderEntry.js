@@ -6,11 +6,11 @@ import styles from '../styles/SliderEntry.style';
 const SliderEntry = (props) => {
 
     const image = () => {
-        const { data: { illustration, base64 }, parallax, parallaxProps, even } = props;
+        const { data: { uri, base64 }, parallax, parallaxProps, even } = props;
 
         return parallax ? (
             <ParallaxImage
-                source={!!illustration ? { uri: illustration } : { uri: `data:image/png;base64,${base64}` }}
+                source={!!uri ? { uri: uri } : { uri: `data:image/png;base64,${base64}` }}
                 containerStyle={[styles.imageContainer, even ? styles.imageContainerEven : {}]}
                 style={styles.image}
                 parallaxFactor={0.35}
@@ -20,7 +20,7 @@ const SliderEntry = (props) => {
             />
         ) : (
             <Image
-                    source={!!illustration ? { uri: illustration } : { uri: `data:image/png;base64,${base64}` }}
+                    source={!!uri ? { uri: uri } : { uri: `data:image/png;base64,${base64}` }}
                 style={styles.image}
             />
         );

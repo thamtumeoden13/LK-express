@@ -92,7 +92,6 @@ const CategoryScreen = (props) => {
                 const itemData = `${item.name.toUpperCase()},${item.subCategories.toString().toUpperCase()}`
                 return itemData.indexOf(textData) > -1
             })
-            console.log('newData', newData)
             setCategoriesFilter(newData)
         } else {
             setCategoriesFilter(categories)
@@ -115,7 +114,6 @@ const CategoryScreen = (props) => {
         let result = await Promise.all(reads)
         let categories = result.filter(e => { return !!e && Object.keys(e).length > 0 });
         categories.map(async (e) => {
-            // e.subCategories = e.subCategories.split(',')
             e.subCategories = []
             if (e.productsRef) {
                 const reads = e.productsRef.map(async (f) => {
@@ -133,12 +131,10 @@ const CategoryScreen = (props) => {
         })
         setCategories(categories)
         setCategoriesFilter(categories)
-        console.log('categories', categories)
         setState(prev => { return { ...prev, isDataFetched: true } })
     }
 
     const onHandlerJoinCategory = (categoryID, categoryName) => {
-        console.log('onHandlerJoinRoom', categoryID)
         const pushAction = StackActions.push('CategoryDetail', { id: categoryID, name: categoryName })
         props.navigation.dispatch(pushAction)
     }

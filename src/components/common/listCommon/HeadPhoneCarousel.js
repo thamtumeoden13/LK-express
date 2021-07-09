@@ -3,55 +3,7 @@ import { View, Text, FlatList, Image, Dimensions, StyleSheet, StatusBar, Animate
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import TouchableScale from 'react-native-touchable-scale';
-
-const DATA = [
-    {
-        type: 'Humlan P',
-        imageUri: require('../../../assets/urbanears_blue.png'),
-        heading: 'Vibrant colors',
-        description: 'Four on-trend colorways to seamlessly suit your style.',
-        key: 'first',
-        color: '#9dcdfa',
-        price: 200000,
-        quantity: 1,
-        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
-    },
-    {
-        type: 'Pampas',
-        imageUri: require('../../../assets/urbanears_pink.png'),
-        heading: 'Redefined sound',
-        description: 'A bold statement tuned to perfection.',
-        key: 'second',
-        color: '#db9efa',
-        price: 250000,
-        quantity: 1,
-        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
-    },
-    {
-        type: 'Humlan P',
-        imageUri: require('../../../assets/urbanears_grey.png'),
-        heading: 'Great quality',
-        description:
-            'An Urbanears classic! Listen-all-day fit. Striking the perfect balance of effortless technology',
-        key: 'third',
-        color: '#999',
-        price: 190000,
-        quantity: 1,
-        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
-    },
-    {
-        type: 'Humlan B',
-        imageUri: require('../../../assets/urbanears_mint.png'),
-        heading: 'From Sweden',
-        description:
-            'The “Plattan” in Plattan headphones is Swedish for “the slab.”',
-        key: 'fourth',
-        color: '#a1e3a1',
-        price: 200000,
-        quantity: 1,
-        thumbnail: 'https://images.pexels.com/photos/2578370/pexels-photo-2578370.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
-    },
-];
+import { formatMoney } from 'utils/function';
 
 const { width, height } = Dimensions.get('window')
 const LOGO_WIDTH = 220
@@ -62,7 +14,7 @@ const CIRCLE_SIZE = width * 0.6
 
 const HeadPhoneCarousel = ({ data, addToCart }) => {
     const scrollX = useRef(new Animated.Value(0)).current
-  
+
     const [result, setResult] = useState([])
 
     useEffect(() => {
@@ -164,8 +116,8 @@ const HeadPhoneCarousel = ({ data, addToCart }) => {
                     {
                         transform: [{ translateX: translateDescription }],
                         opacity
-                    }]}> {`${item.price} $`}</Animated.Text>
-                    <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-around', }}>
+                    }]}> {`${formatMoney(item.price, 0)}`}</Animated.Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', }}>
                         <TouchableScale onPress={() => handerQuantity('minus', item, index)}>
                             <AntDesign name='minuscircleo' size={20} color='#f00' />
                         </TouchableScale>
