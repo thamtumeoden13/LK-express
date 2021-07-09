@@ -17,10 +17,13 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
+import { getRandomColor } from 'utils/function'
+
 import AddCategoryCom from 'components/category/AddCategory'
 
 const db = firebase.firestore()
 const entityRef = db.collection('categories')
+const entityProductsRef = db.collection('products')
 
 const AddCategoryScreen = (props) => {
 
@@ -28,6 +31,8 @@ const AddCategoryScreen = (props) => {
         userID: '',
         userName: ''
     })
+
+    const [products, setProducts] = useState([])
 
     useEffect(() => {
         setTimeout(async () => {
@@ -41,37 +46,58 @@ const AddCategoryScreen = (props) => {
                 }
             })
         })
+        getRealtimeCollection()
     }, [])
 
+
+    const getRealtimeCollection = async () => {
+        const querySnapshot = await entityProductsRef.get()
+        const products = querySnapshot.docs.map(doc => {
+            console.log(doc.data())
+            const product = doc.data()
+            return {
+                ...product,
+                docRef: doc.id
+            }
+        })
+        console.log(products)
+        setProducts(products)
+    }
+
+
     const addCategory = (result) => {
-        let { categoryID, categoryName, listImage } = result
+        let { categoryName, listImage, listProduct } = result
+            console.log('result', result)
         listImage.map(e => {
             e.createdBy = state.userID
             return e
         })
-        listImage.map(element => {
-            const currentValue = {
-                createdByID: state.userID,
-                createdByName: state.userName,
-                createdAt: new Date(),
-                name: categoryName
-            }
-            entityRef.doc(`${categoryID}`).set(currentValue)
-                .then(_doc => {
-                    Keyboard.dismiss()
-                })
-                .catch((error) => {
-                    alert(error)
-                })
-
-            entityRef.doc(`${categoryID}`).collection('images')
-                .doc().set(element)
-                .then(_doc => {
-                    Keyboard.dismiss()
-                })
-                .catch((error) => {
-                    alert(error)
-                })
+        entityRef.add({
+            bg: getRandomColor(),
+            color: getRandomColor(),
+            createdAt: new Date(),
+            createdBy: state.userID,
+            createdByName: state.userName,
+            name: categoryName,
+            productsRef: listProduct,
+            subCategories: 'Toys,Trolleys,LEGO®,'
+        }).then((docRef) => {
+            console.log('docRef', docRef)
+            // images.map(element => {
+            //     entityRef.doc(`${docRef.id}`).collection('images').add({
+            //         imageBase64: !!element.data ? element.data : '',
+            //         imageUrl: !!element.url ? element.url : '',
+            //         createdAt: new Date(),
+            //         createdBy: state.userID,
+            //         createdByName: state.userName,
+            //     }).then(_doc => {
+            //         Keyboard.dismiss()
+            //     }).catch((error) => {
+            //         console.log("Error adding document image: ", error);
+            //     })
+            // })
+        }).catch((error) => {
+            alert(error)
         })
         props.navigation.goBack()
     }
@@ -80,6 +106,7 @@ const AddCategoryScreen = (props) => {
         <SafeAreaView style={styles.safeArea}>
             < View style={styles.container} >
                 <AddCategoryCom
+                    products={products}
                     addCategory={addCategory}
                 />
             </View >

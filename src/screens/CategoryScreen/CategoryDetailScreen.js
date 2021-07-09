@@ -68,7 +68,6 @@ const CategoryDetailScreen = (props) => {
         setCategories([querySnapshot.data()])
     }
 
-
     const onAddShoppingCart = (item) => {
         console.log('onAddShoppingCart', item)
         if (item.quantity > 0) {

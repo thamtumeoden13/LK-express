@@ -19,6 +19,7 @@ import LottieView from 'lottie-react-native';
 import { firebase } from '../../firebase/config'
 import { calcWidth, moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import ShoppingCartIcon from 'components/common/icon/ShoppingCartIcon'
+import AddIcon from 'components/common/icon/AddIcon'
 import { ModalCenterAlert } from "components/common/modal/ModalCenterAlert";
 import { AddCategory } from 'components/category/modalInputForm'
 import HeaderSearchInput from 'components/common/Header/SearchInput'
@@ -73,6 +74,7 @@ const CategoryScreen = (props) => {
     useEffect(() => {
         if (!!state.level && state.level == 1) {
             props.navigation.setOptions({
+                headerLeft: () => <AddIcon onOpen={() => showAddCategory()} />,
                 headerTitle: () =>
                     <HeaderSearchInput
                         placeholder={'Tìm danh mục, sản phẩm'}
@@ -95,6 +97,11 @@ const CategoryScreen = (props) => {
         } else {
             setCategoriesFilter(categories)
         }
+    }
+
+    const showAddCategory = () => {
+        const pushAction = StackActions.push('AddCategory')
+        props.navigation.dispatch(pushAction)
     }
 
     const getRealtimeCollectionCategoriList = async (querySnapshot) => {
