@@ -24,7 +24,7 @@ const DATA = [
     'https://images.pexels.com/photos/605223/pexels-photo-605223.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500',
 ]
 
-const Content = ({ title, content, totalLike, totalViews, onPressItem }) => {
+const Content = ({ title, content, images, onPressItem }) => {
 
     const [state, setState] = useState({
         like: false,
@@ -33,6 +33,7 @@ const Content = ({ title, content, totalLike, totalViews, onPressItem }) => {
         title: title,
         content: content,
         contentSubStr: '',
+        images: images
     })
 
     useEffect(() => {
@@ -67,8 +68,15 @@ const Content = ({ title, content, totalLike, totalViews, onPressItem }) => {
                     </>
                 }
             </TouchableOpacity>
-            <View style={{ height: calcHeight(30) }}>
-                <FlatListAnimationCarousel />
+            <View style={{ flex: 1, alignItems: 'center' }}>
+                {!!images && images.length > 0 &&
+                    <View style={{ height: calcHeight(30), width: calcWidth(90), alignItems: 'center' }}>
+                        <FlatListAnimationCarousel
+                            result={images}
+                            containWith={calcWidth(90)}
+                        />
+                    </View>
+                }
             </View>
         </View>
     )

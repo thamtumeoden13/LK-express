@@ -11,9 +11,9 @@ import ActionSheet from "react-native-actions-sheet";
 import { moderateScale, scale, verticalScale } from 'utils/scaleSize';
 import { formatCount, formatDistanceToNowVi } from 'utils/function'
 
-const colors = ['#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71', '#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71', '#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71'];
+// const colors = ['#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71', '#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71', '#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71'];
 let _isReachedTop
-const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, }) => {
+const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, addDiaryComment}) => {
     console.log('comments', comments)
     const actionSheetRef = useRef();
     const scrollViewRef = useRef();
@@ -98,6 +98,9 @@ const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, }) => {
             content: state.textComment,
             dateCreated: new Date()
         }
+        if (addDiaryComment) {
+            addDiaryComment(state.textComment)
+        }
         const arrays = [newComment, ...newComments]
         setNewComments(arrays)
         onChangeTextComment('')
@@ -155,11 +158,8 @@ const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, }) => {
                 bounciness={4}
                 gestureEnabled={true}
                 defaultOverlayOpacity={0.3}>
-                <View
-                    style={{
-                        paddingHorizontal: 12,
-                    }}>
-                    <View style={styles.container}>
+                <View style={{ paddingHorizontal: 12, }}>
+                    {/* <View style={styles.container}>
                         <FlatList
                             data={colors}
                             keyExtractor={(item, index) => index.toString()}
@@ -181,7 +181,7 @@ const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, }) => {
                                 )
                             }}
                         />
-                    </View>
+                    </View> */}
                     <View onMoveShouldSetResponderCapture={onMoveShouldSetResponderCapture}>
                         <ScrollView
                             ref={scrollViewRef}

@@ -5,7 +5,7 @@ import FlatListAnimationCarousel from 'components/common/listCommon/FlatListAnim
 
 import { calcHeight, scale, verticalScale, calcWidth, moderateScale } from 'utils/scaleSize';
 
-const Content = ({ title, content, }) => {
+const Content = ({ title, content, images }) => {
 
     return (
         <View>
@@ -14,7 +14,9 @@ const Content = ({ title, content, }) => {
                 {!!content && <Text style={{ fontSize: scale(12), fontWeight: '300', }}>{content}</Text>}
             </View>
             <View style={{ height: calcHeight(50) }}>
-                <FlatListAnimationCarousel />
+                <FlatListAnimationCarousel
+                    result={images}
+                />
             </View>
         </View>
     )
