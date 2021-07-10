@@ -55,6 +55,10 @@ const DiaryScreen = (props) => {
                     level: user.level,
                 }
             })
+            const unsubscribeUserList = entityRef.onSnapshot(getRealtimeCollectionDiaryList, err => Alert.alert(error))
+            return () => {
+                unsubscribeUserList()
+            }
         })
         addHasReachedTopListener(onHasReachedTop);
         return () => {
@@ -65,10 +69,7 @@ const DiaryScreen = (props) => {
 
     useEffect(() => {
         if (!!state.userID) {
-            const unsubscribeUserList = entityRef.onSnapshot(getRealtimeCollectionDiaryList, err => Alert.alert(error))
-            return () => {
-                unsubscribeUserList()
-            }
+
         }
     }, [state.userID])
 
@@ -82,7 +83,7 @@ const DiaryScreen = (props) => {
     }, [state.level])
 
     const getRealtimeCollectionDiaryList = async (querySnapshot) => {
-        setState(prev => { return { ...prev, isDataFetched: false } })
+        // setState(prev => { return { ...prev, isDataFetched: false } })
         let reads = querySnapshot.docs.map(async (doc) => {
             const diary = doc.data()
             // const querySnapshotLike = await entityRef.doc(doc.id).collection('likes').get()
@@ -99,7 +100,7 @@ const DiaryScreen = (props) => {
             if (querySnapshotComment.docs.length > 0) {
                 comments = querySnapshotComment.docs.map((doc) => {
                     const comment = doc.data()
-                    return { ...comment, fullName: comment.createdByName }
+                    return { ...comment, fullName: comment.createdByName, dateCreated: comment.createdAt.toDate() }
                 })
             }
             let images = []
@@ -130,7 +131,7 @@ const DiaryScreen = (props) => {
             .sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
         setContents(diaries)
         setState(prev => { return { ...prev, isDataFetched: true } })
-        console.log('isDataFetched - 2')
+        console.log('isDataFetched - 2', diaries)
     }
 
     const onPressItem = (item) => {
