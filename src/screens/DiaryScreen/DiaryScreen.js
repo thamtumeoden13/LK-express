@@ -43,8 +43,6 @@ const DiaryScreen = (props) => {
     const [images, setImages] = useState([])
 
     useEffect(() => {
-        // setState(prev => { return { ...prev, isDataFetched: false } })
-        console.log('isDataFetched - 1')
         const focusListener = props.navigation.addListener('focus', async () => {
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
@@ -57,19 +55,23 @@ const DiaryScreen = (props) => {
                     level: user.level,
                 }
             })
-            addHasReachedTopListener(onHasReachedTop);
-            const unsubscribeUserList = entityRef.onSnapshot(getRealtimeCollectionDiaryList, err => Alert.alert(error))
-            return () => {
-                unsubscribeUserList
-                removeHasReachedTopListener(onHasReachedTop)
-            }
         })
         addHasReachedTopListener(onHasReachedTop);
-        const unsubscribeUserList = entityRef.onSnapshot(getRealtimeCollectionDiaryList, err => Alert.alert(error))
         return () => {
             focusListener
+            removeHasReachedTopListener(onHasReachedTop)
         }
     }, [])
+
+    useEffect(() => {
+        if (!!state.userID) {
+            const unsubscribeUserList = entityRef.onSnapshot(getRealtimeCollectionDiaryList, err => Alert.alert(error))
+            return () => {
+                unsubscribeUserList()
+            }
+        }
+    }, [state.userID])
+
 
     useEffect(() => {
         if (state.level == 1) {
@@ -80,7 +82,7 @@ const DiaryScreen = (props) => {
     }, [state.level])
 
     const getRealtimeCollectionDiaryList = async (querySnapshot) => {
-        // setState(prev => { return { ...prev, isDataFetched: false } })
+        setState(prev => { return { ...prev, isDataFetched: false } })
         let reads = querySnapshot.docs.map(async (doc) => {
             const diary = doc.data()
             // const querySnapshotLike = await entityRef.doc(doc.id).collection('likes').get()
