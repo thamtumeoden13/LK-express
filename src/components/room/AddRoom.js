@@ -4,6 +4,7 @@ import { CheckBox, Avatar, Input, Icon } from 'react-native-elements'
 import AntDesignIcon from 'react-native-vector-icons/AntDesign'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import ImagePicker from 'react-native-image-crop-picker';
 
 import ButtonOutline from 'components/common/button/ButtonOutline';
 import ButtonOutlineBottom from 'components/common/button/ButtonOutlineBottom';
@@ -108,25 +109,14 @@ const AddRoomCom = (props) => {
     }
 
     const onChooseUploadFile = () => {
-        launchImageLibrary(
-            {
-                mediaType: 'photo',
-                includeBase64: true,
-                maxHeight: 200,
-                maxWidth: 200,
-            },
-            (response) => {
-                if (response.didCancel) {
-                    // console.log('User cancelled photo picker');
-                } else if (response.error) {
-                    // console.log('ImagePicker Error: ', response.error);
-                } else if (response.customButton) {
-                    // console.log('User tapped custom button: ', response.customButton);
-                } else {
-                    setState(prev => { return { ...prev, imageBase64: response.base64 } })
-                }
-            },
-        )
+        ImagePicker.openPicker({
+            includeBase64: true,
+            compressImageQuality: 0.5,
+            compressImageMaxWidth: 600,
+            compressImageMaxHeight: 800,
+        }).then(image => {
+            setState(prev => { return { ...prev, imageBase64: image.data } })
+        });
     }
 
     const handlerCheckBox = (index) => {

@@ -29,8 +29,6 @@ const RoomScreen = (props) => {
         level: '',
         page: 0,
         isDataFetchedRoomList: false,
-        isDataFetchedChatList: false,
-        isDataFetchedUserList: false,
     })
     const [rooms, setRooms] = useState([])
     const [roomsFilter, setRoomsFilter] = useState([])
@@ -130,15 +128,6 @@ const RoomScreen = (props) => {
         setRoomsFilter(rooms)
         setState(prev => { return { ...prev, isDataFetchedRoomList: true } })
     }
-
-    // const getRealtimeCollectionUserList = async (querySnapshot) => {
-    //     let users = querySnapshot.docs.map((doc) => {
-    //         const user = doc.data()
-    //         return { ...user, doc: doc.id }
-    //     })
-    //     setUsers(users)
-    //     setState(prev => { return { ...prev, isDataFetchedUserList: true } })
-    // }
 
     const onHandlerJoinRoom = (roomID) => {
         const pushAction = StackActions.push('RoomChatDetail', { id: roomID })

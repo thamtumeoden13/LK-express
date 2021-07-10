@@ -43,8 +43,9 @@ const DiaryScreen = (props) => {
     const [images, setImages] = useState([])
 
     useEffect(() => {
+        // setState(prev => { return { ...prev, isDataFetched: false } })
+        console.log('isDataFetched - 1')
         const focusListener = props.navigation.addListener('focus', async () => {
-            setState(prev => { return { ...prev, isDataFetched: false } })
             const userToken = await AsyncStorage.getItem('User');
             const user = JSON.parse(userToken)
             setState(prev => {
@@ -56,13 +57,17 @@ const DiaryScreen = (props) => {
                     level: user.level,
                 }
             })
+            addHasReachedTopListener(onHasReachedTop);
+            const unsubscribeUserList = entityRef.onSnapshot(getRealtimeCollectionDiaryList, err => Alert.alert(error))
+            return () => {
+                unsubscribeUserList
+                removeHasReachedTopListener(onHasReachedTop)
+            }
         })
         addHasReachedTopListener(onHasReachedTop);
         const unsubscribeUserList = entityRef.onSnapshot(getRealtimeCollectionDiaryList, err => Alert.alert(error))
         return () => {
-            unsubscribeUserList
             focusListener
-            removeHasReachedTopListener(onHasReachedTop)
         }
     }, [])
 
@@ -75,12 +80,19 @@ const DiaryScreen = (props) => {
     }, [state.level])
 
     const getRealtimeCollectionDiaryList = async (querySnapshot) => {
-        setState(prev => { return { ...prev, isDataFetched: false } })
+        // setState(prev => { return { ...prev, isDataFetched: false } })
         let reads = querySnapshot.docs.map(async (doc) => {
             const diary = doc.data()
-            const querySnapshotLike = await entityRef.doc(doc.id).collection('likes').get()
-            const querySnapshotComment = await entityRef.doc(doc.id).collection('comments').get()
-            const querySnapshotImage = await entityRef.doc(doc.id).collection('images').get()
+            // const querySnapshotLike = await entityRef.doc(doc.id).collection('likes').get()
+            // const querySnapshotComment = await entityRef.doc(doc.id).collection('comments').get()
+            // const querySnapshotImage = await entityRef.doc(doc.id).collection('images').get()
+
+            const [querySnapshotLike, querySnapshotComment, querySnapshotImage] = await Promise.all([
+                entityRef.doc(doc.id).collection('likes').get(),
+                entityRef.doc(doc.id).collection('comments').get(),
+                entityRef.doc(doc.id).collection('images').get()
+            ])
+
             let comments = []
             if (querySnapshotComment.docs.length > 0) {
                 comments = querySnapshotComment.docs.map((doc) => {
@@ -116,6 +128,7 @@ const DiaryScreen = (props) => {
             .sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
         setContents(diaries)
         setState(prev => { return { ...prev, isDataFetched: true } })
+        console.log('isDataFetched - 2')
     }
 
     const onPressItem = (item) => {

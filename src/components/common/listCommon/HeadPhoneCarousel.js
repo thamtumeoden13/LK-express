@@ -59,7 +59,7 @@ const HeadPhoneCarousel = ({ data, addToCart }) => {
                     })
 
                     return (
-                        <Animated.View key={key} style={[styles.circle,
+                        <Animated.View key={index.toString()} style={[styles.circle,
                         {
                             backgroundColor: color,
                             opacity: opacity,

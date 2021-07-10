@@ -30,7 +30,6 @@ const RoomScreen = (props) => {
         page: 0,
         isDataFetchedRoomList: false,
         isDataFetchedChatList: false,
-        isDataFetchedUserList: false,
     })
     const [rooms, setRooms] = useState([])
     const [usersByChat, setUsersByChat] = useState([])
@@ -194,7 +193,6 @@ const RoomScreen = (props) => {
             return { ...user, doc: doc.id }
         })
         setUsers(users)
-        setState(prev => { return { ...prev, isDataFetchedUserList: true } })
         // const options = {
         //     soundName: "default",
         //     playSound: true,

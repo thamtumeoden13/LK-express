@@ -6,7 +6,8 @@ import {
     SafeAreaView,
     Image,
     StatusBar,
-    Alert
+    Alert,
+    Keyboard
 } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { StackActions } from '@react-navigation/native';
@@ -65,7 +66,20 @@ const CategoryDetailScreen = (props) => {
 
     const getRealtimeCollection = async () => {
         const querySnapshot = await entityProductsRef.doc(state.categoryID).get()
-        setCategories([querySnapshot.data()])
+        const querySnapshotVariant = await entityProductsRef.doc(querySnapshot.id).collection('variants').get()
+        let variants = []
+        if (querySnapshotVariant.docs.length > 0) {
+            variants = querySnapshotVariant.docs.map(doc => {
+                const variant = doc.data()
+                return {
+                    ...variant,
+                    docRef: doc.id,
+                }
+            })
+        }
+        const categories = !!variants && variants.length > 0 ? variants : [querySnapshot.data()]
+        console.log('categories', categories)
+        setCategories(categories)
     }
 
     const onAddShoppingCart = (item) => {
@@ -73,7 +87,7 @@ const CategoryDetailScreen = (props) => {
         if (item.quantity > 0) {
             addShoppingCart(item)
         }
-        else{
+        else {
             Alert.alert('Thêm giỏ hàng', `Vui lòng nhập số lượng`);
         }
     }
