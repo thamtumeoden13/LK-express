@@ -9,7 +9,6 @@ import {
     Alert,
     Keyboard
 } from 'react-native';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { StackActions } from '@react-navigation/native';
 
 import {

@@ -3,7 +3,7 @@ import { Image, Text, TextInput, TouchableOpacity, View, Keyboard, Modal, SafeAr
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import AsyncStorage from '@react-native-community/async-storage';
 import LottieView from 'lottie-react-native';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import ImagePicker from 'react-native-image-crop-picker';
 import FeatherIcon from 'react-native-vector-icons/Feather'
 
 import ButtonOutline from 'components/common/button/ButtonOutline';
@@ -83,26 +83,14 @@ const UpdateProfileScreen = (props) => {
     }
 
     const onChooseUploadFile = () => {
-        launchImageLibrary(
-            {
-                mediaType: 'photo',
-                includeBase64: true,
-                maxHeight: 200,
-                maxWidth: 200,
-            },
-            (response) => {
-                if (response.didCancel) {
-                    // console.log('User cancelled photo picker');
-                } else if (response.error) {
-                    // console.log('ImagePicker Error: ', response.error);
-                } else if (response.customButton) {
-                    // console.log('User tapped custom button: ', response.customButton);
-                } else {
-                    setUser(prev => { return { ...prev, avatarBase64: response.base64 } })
-                    // uploadImage(response)
-                }
-            },
-        )
+        ImagePicker.openPicker({
+            includeBase64: true,
+            compressImageQuality: 1,
+            compressImageMaxWidth: 600,
+            compressImageMaxHeight: 800,
+        }).then(image => {
+            setUser(prev => { return { ...prev, avatarBase64: image.data } })
+        });
     }
 
     return (

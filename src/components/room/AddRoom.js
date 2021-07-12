@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Dimensions }
 import { CheckBox, Avatar, Input, Icon } from 'react-native-elements'
 import AntDesignIcon from 'react-native-vector-icons/AntDesign'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 
 import ButtonOutline from 'components/common/button/ButtonOutline';
