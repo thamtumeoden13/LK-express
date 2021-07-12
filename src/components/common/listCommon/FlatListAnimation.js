@@ -45,7 +45,7 @@ const FlatListAnimation = ({ result }) => {
     }
 
     const handlerShowLocation = (location) => {
-        const url = `maps://?ll=${location.replace(/ /g, '')}`
+        const url = `maps://?q=${location.replace(/ /g, '')}`
         Linking.canOpenURL(url)
             .then((supported) => {
                 return Linking.openURL(url)
