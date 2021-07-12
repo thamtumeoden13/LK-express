@@ -18,6 +18,7 @@ import ButtonOutlineBottom from 'components/common/button/ButtonOutlineBottom';
 
 import { calcHeight, calcWidth, verticalScale, moderateScale, scale } from 'utils/scaleSize'
 import { firebase } from '../../firebase/config'
+import { guidGenerator } from 'utils/function'
 
 const colors = ['#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71', '#F08FC0'];
 let _isReachedTop
@@ -100,14 +101,24 @@ const DiaryScreen = (props) => {
             if (querySnapshotComment.docs.length > 0) {
                 comments = querySnapshotComment.docs.map((doc) => {
                     const comment = doc.data()
-                    return { ...comment, fullName: comment.createdByName, dateCreated: comment.createdAt.toDate() }
+                    return {
+                        ...comment,
+                        commentRef: doc.id,
+                        fullName: comment.createdByName,
+                        dateCreated: comment.createdAt.toDate()
+                    }
                 })
             }
             let images = []
             if (querySnapshotImage.docs.length > 0) {
                 images = querySnapshotImage.docs.map((doc) => {
                     const image = doc.data()
-                    return { url: image.imageUrl, base64: image.imageBase64 }
+                    return {
+                        ...image,
+                        imageRef: doc.id,
+                        url: image.imageUrl,
+                        base64: image.imageBase64
+                    }
                 })
             }
 
@@ -242,8 +253,8 @@ const DiaryScreen = (props) => {
                 compressImageMaxWidth: 600,
                 compressImageMaxHeight: 800,
             }).then(image => {
-                console.log('image', image);
-                const newImages = [image, ...images]
+                const element = { ...image, imageRef: guidGenerator() }
+                const newImages = [element, ...images]
                 setImages(newImages)
             });
         }
@@ -255,6 +266,10 @@ const DiaryScreen = (props) => {
                 compressImageMaxWidth: 600,
                 compressImageMaxHeight: 800,
             }).then(result => {
+                result.map(e => {
+                    e.imageRef = guidGenerator()
+                    return e
+                })
                 const newImages = [...result, ...images]
                 console.log('ImagePicker.openPicker', newImages);
                 setImages(newImages)
@@ -268,7 +283,8 @@ const DiaryScreen = (props) => {
                 {!!state.isDataFetched ?
                     <FlatList
                         data={contents}
-                        keyExtractor={(item, index) => index.toString()}
+                        extraData={contents}
+                        keyExtractor={(item, index) => item.docRef.toString()}
                         renderItem={({ item, index }) => {
                             return (
                                 <View >
@@ -390,7 +406,7 @@ const DiaryScreen = (props) => {
                         >
                             <FlatList
                                 data={images}
-                                keyExtractor={(item, index) => index.toString()}
+                                keyExtractor={(item, index) => item.imageRef.toString()}
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
                                 renderItem={({ item, index }) => {

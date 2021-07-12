@@ -9,11 +9,11 @@ import getMinutes from 'date-fns/getMinutes';
 import ActionSheet from "react-native-actions-sheet";
 
 import { moderateScale, scale, verticalScale } from 'utils/scaleSize';
-import { formatCount, formatDistanceToNowVi } from 'utils/function'
+import { formatCount, formatDistanceToNowVi, guidGenerator } from 'utils/function'
 
 // const colors = ['#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71', '#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71', '#4a4e4d', '#0e9aa7', '#3da4ab', '#f6cd61', '#fe8a71'];
 let _isReachedTop
-const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, addDiaryComment}) => {
+const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, addDiaryComment }) => {
     console.log('comments', comments)
     const actionSheetRef = useRef();
     const scrollViewRef = useRef();
@@ -96,7 +96,8 @@ const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, addDiaryCo
         const newComment = {
             fullName: fullName,
             content: state.textComment,
-            dateCreated: new Date()
+            dateCreated: new Date(),
+            commentRef: guidGenerator()
         }
         if (addDiaryComment) {
             addDiaryComment(state.textComment)
@@ -207,7 +208,7 @@ const Commment = ({ fullName, comments, totalLike = 0, totalView = 0, addDiaryCo
                             </View>
                             <FlatList
                                 data={newComments}
-                                keyExtractor={(item, index) => index.toString()}
+                                keyExtractor={(item, index) => item.commentRef.toString()}
                                 bounces={false}
                                 showsVerticalScrollIndicator
                                 renderItem={({ item, index }) => {

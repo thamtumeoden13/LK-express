@@ -116,6 +116,7 @@ const RoomScreen = (props) => {
             if (querySnapshot2.docs.length > 0) {
                 return {
                     ...room,
+                    roomRef: doc.id,
                     name: room.currentUser,
                     subtitle: room.currentMessage,
                     avatarURL: room.currentAvatar,
@@ -134,7 +135,7 @@ const RoomScreen = (props) => {
         props.navigation.dispatch(pushAction)
     }
 
-    const keyExtractor = (item, index) => index.toString()
+    const keyExtractor = (item, index) => item.roomRef.toString()
 
     const renderItemRoomChat = ({ item }) => {
         return (

@@ -154,7 +154,7 @@ const HeadPhoneCarousel = ({ data, addToCart }) => {
                 />
                 {result.map((item, index) => {
                     return (
-                        <View key={item.key} style={styles.paginationDotContainer}>
+                        <View key={item.docRef} style={styles.paginationDotContainer}>
                             <View
                                 style={[styles.paginationDot, { backgroundColor: item.color }]}
                             />

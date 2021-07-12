@@ -214,7 +214,7 @@ const AddRoomCom = (props) => {
                     <FlatList
                         data={users.chooses}
                         extraData={users.chooses}
-                        keyExtractor={(item, index) => index.toString()}
+                        keyExtractor={(item, index) => item.docRef.toString()}
                         renderItem={({ item, index }) => {
                             return (
                                 <TouchableOpacity

@@ -78,7 +78,7 @@ const AddRoomScreen = (props) => {
                 : ''
             return {
                 ...user,
-                doc: doc.id,
+                docRef: doc.id,
                 name: user.fullName,
                 jobTitle: phoneNumber,
                 email: user.email,

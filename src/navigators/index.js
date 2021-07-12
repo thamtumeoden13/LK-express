@@ -170,8 +170,8 @@ function CategoryStackScreen({ navigation }) {
                 name="CategoryDetail"
                 component={CategoryDetailScreen}
                 options={{
-                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
-                    headerTitle: () => <HeaderTitle title={`Sản phẩm`} />,
+                    headerLeft: () => <BackIcon navigation={navigation} />,
+                    headerTitle: () => <HeaderTitle title={`Chi tiết`} />,
                     headerRight: () => <BagIcon navigation={navigation} />,
                 }}
             />
@@ -179,7 +179,7 @@ function CategoryStackScreen({ navigation }) {
                 name="AddCategory"
                 component={AddCategoryScreen}
                 options={{
-                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
+                    headerLeft: () => <BackIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Thêm Danh Mục`} />,
                     // headerRight: () => <BagIcon navigation={navigation} />,
                 }}
@@ -188,6 +188,7 @@ function CategoryStackScreen({ navigation }) {
                 name="ShoppingCart"
                 component={ShoppingCartScreen}
                 options={{
+                    headerLeft: () => <BackIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Giỏ Hàng`} />,
                 }}
             />
@@ -212,6 +213,7 @@ function DiaryStackScreen({ navigation }) {
                 name="DiaryDetail"
                 component={DiaryDetailScreen}
                 options={{
+                    headerLeft: () => <BackIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Bình luận`} />,
                     // headerRight: () => <BagIcon navigation={navigation} />,
                 }}
@@ -243,8 +245,7 @@ function ProfileStackScreen({ navigation }) {
             <ProfileStack.Screen
                 name="UpdateProfile" component={UpdateProfileScreen}
                 options={{
-                    // headerLeft: () => <DrawerIcon navigation={navigation} />,
-                    // headerRight: () => <BagIcon navigation={navigation} />,
+                    headerLeft: () => <BackIcon navigation={navigation} />,
                     headerTitle: () => <HeaderTitle title={`Cập nhật thông tin`} />,
                 }}
             />
